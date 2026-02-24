@@ -12,6 +12,7 @@ import {
     Activity,
     LogOut
 } from 'lucide-react';
+import CONFIG from '../config';
 import '../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -32,7 +33,7 @@ const AdminDashboard = () => {
         // Fetch real stats from API
         const fetchStats = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/placement-stats');
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/placement-stats`);
                 if (response.ok) {
                     const data = await response.json();
                     const currentYear = Object.keys(data)[0];
@@ -52,7 +53,7 @@ const AdminDashboard = () => {
 
         const fetchStudents = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/admin/students');
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/admin/students`);
                 if (response.ok) {
                     const data = await response.json();
                     setRecentUsers(data);
@@ -71,7 +72,7 @@ const AdminDashboard = () => {
         if (!message) return;
 
         try {
-            const response = await fetch('http://localhost:5000/api/admin/broadcast', {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/admin/broadcast`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -103,28 +104,28 @@ const AdminDashboard = () => {
 
                 <nav className="admin-nav">
                     <button
-                        className={`admin-nav-item ${activeTab === 'overview' ? 'active' : ''}`}
+                        className={`admin - nav - item ${activeTab === 'overview' ? 'active' : ''}`}
                         onClick={() => setActiveTab('overview')}
                     >
                         <Activity size={20} />
                         <span>Overview</span>
                     </button>
                     <button
-                        className={`admin-nav-item ${activeTab === 'students' ? 'active' : ''}`}
+                        className={`admin - nav - item ${activeTab === 'students' ? 'active' : ''} `}
                         onClick={() => setActiveTab('students')}
                     >
                         <Users size={20} />
                         <span>Student Records</span>
                     </button>
                     <button
-                        className={`admin-nav-item ${activeTab === 'companies' ? 'active' : ''}`}
+                        className={`admin - nav - item ${activeTab === 'companies' ? 'active' : ''} `}
                         onClick={() => setActiveTab('companies')}
                     >
                         <Briefcase size={20} />
                         <span>Company Master</span>
                     </button>
                     <button
-                        className={`admin-nav-item ${activeTab === 'reports' ? 'active' : ''}`}
+                        className={`admin - nav - item ${activeTab === 'reports' ? 'active' : ''} `}
                         onClick={() => setActiveTab('reports')}
                     >
                         <FileText size={20} />

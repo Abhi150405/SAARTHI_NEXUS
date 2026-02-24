@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Bot } from 'lucide-react';
+import CONFIG from '../config';
 import './Chatbot.css';
 
 const Chatbot = () => {
@@ -29,7 +30,7 @@ const Chatbot = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5000/api/chat', {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: userMsg })

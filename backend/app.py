@@ -89,13 +89,17 @@ else:
 
 # MongoDB Setup
 try:
-    client = MongoClient('mongodb://localhost:27017/')
+    mongo_uri = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/')
+    client = MongoClient(mongo_uri)
     db = client['saarthi_nexus']
-    collection = db['placement_records'] # Updated to granular collection
+    collection = db['placement_records']
     notifications_collection = db['notifications']
-    # Create a TTL index: expires after 7 days (604800 seconds)
+    
+    # Create a TTL index: expires after 7 days
     notifications_collection.create_index("created_at", expireAfterSeconds=604800)
-    print("Successfully connected to MongoDB Atlas and initialized TTL index!")
+    
+    connection_type = "Atlas" if "mongodb+srv" in mongo_uri else "Local"
+    print(f"Successfully connected to MongoDB ({connection_type}) and initialized TTL index!")
 except Exception as e:
     print(f"Error connecting to MongoDB: {e}")
     collection = None
@@ -747,4 +751,5 @@ def index():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, use_reloader=False)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port, use_reloader=False)

@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import { Filter, DollarSign, TrendingUp, Users, Target } from 'lucide-react';
+import CONFIG from '../config';
 import '../styles/Dashboard.css';
 
 ChartJS.register(
@@ -38,7 +39,7 @@ const Dashboard = () => {
     React.useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/placement-stats');
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/placement-stats`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch placement stats');
                 }

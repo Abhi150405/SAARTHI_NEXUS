@@ -7,8 +7,10 @@ import {
     Eye,
     EyeOff,
     ArrowRight,
-    Mail
+    Mail,
+    AlertTriangle
 } from 'lucide-react';
+import CONFIG from '../config';
 import '../styles/Login.css';
 
 const StudentLogin = () => {
@@ -40,7 +42,7 @@ const StudentLogin = () => {
         setFieldErrors({});
 
         try {
-            const response = await fetch('http://localhost:5000/api/login', {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, role })

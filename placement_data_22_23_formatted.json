@@ -1,0 +1,2488 @@
+[
+    {
+        "academic_year": "2022-23",
+        "company_name": "Siemens",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 11.0,
+        "visit_date": "02-08-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 3,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 8,
+            "total": 9
+        },
+        "total_salary_lpa": 99.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Siemens",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 11.0,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 6,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 8,
+            "female": 3,
+            "total": 11
+        },
+        "total_salary_lpa": 121.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Espressif Systems",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 18.9,
+        "visit_date": "04-08-22",
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 18.9
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Ittiam Systems",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 16.0,
+        "visit_date": "07-08-22",
+        "criteria": {
+            "min_cgpa": "8.53",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 16.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Ittiam Systems",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 16.0,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 1,
+            "total": 5
+        },
+        "total_salary_lpa": 80.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "FinIQ",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 15.0,
+        "visit_date": "06-08-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 1,
+            "total": 4
+        },
+        "total_salary_lpa": 60.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Trilogy Innovations",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 36.5,
+        "visit_date": "14-08-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 0,
+            "total": 0
+        },
+        "total_salary_lpa": 0.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Bajaj Finserv",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.8,
+        "visit_date": "08-08-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 17,
+            "IT": 17,
+            "E&TC": 18
+        },
+        "gender_distribution": {
+            "male": 40,
+            "female": 12,
+            "total": 52
+        },
+        "total_salary_lpa": 665.6
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Avaya",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": "09-08-22",
+        "criteria": {
+            "min_cgpa": "8.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 1,
+            "E&TC": 5
+        },
+        "gender_distribution": {
+            "male": 8,
+            "female": 1,
+            "total": 9
+        },
+        "total_salary_lpa": 108.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "PhonePe",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 33.14,
+        "visit_date": "01-08-22",
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 0,
+            "total": 4
+        },
+        "total_salary_lpa": 132.56
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "UBS",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.5,
+        "visit_date": "25-08-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 6,
+            "IT": 6,
+            "E&TC": 6
+        },
+        "gender_distribution": {
+            "male": 17,
+            "female": 1,
+            "total": 18
+        },
+        "total_salary_lpa": 225.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "UBS",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.5,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 5,
+            "IT": 3,
+            "E&TC": 7
+        },
+        "gender_distribution": {
+            "male": 13,
+            "female": 2,
+            "total": 15
+        },
+        "total_salary_lpa": 187.5
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Deutsche Bank",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 19.63,
+        "visit_date": "27-07-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 15,
+            "IT": 8,
+            "E&TC": 10
+        },
+        "gender_distribution": {
+            "male": 14,
+            "female": 19,
+            "total": 33
+        },
+        "total_salary_lpa": 647.79
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Deutsche Bank",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 19.63,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 2,
+            "total": 3
+        },
+        "total_salary_lpa": 58.89
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "ZS Associates",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.58,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 3,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 2,
+            "total": 5
+        },
+        "total_salary_lpa": 62.9
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "BMC Software",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 14.0,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 0,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 8,
+            "female": 0,
+            "total": 8
+        },
+        "total_salary_lpa": 112.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Tracelink",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.75,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 1,
+            "total": 4
+        },
+        "total_salary_lpa": 51.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Goldman Sachs",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 24.0,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 1,
+            "total": 2
+        },
+        "total_salary_lpa": 48.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Adobe",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 47.27,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 3,
+            "total": 3
+        },
+        "total_salary_lpa": 141.81
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "TIAA India",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 10.48,
+        "visit_date": "13-08-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 3,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 2,
+            "total": 8
+        },
+        "total_salary_lpa": 83.84
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Barclays",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 13.32,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 0,
+            "E&TC": 10
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 9,
+            "total": 14
+        },
+        "total_salary_lpa": 186.48
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "EQ Technologic",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 13.88,
+        "visit_date": "16-08-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 6,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 8,
+            "female": 0,
+            "total": 8
+        },
+        "total_salary_lpa": 111.04
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "EQ Technologic",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 11.13,
+        "visit_date": "16-08-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 2,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 33.39
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Mastercard",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 13.4,
+        "visit_date": "11-08-22",
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 1,
+            "total": 4
+        },
+        "total_salary_lpa": 53.6
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Mastercard",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 13.4,
+        "visit_date": "18-10-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 15,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 9,
+            "female": 7,
+            "total": 16
+        },
+        "total_salary_lpa": 214.4
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Mastercard",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 13.4,
+        "visit_date": "19-12-22",
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 2,
+            "total": 4
+        },
+        "total_salary_lpa": 53.6
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "BNY Mellon",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 21.64,
+        "visit_date": "12-08-22",
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 9,
+            "IT": 4,
+            "E&TC": 7
+        },
+        "gender_distribution": {
+            "male": 16,
+            "female": 4,
+            "total": 20
+        },
+        "total_salary_lpa": 432.8
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Kylas",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 13.0,
+        "visit_date": "13-01-23",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 0,
+            "total": 4
+        },
+        "total_salary_lpa": 52.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Turtlemint",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 18.0,
+        "visit_date": "15-08-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 1,
+            "total": 5
+        },
+        "total_salary_lpa": 90.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Barclays",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.6,
+        "visit_date": "01-09-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 13,
+            "IT": 0,
+            "E&TC": 9
+        },
+        "gender_distribution": {
+            "male": 10,
+            "female": 12,
+            "total": 22
+        },
+        "total_salary_lpa": 277.2
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "PubMatic India",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 13.0,
+        "visit_date": "17-08-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 10,
+            "IT": 0,
+            "E&TC": 6
+        },
+        "gender_distribution": {
+            "male": 15,
+            "female": 1,
+            "total": 16
+        },
+        "total_salary_lpa": 208.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Druva",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 20.01,
+        "visit_date": "25-08-22",
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 1,
+            "total": 6
+        },
+        "total_salary_lpa": 120.06
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Veritas India",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 15.97,
+        "visit_date": "21-08-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 31.94
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Ion",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 14.1,
+        "visit_date": "21-08-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 1,
+            "E&TC": 5
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 2,
+            "total": 9
+        },
+        "total_salary_lpa": 126.9
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "IDeaS",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 10.17,
+        "visit_date": "23-08-22",
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 3,
+            "total": 4
+        },
+        "total_salary_lpa": 40.68
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Toshiba",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 10.0,
+        "visit_date": "30-08-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 30.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "HSBC",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": "09-09-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 5,
+            "IT": 4,
+            "E&TC": 6
+        },
+        "gender_distribution": {
+            "male": 9,
+            "female": 6,
+            "total": 15
+        },
+        "total_salary_lpa": 135.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Incubyte",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 11.0,
+        "visit_date": "08-09-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 33.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Ugam",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": "08-09-22",
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 18.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Elastic Run",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "13-09-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 2,
+            "total": 2
+        },
+        "total_salary_lpa": 16.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Trading Technologies",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": "14-10-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 12.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Credit Suisse",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 18.0,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 6,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 1,
+            "total": 8
+        },
+        "total_salary_lpa": 144.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Aspect Ratio",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 14.0,
+        "visit_date": "05-09-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 28.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "RIA Advisory LLP",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 9.25,
+        "visit_date": "02-09-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 4,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 2,
+            "total": 9
+        },
+        "total_salary_lpa": 83.25
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Lowe's India",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 18.36,
+        "visit_date": "26-08-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 18.36
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Principal Global Services",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "05-09-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 7,
+            "E&TC": 8
+        },
+        "gender_distribution": {
+            "male": 14,
+            "female": 3,
+            "total": 17
+        },
+        "total_salary_lpa": 136.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Samsung Semiconductor India Research",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 21.0,
+        "visit_date": "26-09-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 3,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 1,
+            "total": 8
+        },
+        "total_salary_lpa": 168.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Innoplexus",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": "16-09-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 1,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 0,
+            "total": 7
+        },
+        "total_salary_lpa": 84.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Schlumberger",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 9.58,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 2,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 3,
+            "total": 3
+        },
+        "total_salary_lpa": 28.74
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "ACI Worldwide",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": "13-09-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 9,
+            "IT": 0,
+            "E&TC": 5
+        },
+        "gender_distribution": {
+            "male": 9,
+            "female": 5,
+            "total": 14
+        },
+        "total_salary_lpa": 168.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "ZS Associates",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 13.65,
+        "visit_date": "16-09-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 3,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 7,
+            "total": 9
+        },
+        "total_salary_lpa": 122.85
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "CLSA",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.4,
+        "visit_date": "17-09-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 2,
+            "E&TC": 6
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 2,
+            "total": 9
+        },
+        "total_salary_lpa": 75.6
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Source.One",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": "21-09-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 3,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 36.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Quantiphi Analytics",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.5,
+        "visit_date": "09-10-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 4,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 8,
+            "female": 3,
+            "total": 11
+        },
+        "total_salary_lpa": 93.5
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "e2open",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "15-09-22",
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 8,
+            "IT": 0,
+            "E&TC": 12
+        },
+        "gender_distribution": {
+            "male": 10,
+            "female": 10,
+            "total": 20
+        },
+        "total_salary_lpa": 160.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Searce",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": "19-09-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 3,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 2,
+            "total": 8
+        },
+        "total_salary_lpa": 96.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "NICE Inc.",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "27-09-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 5,
+            "IT": 11,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 12,
+            "female": 8,
+            "total": 20
+        },
+        "total_salary_lpa": 160.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Amdocs",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 6.5,
+        "visit_date": "28-09-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 2,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 1,
+            "total": 5
+        },
+        "total_salary_lpa": 32.5
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Arista Networks",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 28.1,
+        "visit_date": "29-09-22",
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 56.2
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Energy Exemplar",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 11.0,
+        "visit_date": "29-09-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 1,
+            "total": 4
+        },
+        "total_salary_lpa": 44.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Wissen Technology",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "13-10-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 3,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 9,
+            "female": 1,
+            "total": 10
+        },
+        "total_salary_lpa": 80.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "EXL",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 6.5,
+        "visit_date": "18-10-22",
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 4,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 3,
+            "total": 8
+        },
+        "total_salary_lpa": 52.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Oracle",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": "30-09-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 6,
+            "E&TC": 6
+        },
+        "gender_distribution": {
+            "male": 12,
+            "female": 2,
+            "total": 14
+        },
+        "total_salary_lpa": 98.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Visteon",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": "17-10-22",
+        "criteria": {
+            "min_cgpa": "8.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 4,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 0,
+            "total": 4
+        },
+        "total_salary_lpa": 28.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Berkadia",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.5,
+        "visit_date": "02-11-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 17.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Datametica",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 10.0,
+        "visit_date": "18-10-22",
+        "criteria": {
+            "min_cgpa": "8.9",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 30.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Unknown",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "27-10-22",
+        "criteria": {
+            "min_cgpa": "",
+            "eligible_branches": ""
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 5
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 2,
+            "total": 5
+        },
+        "total_salary_lpa": 40.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Persistant",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 9.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Persistant",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.8,
+        "visit_date": "PPO",
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 7.8
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Cloudlex",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 11.5,
+        "visit_date": "19-10-22",
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 34.5
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "HDFC Bank",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.42,
+        "visit_date": "20-10-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 1,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 0,
+            "total": 5
+        },
+        "total_salary_lpa": 62.1
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Promobi Technology",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "28-10-22",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 16.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "TCS R&I",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": "02-12-22",
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 1,
+            "total": 3
+        },
+        "total_salary_lpa": 27.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "RBL Bank",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": "06-12-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 6,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 1,
+            "total": 6
+        },
+        "total_salary_lpa": 54.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Media.net",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 15.8,
+        "visit_date": "21-11-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 15.8
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Fold Health",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": "26-11-22",
+        "criteria": {
+            "min_cgpa": "6.75",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 1,
+            "total": 3
+        },
+        "total_salary_lpa": 27.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Launch Ventures",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 6.0,
+        "visit_date": "27-11-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 2,
+            "total": 4
+        },
+        "total_salary_lpa": 24.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Deloitte India",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": "30-11-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 4,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 2,
+            "total": 8
+        },
+        "total_salary_lpa": 56.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Imagination Technologies",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": "08-12-22",
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 12.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Dragonfly Financial Technologies",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": "16-12-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 2,
+            "E&TC": 8
+        },
+        "gender_distribution": {
+            "male": 8,
+            "female": 2,
+            "total": 10
+        },
+        "total_salary_lpa": 120.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Findability Sciences",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 6.0,
+        "visit_date": "21-12-22",
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 6.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Findability Sciences",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "21-12-22",
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 8.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Miko",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": "23-12-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 12.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Dataeaze",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "22-12-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 1,
+            "total": 4
+        },
+        "total_salary_lpa": 32.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "AGCO",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.5,
+        "visit_date": "18-01-23",
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 7,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 4,
+            "total": 11
+        },
+        "total_salary_lpa": 82.5
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Sell.Do (Beyondwalls)",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 6.0,
+        "visit_date": "13-01-23",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 1,
+            "total": 2
+        },
+        "total_salary_lpa": 12.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Emerson",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "19-01-23",
+        "criteria": {
+            "min_cgpa": "6.75",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 24.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Flextrade",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 11.0,
+        "visit_date": "17-01-23",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 11.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Nihilent",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "30-01-23",
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 3,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 1,
+            "total": 3
+        },
+        "total_salary_lpa": 24.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Cutshort",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": "24-01-23",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 7.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Veras Retail",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": "20-01-23",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 1,
+            "total": 2
+        },
+        "total_salary_lpa": 14.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Bloomberg",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 35.0,
+        "visit_date": "27-01-23",
+        "criteria": {
+            "min_cgpa": "8.5",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 105.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Facctum IT Solutions",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 6.0,
+        "visit_date": "07-02-23",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 12.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Zinrelo",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "21-02-23",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 2,
+            "total": 4
+        },
+        "total_salary_lpa": 32.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "e-Emphasys",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "02-03-23",
+        "criteria": {
+            "min_cgpa": "6.82",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 8.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "ETraveli",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.5,
+        "visit_date": "06-03-23",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "CS & IT (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 17.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Metro GSC",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": "20-02-23",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 1,
+            "total": 2
+        },
+        "total_salary_lpa": 16.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Suzlon",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.2,
+        "visit_date": "21-02-23",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 7.2
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "64 Squares",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 9.6,
+        "visit_date": "13-03-23",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 28.8
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Cadence",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 15.0,
+        "visit_date": "05-03-23",
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "E&TC (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 15.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Avegen",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 6.0,
+        "visit_date": "14-05-23",
+        "criteria": {
+            "min_cgpa": "6.81",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 18.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Altometa",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 15.0,
+        "visit_date": "25-02-23",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 30.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "UPTIQ",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 22.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.82",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 66.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "BBD",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.58,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.82",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 1,
+            "total": 3
+        },
+        "total_salary_lpa": 22.74
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Ordway Labs",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.82",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 3,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 3,
+            "total": 9
+        },
+        "total_salary_lpa": 72.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Ayaan Autonomous",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 6.35,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.82",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 2,
+            "total": 4
+        },
+        "total_salary_lpa": 25.4
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "TCS Digital",
+        "category": "Group I: Niche Companies (Salary above 6.5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": "23-12-22",
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 7.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Cognizant",
+        "category": "Group II: Variant Recruiters (Salary below 6 LPA)",
+        "salary_lpa": 4.0,
+        "visit_date": "11-09-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 4.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Flo Group",
+        "category": "Group II: Variant Recruiters (Salary below 6 LPA)",
+        "salary_lpa": 4.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 1,
+            "total": 3
+        },
+        "total_salary_lpa": 12.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Agiliad Technologies",
+        "category": "Group II: Variant Recruiters (Salary below 6 LPA)",
+        "salary_lpa": 5.5,
+        "visit_date": "5/29/2023",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 2,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 3,
+            "total": 3
+        },
+        "total_salary_lpa": 16.5
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Vertiv",
+        "category": "Group II: Variant Recruiters (Salary below 6 LPA)",
+        "salary_lpa": 4.5,
+        "visit_date": "6/5/2023",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 2,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 1,
+            "total": 6
+        },
+        "total_salary_lpa": 27.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "Yardi",
+        "category": "Group II: Variant Recruiters (Salary below 6 LPA)",
+        "salary_lpa": 5.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.82",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 4,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 1,
+            "total": 6
+        },
+        "total_salary_lpa": 33.0
+    },
+    {
+        "academic_year": "2022-23",
+        "company_name": "LTI Spark",
+        "category": "Group II: Variant Recruiters (Salary below 6 LPA)",
+        "salary_lpa": 4.0,
+        "visit_date": "30-09-22",
+        "criteria": {
+            "min_cgpa": "NC",
+            "eligible_branches": "All (UG)"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 4.0
+    }
+]
