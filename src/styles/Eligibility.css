@@ -16,19 +16,31 @@
     border: 1px solid var(--border-light);
     border-radius: var(--radius-md);
     font-size: 1rem;
+    background: var(--bg-body);
+    color: var(--text-main);
+}
+
+.select-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    background: var(--bg-body);
+    color: var(--text-main);
 }
 
 .probability-section {
     margin-top: 2rem;
-    background: #F0F9FF;
+    background: var(--bg-body);
     padding: 1rem;
     border-radius: var(--radius-md);
-    border: 1px solid #BAE6FD;
+    border: 1px solid var(--border-light);
 }
 
 .progress-bar-container {
     height: 10px;
-    background: #E0F2FE;
+    background: var(--border-light);
     border-radius: 5px;
     margin: 0.5rem 0;
     overflow: hidden;
@@ -59,14 +71,14 @@
     padding: 1rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-light);
-    background: white;
+    background: var(--bg-card);
     transition: all 0.2s;
 }
 
 .company-card.eligible {
-    border-color: #059669;
-    /* Green */
-    background: #ECFDF5;
+    border-color: #10B981;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--text-main);
 }
 
 .company-card.not-eligible {
@@ -86,7 +98,7 @@
 }
 
 .company-card.eligible .company-header {
-    color: #059669;
+    color: #10B981;
 }
 
 .criteria {
@@ -119,7 +131,7 @@
     padding: 0.75rem;
     border: 1px solid var(--border-light);
     border-radius: var(--radius-md);
-    background: #F9FAFB;
+    background: var(--bg-card);
 }
 
 .study-item:hover {

@@ -16,24 +16,51 @@ const Help = () => {
         "Resume tips for Freshers"
     ];
 
-    const handleAsk = (q) => {
+    const handleAsk = async (q) => {
         const text = q || query;
         if (!text.trim()) return;
 
-        setHistory([...history, { type: 'user', text }]);
+        setHistory(prev => [...prev, { type: 'user', text }]);
         setQuery('');
         setIsTyping(true);
 
-        // Mock response
-        setTimeout(() => {
-            let response = "I don't have specific data on that yet, but generally...";
-            if (text.includes('DSA')) response = "Top companies like Google, Microsoft, Amazon, and Adobe prioritize Data Structures and Algorithms (DSA). Key topics include Arrays, Trees, Graphs, and DP.";
-            if (text.includes('PhonePe')) response = "PhonePe typically requires a minimum CGPA of 8.0 for CSE/ECE branches. Strong problem-solving skills and proficiency in C++/Java are mandatory.";
-            if (text.includes('Amazon')) response = "For Amazon, focus on Leadership Principles and DSA. Practice medium-hard LeetCode problems and System Design basics.";
+        try {
+            const response = await fetch('http://localhost:5000/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: text })
+            });
 
-            setHistory(prev => [...prev, { type: 'bot', text: response }]);
+            if (!response.body) throw new Error('No response body');
+
+            // Add placeholder for bot message
+            setHistory(prev => [...prev, { type: 'bot', text: '' }]);
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedResponse = '';
+
+            setIsTyping(false); // Stop showing typing once streaming starts
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                accumulatedResponse += chunk;
+
+                // Update the last message (the bot placeholder) with new text
+                setHistory(prev => {
+                    const updated = [...prev];
+                    updated[updated.length - 1].text = accumulatedResponse;
+                    return updated;
+                });
+            }
+        } catch (error) {
+            console.error("Chat Error:", error);
+            setHistory(prev => [...prev, { type: 'bot', text: "Service is temporarily unavailable. Please try again later." }]);
             setIsTyping(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -50,7 +77,13 @@ const Help = () => {
                 <div className="chat-body">
                     {history.map((msg, i) => (
                         <div key={i} className={`message ${msg.type}`}>
-                            <div className="message-bubble">{msg.text}</div>
+                            <div className="message-bubble">
+                                {msg.type === 'bot' ? (
+                                    <div dangerouslySetInnerHTML={{ __html: msg.text }} />
+                                ) : (
+                                    msg.text
+                                )}
+                            </div>
                         </div>
                     ))}
                     {isTyping && (

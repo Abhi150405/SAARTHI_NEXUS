@@ -24,7 +24,7 @@
 }
 
 .metric-card {
-    background: white;
+    background: var(--bg-card);
     padding: 1.5rem;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
@@ -68,7 +68,7 @@
 }
 
 .chart-card {
-    background: white;
+    background: var(--bg-card);
     padding: 1.5rem;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
@@ -91,6 +91,25 @@
 .pie-chart {
     display: flex;
     justify-content: center;
+}
+
+.filter-container {
+    background: var(--bg-card);
+    border-color: var(--border-light) !important;
+}
+
+.filter-icon {
+    color: var(--text-muted);
+}
+
+.filter-container select {
+    color: var(--text-main);
+    background: transparent;
+}
+
+.filter-container option {
+    background: var(--bg-card);
+    color: var(--text-main);
 }
 
 @media (max-width: 1024px) {

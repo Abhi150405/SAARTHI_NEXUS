@@ -7,15 +7,24 @@ const Eligibility = () => {
     const [tenthScore, setTenthScore] = useState(85);
     const [twelfthScore, setTwelfthScore] = useState(82);
     const [amcatScore, setAmcatScore] = useState(70);
-    const [department, setDepartment] = useState('CSE');
+    const [department, setDepartment] = useState('CE');
+    const [internships, setInternships] = useState(1);
+    const [backlogs, setBacklogs] = useState(0);
+    const [projects, setProjects] = useState(2);
+    const [aiProbability, setAiProbability] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     // Mock Data
+    // Real Data from Placement Reports
     const companies = [
-        { name: 'Google', minCgpa: 9.0, min10th: 85, min12th: 85, minAmcat: 0, requiredToppings: ['DSA', 'System Design'] },
-        { name: 'Microsoft', minCgpa: 8.0, min10th: 80, min12th: 80, minAmcat: 0, requiredToppings: ['DSA', 'Azure'] },
-        { name: 'Amazon', minCgpa: 7.5, min10th: 75, min12th: 75, minAmcat: 0, requiredToppings: ['DSA', 'AWS'] },
-        { name: 'TCS', minCgpa: 6.0, min10th: 60, min12th: 60, minAmcat: 60, requiredToppings: ['Aptitude'] },
-        { name: 'Salesforce', minCgpa: 8.5, min10th: 80, min12th: 80, minAmcat: 0, requiredToppings: ['Java', 'Cloud'] },
+        { name: 'TCS (Mass Only)', minCgpa: 6.0, min10th: 60, min12th: 60, minAmcat: 60, requiredToppings: ['Aptitude', 'Java Basics'] },
+        { name: 'Accenture', minCgpa: 6.5, min10th: 65, min12th: 65, minAmcat: 60, requiredToppings: ['Problem Solving', 'Communication'] },
+        { name: 'Barclays', minCgpa: 7.0, min10th: 75, min12th: 75, minAmcat: 0, requiredToppings: ['SQL', 'Banking Domain'] },
+        { name: 'Deutsche Bank', minCgpa: 8.0, min10th: 80, min12th: 80, minAmcat: 0, requiredToppings: ['Operating Systems', 'System Design'] },
+        { name: 'PhonePe', minCgpa: 8.5, min10th: 85, min12th: 85, minAmcat: 0, requiredToppings: ['Advanced DSA', 'System Design'] },
+        { name: 'Goldman Sachs', minCgpa: 7.5, min10th: 80, min12th: 80, minAmcat: 0, requiredToppings: ['DSA', 'Quant'] },
+        { name: 'Veritas', minCgpa: 6.82, min10th: 65, min12th: 65, minAmcat: 0, requiredToppings: ['C++', 'Testing'] },
+        { name: 'Oracle', minCgpa: 7.0, min10th: 70, min12th: 70, minAmcat: 0, requiredToppings: ['Database Management', 'Java'] }
     ];
 
     const getEligibilityStatus = () => {
@@ -32,6 +41,33 @@ const Eligibility = () => {
                 reasons
             };
         });
+    };
+
+    const predictPlacement = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:5000/predict_placement', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cgpa: parseFloat(cgpa),
+                    tenth_score: parseFloat(tenthScore),
+                    twelfth_score: parseFloat(twelfthScore),
+                    amcat_score: parseFloat(amcatScore),
+                    internships: parseInt(internships),
+                    backlogs: parseInt(backlogs),
+                    projects: parseInt(projects)
+                })
+            });
+            const data = await response.json();
+            if (data.placement_probability !== undefined) {
+                setAiProbability(Math.round(data.placement_probability * 100));
+            }
+        } catch (e) {
+            console.error("ML Backend not reachable", e);
+            alert("Could not connect to ML Backend. Please run 'python backend/app.py'");
+        }
+        setLoading(false);
     };
 
     const eligibleCompanies = getEligibilityStatus().filter(c => c.eligible);
@@ -98,24 +134,63 @@ const Eligibility = () => {
                             onChange={e => setDepartment(e.target.value)}
                             className="select-input"
                         >
-                            <option>CSE</option>
-                            <option>ECE</option>
-                            <option>EEE</option>
-                            <option>MECH</option>
+                            <option value="CE">CE</option>
+                            <option value="IT">IT</option>
+                            <option value="AI&DS">AI&DS</option>
+                            <option value="E&CE(Electronics & Computer Engineering)">E&CE(Electronics & Computer Engineering)</option>
+                            <option value="E&TC">E&TC</option>
                         </select>
                     </div>
 
+                    <div className="flex gap-4">
+                        <div className="form-group flex-1">
+                            <label>Internships</label>
+                            <input
+                                type="number"
+                                value={internships}
+                                onChange={e => setInternships(e.target.value)}
+                                className="text-input"
+                            />
+                        </div>
+                        <div className="form-group flex-1">
+                            <label>Projects</label>
+                            <input
+                                type="number"
+                                value={projects}
+                                onChange={e => setProjects(e.target.value)}
+                                className="text-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Backlogs</label>
+                        <input
+                            type="number"
+                            value={backlogs}
+                            onChange={e => setBacklogs(e.target.value)}
+                            className="text-input"
+                        />
+                    </div>
+
                     <div className="probability-section">
-                        <label>Placement Probability</label>
+                        <label>Placement Probability {aiProbability !== null && '(AI Predicted)'}</label>
                         <div className="progress-bar-container">
                             <div
-                                className="progress-bar"
-                                style={{ width: `${Math.min(cgpa * 10 + 10, 100)}%` }}
+                                className={`progress-bar ${aiProbability !== null ? 'ai-active' : ''}`}
+                                style={{ width: `${aiProbability !== null ? aiProbability : Math.min(cgpa * 10 + 10, 100)}%` }}
                             ></div>
                         </div>
                         <p className="prob-text">
-                            {Math.min(cgpa * 10 + 10, 100)}% Chance of Placement
+                            {aiProbability !== null ? aiProbability : Math.min(cgpa * 10 + 10, 100)}% Chance of Placement
                         </p>
+                        <button
+                            className="btn-primary mt-3 w-full"
+                            onClick={predictPlacement}
+                            disabled={loading}
+                        >
+                            {loading ? 'Analyzing...' : 'Analyze with AI'}
+                        </button>
                     </div>
                 </div>
 

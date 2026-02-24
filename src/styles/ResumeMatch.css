@@ -21,7 +21,7 @@
     text-align: center;
     transition: all 0.2s;
     position: relative;
-    background: #F9FAFB;
+    background: var(--bg-body);
     min-height: 200px;
 }
 
@@ -145,12 +145,13 @@
 }
 
 .keyword-tag {
-    background: #FEF3C7;
-    color: #D97706;
+    background: var(--bg-body);
+    color: var(--primary);
     padding: 0.25rem 0.75rem;
     border-radius: 100px;
     font-size: 0.875rem;
     font-weight: 500;
+    border: 1px solid var(--border-light);
 }
 
 .tips-list {
@@ -177,7 +178,7 @@
     padding: 0.75rem;
     border: 1px solid var(--border-light);
     border-radius: var(--radius-md);
-    background: #F9FAFB;
+    background: var(--bg-body);
 }
 
 .company-info h4 {
