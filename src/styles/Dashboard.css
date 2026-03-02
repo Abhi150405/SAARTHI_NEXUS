@@ -1,3 +1,7 @@
+.dashboard-page {
+    animation: fadeInUp 0.4s ease-out;
+}
+
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -7,60 +11,116 @@
 
 .page-title {
     font-size: 1.875rem;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text-main);
+    letter-spacing: -0.02em;
 }
 
 .page-subtitle {
     color: var(--text-muted);
     margin-top: 0.25rem;
+    font-size: 0.95rem;
 }
 
+/* ===== METRICS GRID ===== */
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
+    gap: 1.25rem;
     margin-bottom: 2rem;
 }
 
 .metric-card {
     background: var(--bg-card);
     padding: 1.5rem;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light);
     display: flex;
     align-items: center;
     gap: 1rem;
+    transition: all var(--transition-spring);
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: rgba(79, 70, 229, 0.15);
+}
+
+.metric-card:hover::before {
+    opacity: 1;
+}
+
+.metric-card:nth-child(1) {
+    animation: fadeInUp 0.4s ease-out 0.05s both;
+}
+
+.metric-card:nth-child(2) {
+    animation: fadeInUp 0.4s ease-out 0.1s both;
+}
+
+.metric-card:nth-child(3) {
+    animation: fadeInUp 0.4s ease-out 0.15s both;
+}
+
+.metric-card:nth-child(4) {
+    animation: fadeInUp 0.4s ease-out 0.2s both;
 }
 
 .metric-icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(79, 70, 229, 0.1);
-    color: var(--primary);
-    border-radius: 12px;
+    width: 52px;
+    height: 52px;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    transition: transform var(--transition-spring);
+}
+
+.metric-card:hover .metric-icon {
+    transform: scale(1.1) rotate(-3deg);
 }
 
 .metric-label {
-    font-size: 0.875rem;
+    font-size: 0.825rem;
     color: var(--text-muted);
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.15rem;
 }
 
 .metric-value {
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text-main);
+    letter-spacing: -0.01em;
 }
 
+/* ===== CHART SECTION ===== */
 .charts-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .full-width {
@@ -69,17 +129,36 @@
 
 .chart-card {
     background: var(--bg-card);
-    padding: 1.5rem;
-    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    border-radius: var(--radius-xl);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light);
+    transition: all var(--transition-base);
+    animation: fadeInUp 0.5s ease-out 0.3s both;
+}
+
+.chart-card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(79, 70, 229, 0.1);
 }
 
 .chart-card h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
+    font-size: 1.05rem;
+    font-weight: 700;
     margin-bottom: 1.5rem;
     color: var(--text-main);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-card h3::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-full);
 }
 
 .chart-wrapper {
@@ -93,9 +172,17 @@
     justify-content: center;
 }
 
+/* ===== FILTER ===== */
 .filter-container {
     background: var(--bg-card);
     border-color: var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    transition: all var(--transition-base);
+}
+
+.filter-container:hover {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .filter-icon {
@@ -105,6 +192,8 @@
 .filter-container select {
     color: var(--text-main);
     background: transparent;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .filter-container option {
@@ -112,8 +201,14 @@
     color: var(--text-main);
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .charts-container {
         grid-template-columns: 1fr;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
     }
 }

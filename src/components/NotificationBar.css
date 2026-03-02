@@ -23,36 +23,38 @@
 .notification-bar {
     max-width: 1200px;
     margin: 0 auto;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(79, 70, 229, 0.2);
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(79, 70, 229, 0.15);
+    border-radius: var(--radius-xl);
     display: flex;
     align-items: center;
     gap: 1.5rem;
     padding: 0.6rem 1.5rem;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
 [data-theme='dark'] .notification-bar {
-    background: rgba(17, 24, 39, 0.95);
-    border-color: rgba(79, 70, 229, 0.4);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    background: rgba(15, 23, 42, 0.92);
+    border-color: rgba(79, 70, 229, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
 }
 
 .notif-badge {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: #ef4444;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
+    padding: 0.25rem 0.85rem;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .notif-content {
@@ -61,12 +63,13 @@
 }
 
 .notif-text {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     color: var(--text-main);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 500;
 }
 
 .notif-admin {
@@ -78,7 +81,7 @@
 .notif-controls {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.25rem;
     flex-shrink: 0;
 }
 
@@ -86,14 +89,16 @@
     font-size: 0.75rem;
     color: var(--primary);
     font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 2px;
+    text-decoration: none;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition-fast);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-md);
+    background: var(--primary-light);
 }
 
 .notif-history-link:hover {
-    opacity: 0.8;
+    opacity: 0.85;
 }
 
 .notif-pagination {
@@ -102,36 +107,42 @@
     gap: 0.75rem;
     font-size: 0.75rem;
     color: var(--text-muted);
+    font-weight: 500;
 }
 
 .notif-pagination button {
     background: var(--bg-body);
     border: 1px solid var(--border-light);
     color: var(--text-main);
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-md);
     cursor: pointer;
     font-size: 0.7rem;
-    transition: all 0.2s;
+    font-weight: 600;
+    transition: all var(--transition-base);
 }
 
 .notif-pagination button:hover {
     border-color: var(--primary);
     color: var(--primary);
+    background: var(--primary-light);
 }
 
 .notif-close {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--text-light);
     cursor: pointer;
     display: flex;
     align-items: center;
-    transition: color 0.2s;
+    transition: all var(--transition-fast);
+    padding: 0.35rem;
+    border-radius: var(--radius-md);
 }
 
 .notif-close:hover {
-    color: #ef4444;
+    color: var(--danger);
+    background: var(--danger-light);
 }
 
 @media (max-width: 768px) {

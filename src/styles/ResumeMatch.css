@@ -1,8 +1,12 @@
+.resume-page {
+    animation: fadeInUp 0.4s ease-out;
+}
+
 .match-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    height: 600px;
+    min-height: 500px;
 }
 
 .full-height {
@@ -13,22 +17,24 @@
 
 .dropzone {
     flex: 1;
-    border: 2px dashed var(--border-light);
-    border-radius: var(--radius-lg);
+    border: 2px dashed var(--border-medium);
+    border-radius: var(--radius-xl);
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    transition: all 0.2s;
+    transition: all var(--transition-base);
     position: relative;
     background: var(--bg-body);
     min-height: 200px;
+    cursor: pointer;
 }
 
 .dropzone:hover,
 .dropzone.has-file {
     border-color: var(--primary);
-    background: rgba(79, 70, 229, 0.02);
+    background: var(--primary-light);
+    box-shadow: 0 0 0 4px var(--primary-light);
 }
 
 .file-input {
@@ -54,11 +60,11 @@
 }
 
 .icon-warn {
-    color: #F59E0B;
+    color: var(--warning);
 }
 
 .icon-success {
-    color: #10B981;
+    color: var(--success);
 }
 
 .small-text {
@@ -76,21 +82,45 @@
 }
 
 .file-name {
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--text-main);
 }
 
 .btn-text {
     text-decoration: underline;
     color: var(--text-muted);
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     z-index: 2;
     position: relative;
+    transition: color var(--transition-fast);
+}
+
+.btn-text:hover {
+    color: var(--primary);
 }
 
 .full-width-btn {
     width: 100%;
     margin-top: 1.5rem;
-    padding: 0.75rem;
+    padding: 0.85rem;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition-spring);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.full-width-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
 }
 
 .empty-state {
@@ -105,7 +135,8 @@
 
 .empty-state h3 {
     margin-top: 1rem;
-    color: var(--text-main);
+    color: var(--text-muted);
+    font-weight: 600;
 }
 
 .score-overview {
@@ -121,20 +152,21 @@
 .score-circle {
     width: 80px;
     height: 80px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     border: 4px solid var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 1rem auto 0;
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--primary);
+    transition: all var(--transition-base);
 }
 
 .score-circle.good {
-    border-color: #10B981;
-    color: #10B981;
+    border-color: var(--success);
+    color: var(--success);
 }
 
 .keywords-list {
@@ -145,13 +177,20 @@
 }
 
 .keyword-tag {
-    background: var(--bg-body);
+    background: var(--primary-light);
     color: var(--primary);
-    padding: 0.25rem 0.75rem;
-    border-radius: 100px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border: 1px solid var(--border-light);
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(79, 70, 229, 0.15);
+    transition: all var(--transition-fast);
+}
+
+.keyword-tag:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-1px);
 }
 
 .tips-list {
@@ -162,6 +201,7 @@
 
 .tips-list li {
     margin-bottom: 0.5rem;
+    line-height: 1.6;
 }
 
 .companies-list {
@@ -175,10 +215,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem;
+    padding: 0.85rem;
     border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     background: var(--bg-body);
+    transition: all var(--transition-base);
+}
+
+.company-match-item:hover {
+    border-color: rgba(79, 70, 229, 0.15);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-xs);
 }
 
 .company-info h4 {
@@ -194,10 +241,16 @@
 }
 
 .match-tag {
-    background: #ECFDF5;
+    background: var(--success-light);
     color: #059669;
-    font-weight: 600;
-    font-size: 0.85rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-full);
+}
+
+@media (max-width: 768px) {
+    .match-container {
+        grid-template-columns: 1fr;
+    }
 }

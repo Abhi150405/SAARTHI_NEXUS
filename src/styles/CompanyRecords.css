@@ -1,103 +1,15 @@
 .records-page {
-    padding: 2rem;
-    height: calc(100vh - 80px);
-    /* Adjust based on navbar height */
+    padding: 0;
+    height: calc(100vh - 120px);
     display: flex;
     flex-direction: column;
-}
-
-.chat-window {
-    width: 380px;
-    height: 500px;
-    background: var(--bg-card);
-    border-radius: 16px;
-    box-shadow: var(--shadow-lg);
-    margin-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border: 1px solid var(--border-light);
-}
-
-.chat-header {
-    padding: 1rem;
-    background: var(--primary);
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chat-header h3 {
-    margin: 0;
-    font-size: 1rem;
-}
-
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    background: var(--bg-body);
-}
-
-.message {
-    max-width: 80%;
-    padding: 0.75rem;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    line-height: 1.4;
-    white-space: pre-wrap;
-}
-
-.message.user {
-    align-self: flex-end;
-    background: var(--bg-chat-user);
-    color: white;
-    border-bottom-right-radius: 2px;
-}
-
-.message.bot {
-    align-self: flex-start;
-    background: var(--bg-chat-bot);
-    color: var(--text-chat-bot);
-    border-bottom-left-radius: 2px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.chat-input {
-    padding: 1rem;
-    border-top: 1px solid var(--border-light);
-    display: flex;
-    gap: 0.5rem;
-    background: var(--bg-card);
-}
-
-.chat-input input {
-    flex: 1;
-    background: var(--bg-body);
-    color: var(--text-main);
-    border: 1px solid var(--border-light);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    outline: none;
-}
-
-.chat-input button {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 0.5rem;
-    border-radius: 8px;
-    cursor: pointer;
+    animation: fadeInUp 0.4s ease-out;
 }
 
 .records-layout {
     display: grid;
     grid-template-columns: 350px 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
     flex: 1;
     overflow: hidden;
     margin-top: 1.5rem;
@@ -117,13 +29,27 @@
     gap: 0.75rem;
     padding: 0.75rem 1rem;
     background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-base);
+}
+
+.search-bar:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
 }
 
 .search-bar input {
     border: none;
     outline: none;
     width: 100%;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    background: transparent;
+    color: var(--text-main);
+}
+
+.search-bar input::placeholder {
+    color: var(--text-light);
 }
 
 .companies-scroll-area {
@@ -131,8 +57,8 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding-right: 0.5rem;
+    gap: 0.5rem;
+    padding-right: 0.25rem;
 }
 
 .company-list-item {
@@ -141,31 +67,35 @@
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-base);
     background: var(--bg-card);
     border: 1px solid transparent;
+    border-radius: var(--radius-lg);
 }
 
 .company-list-item:hover {
     background: var(--bg-hover);
     border-color: var(--border-light);
+    transform: translateX(4px);
 }
 
 .company-list-item.active {
-    background: var(--bg-active);
+    background: var(--primary-light);
     border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
 }
 
 .item-info h4 {
     margin: 0;
     color: var(--text-main);
-    font-size: 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
 }
 
 .item-info p {
     margin: 0.25rem 0 0;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
 }
 
 /* Details Section */
@@ -178,11 +108,13 @@
     background: var(--bg-card);
     padding: 2.5rem;
     min-height: 100%;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-light);
 }
 
 .detail-header {
     margin-bottom: 3rem;
-    border-bottom: 2px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-light);
     padding-bottom: 2rem;
 }
 
@@ -195,48 +127,64 @@
 .company-logo-type {
     width: 64px;
     height: 64px;
-    background: var(--primary);
+    background: var(--gradient-primary);
     color: white;
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
 }
 
 .title-block h2 {
     margin: 0;
-    font-size: 2rem;
+    font-size: 1.875rem;
     color: var(--text-main);
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .stats-row {
     display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
 }
 
-.badge {
+.stats-row .badge {
     background: var(--bg-body);
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
     color: var(--text-muted);
     display: flex;
     align-items: center;
     gap: 0.4rem;
     border: 1px solid var(--border-light);
+    font-weight: 500;
 }
 
 /* Timeline */
 .years-timeline h3 {
     margin-bottom: 1.5rem;
     color: var(--text-main);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.years-timeline h3::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-full);
 }
 
 .timeline-grid {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .timeline-item {
@@ -248,18 +196,25 @@
 
 .year-label {
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-light);
     padding-top: 1rem;
+    font-size: 0.9rem;
 }
 
 .history-card {
     background: var(--bg-body);
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     padding: 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border: 1px solid var(--border-light);
+    transition: all var(--transition-base);
+}
+
+.history-card:hover {
+    border-color: rgba(79, 70, 229, 0.15);
+    box-shadow: var(--shadow-sm);
 }
 
 .main-stat {
@@ -273,20 +228,22 @@
 }
 
 .stat-group .label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #94a3b8;
+    letter-spacing: 0.06em;
+    color: var(--text-light);
+    font-weight: 600;
 }
 
 .stat-group .value {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.05rem;
+    font-weight: 700;
     color: var(--text-main);
 }
 
 .stat-group.highlight .value {
-    color: #2563eb;
+    color: var(--primary);
+    font-weight: 800;
 }
 
 .extra-details {
@@ -295,24 +252,25 @@
 
 .branch-pills {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.35rem;
     justify-content: flex-end;
     margin-bottom: 0.5rem;
 }
 
 .pill {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     background: var(--bg-card);
-    padding: 2px 8px;
-    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full);
     border: 1px solid var(--border-light);
     color: var(--text-muted);
+    font-weight: 500;
 }
 
 .criteria-text {
     margin: 0;
-    font-size: 0.8rem;
-    color: #94a3b8;
+    font-size: 0.75rem;
+    color: var(--text-light);
 }
 
 .empty-details {
@@ -324,21 +282,20 @@
     color: var(--text-light);
     text-align: center;
     background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-light);
 }
 
 .empty-details h3 {
     margin: 1rem 0 0.5rem;
-    color: #475569;
+    color: var(--text-muted);
+    font-weight: 600;
 }
 
-/* Scrollbar Styling */
-.companies-scroll-area::-webkit-scrollbar,
-.details-section::-webkit-scrollbar {
-    width: 6px;
-}
-
-.companies-scroll-area::-webkit-scrollbar-thumb,
-.details-section::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 10px;
+/* Responsive */
+@media (max-width: 1024px) {
+    .records-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
 }
