@@ -476,8 +476,295 @@
     border-color: #ef4444;
 }
 
+/* ===== INSTITUTIONAL FEEDBACK DOCUMENT ===== */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap');
+
+.industry-feedback-document {
+    background: #0f1724;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 2.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Open Sans', 'Roboto', sans-serif;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.doc-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 2px solid rgba(239, 68, 68, 0.3);
+}
+
+.doc-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.35rem;
+}
+
+.doc-subtitle {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.doc-success-banner {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 10px;
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 1.5rem;
+    color: #34d399;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.doc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.doc-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    padding: 0.6rem 0.85rem;
+    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid #ef4444;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+/* --- Document Table --- */
+.doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.doc-table th,
+.doc-table td {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+}
+
+.doc-table th {
+    background: rgba(239, 68, 68, 0.06);
+    color: #cbd5e1;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+.doc-label-cell {
+    color: #cbd5e1;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.015);
+    white-space: nowrap;
+}
+
+.doc-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #f1f5f9;
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.doc-input:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+}
+
+.doc-input option {
+    background: #1e293b;
+    color: #f1f5f9;
+}
+
+.doc-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #f1f5f9;
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+}
+
+.doc-textarea:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+}
+
+/* --- Rating Scale Legend --- */
+.rating-scale-legend {
+    display: flex;
+    gap: 1.25rem;
+    padding: 0.5rem 0;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.rating-scale-legend strong {
+    color: #e2e8f0;
+    margin-right: 2px;
+}
+
+/* --- Rating Matrix --- */
+.rating-matrix-table th:not(:first-child) {
+    width: 10%;
+    text-align: center;
+}
+
+.radio-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.radio-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.radio-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-circle {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    display: inline-block;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.radio-circle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ef4444;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+}
+
+.radio-label input[type="radio"]:checked+.radio-circle {
+    border-color: #ef4444;
+}
+
+.radio-label input[type="radio"]:checked+.radio-circle::after {
+    transform: scale(1);
+}
+
+.radio-label:hover .radio-circle {
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* --- Submit Button --- */
+.doc-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex: 1;
+    padding: 1rem;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
+    margin-top: 0.5rem;
+}
+
+.doc-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
+}
+
+.doc-submit-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.doc-cancel-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 1rem;
+    background: transparent;
+    color: #cbd5e1;
+    border: 1px solid rgba(203, 213, 225, 0.3);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.doc-cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
 @media (max-width: 1200px) {
     .admin-main-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .industry-feedback-document {
+        padding: 1.25rem;
+    }
+
+    .doc-table th,
+    .doc-table td {
+        padding: 0.5rem 0.65rem;
+        font-size: 0.8rem;
+    }
+
+    .rating-scale-legend {
+        gap: 0.5rem;
+        font-size: 0.7rem;
     }
 }

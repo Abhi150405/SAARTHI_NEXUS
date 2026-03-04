@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, X, Info } from 'lucide-react';
 import './NotificationBar.css';
+import { API_URL } from '../config';
 
 const NotificationBar = () => {
     const [notifications, setNotifications] = useState([]);
@@ -11,7 +12,7 @@ const NotificationBar = () => {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/notifications');
+                const response = await fetch(`${API_URL}/api/notifications`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.length > 0) {
