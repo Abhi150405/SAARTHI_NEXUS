@@ -16,6 +16,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Signup from './pages/Signup';
 import Notifications from './pages/Notifications';
+import Profile from './pages/Profile';
 import ThemeToggle from './components/ThemeToggle';
 
 // Protected Route Component
@@ -82,6 +83,7 @@ function App() {
           <Route path="help" element={<Help />} />
           <Route path="about" element={<AboutUs />} />
           <Route path="notifications" element={<Notifications />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
 
         {/* Global Redirect */}
