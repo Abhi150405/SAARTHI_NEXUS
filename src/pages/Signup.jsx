@@ -12,6 +12,7 @@ import {
     BookOpen
 } from 'lucide-react';
 import '../styles/Login.css';
+import { API_URL } from '../config';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -63,7 +64,7 @@ const Signup = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/signup', {
+            const response = await fetch(`${API_URL}/api/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

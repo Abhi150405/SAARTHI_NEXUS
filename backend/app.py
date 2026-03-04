@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
+from bson.objectid import ObjectId
 import joblib
 import pandas as pd
 import numpy as np
@@ -34,7 +35,8 @@ env_paths = [
 ]
 for path in env_paths:
     if os.path.exists(path):
-        load_dotenv(path)
+        load_dotenv(path, override=True)
+        log_print(f"Loaded environment variables from: {path}")
         break
 
 app = Flask(__name__)
@@ -71,11 +73,17 @@ if GEMINI_API_KEY:
             model_gen = genai.GenerativeModel(
                 model_name=chosen_model.replace('models/', ''),
                 generation_config={
-                    "temperature": 0.1,
+                    "temperature": 0.4,
                     "top_p": 0.95,
                     "top_k": 40,
-                    "max_output_tokens": 512,
-                }
+                    "max_output_tokens": 2048,
+                },
+                safety_settings=[
+                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+                ]
             )
             log_print(f"Gemini Model successfully initialized with High-Speed config: {chosen_model}")
         else:
@@ -88,20 +96,19 @@ else:
     log_print("WARNING: Gemini API Key not found. Chatbot will run in technical mode.")
 
 # MongoDB Setup
+MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
 try:
-    mongo_uri = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/')
-    client = MongoClient(mongo_uri)
+    client = MongoClient(MONGO_URI)
     db = client['saarthi_nexus']
-    collection = db['placement_records']
+    collection = db['placement_records'] # Updated to granular collection
     notifications_collection = db['notifications']
-    
-    # Create a TTL index: expires after 7 days
+    # Create a TTL index: expires after 7 days (604800 seconds)
     notifications_collection.create_index("created_at", expireAfterSeconds=604800)
-    
-    connection_type = "Atlas" if "mongodb+srv" in mongo_uri else "Local"
-    print(f"Successfully connected to MongoDB ({connection_type}) and initialized TTL index!")
+    # Test the connection
+    client.admin.command('ping')
+    log_print(f"Successfully connected to MongoDB! URI: {MONGO_URI[:30]}...")
 except Exception as e:
-    print(f"Error connecting to MongoDB: {e}")
+    log_print(f"Error connecting to MongoDB: {e}")
     collection = None
 
 # New collections for interview experiences, feedback and separated user roles
@@ -398,27 +405,95 @@ def get_interview_experiences():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# --- COMPANY FEEDBACK ENDPOINTS ---
+# --- COMPANY FEEDBACK ENDPOINTS (Admin-Managed — Institutional Form) ---
 
 @app.route('/api/company-feedback', methods=['POST'])
 def add_company_feedback():
+    """Admin-only: Add industry feedback with institutional form structure"""
     if feedback_collection is None:
         return jsonify({'error': 'Database connection failed'}), 500
     
     try:
         data = request.json
-        if not data.get('company_name') or not data.get('feedback'):
-            return jsonify({'error': 'Missing company_name or feedback'}), 400
+        if not data.get('company_name'):
+            return jsonify({'error': 'Company name is required'}), 400
             
         feedback_record = {
             "company_name": data['company_name'],
-            "feedback": data['feedback'],
-            "rating": data.get('rating', 5),
-            "date": pd.Timestamp.now().isoformat()
+            "students_appeared": data.get('students_appeared', {}),
+            "overall_observation": data.get('overall_observation', {}),
+            "training_suggestions": data.get('training_suggestions', ''),
+            "industry_institute_remarks": data.get('industry_institute_remarks', ''),
+            "admin_name": data.get('admin_name', 'TNP Admin'),
+            "date": data.get('date') or pd.Timestamp.now().isoformat()
         }
         
         result = feedback_collection.insert_one(feedback_record)
-        return jsonify({'message': 'Feedback added successfully', 'id': str(result.inserted_id)}), 201
+        return jsonify({'message': 'Feedback from Industry published successfully', 'id': str(result.inserted_id)}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/company-feedback', methods=['GET'])
+def get_all_company_feedback():
+    """Get all company feedback (for student view and admin edit)"""
+    if feedback_collection is None:
+        return jsonify({'error': 'Database connection failed'}), 500
+    
+    try:
+        # Include _id so the frontend can identify which one to update
+        feedbacks = list(feedback_collection.find().sort("date", -1))
+        for fb in feedbacks:
+            fb['_id'] = str(fb['_id'])
+        return jsonify(feedbacks)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/company-feedback/<id>', methods=['PUT'])
+def update_company_feedback(id):
+    """Admin-only: Update existing company feedback"""
+    if feedback_collection is None:
+        return jsonify({'error': 'Database connection failed'}), 500
+    
+    try:
+        data = request.json
+        if not data.get('company_name'):
+            return jsonify({'error': 'Company name is required'}), 400
+            
+        update_data = {
+            "company_name": data['company_name'],
+            "students_appeared": data.get('students_appeared', {}),
+            "overall_observation": data.get('overall_observation', {}),
+            "training_suggestions": data.get('training_suggestions', ''),
+            "industry_institute_remarks": data.get('industry_institute_remarks', ''),
+        }
+        
+        if 'date' in data and data['date']:
+            update_data['date'] = data['date']
+        
+        result = feedback_collection.update_one(
+            {'_id': ObjectId(id)},
+            {'$set': update_data}
+        )
+        
+        if result.matched_count == 0:
+            return jsonify({'error': 'Feedback not found'}), 404
+            
+        return jsonify({'message': 'Feedback from Industry updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/company-feedback/<id>', methods=['DELETE'])
+def delete_company_feedback(id):
+    """Admin-only: Delete existing company feedback"""
+    if feedback_collection is None:
+        return jsonify({'error': 'Database connection failed'}), 500
+    
+    try:
+        result = feedback_collection.delete_one({'_id': ObjectId(id)})
+        if result.deleted_count == 0:
+            return jsonify({'error': 'Feedback not found'}), 404
+            
+        return jsonify({'message': 'Feedback deleted successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -504,10 +579,15 @@ def get_chat_response(query):
         # 3. GENERATION: Use Gemini if API key is available
         if model_gen:
             try:
+                # Check for "Hii" greeting logic
+                is_hii = query.strip().lower() == "hii"
+                intro_instruction = "Start your response with 'Hello! I am Saarthi, the Official AI Placement Assistant for PICT.' and then ask how you can help." if is_hii else "CRITICAL: DO NOT include your introduction (e.g., 'Hello! I am Saarthi...') or any greeting. Directly answer the user's question."
+
                 if context_parts and not ("The platform contains placement data" in context_string):
                     # We have specific company/year data
                     prompt = (
                         f"You are Saarthi, an AI Placement Assistant for PICT (Pune Institute of Computer Technology). "
+                        f"{intro_instruction} "
                         f"Use the following technical placement data to answer the user's question accurately. "
                         f"Keep the tone professional yet helpful.\n\n"
                         f"Context Data:\n{context_string}\n\n"
@@ -518,6 +598,7 @@ def get_chat_response(query):
                     # General query or fallback
                     prompt = (
                         f"You are Saarthi, an AI Placement Assistant for PICT (Pune Institute of Computer Technology). "
+                        f"{intro_instruction} "
                         f"Your goal is to help students with placement queries, career advice, and interview preparation. "
                         f"The user has asked a general question: '{query}'. "
                         f"Provide a helpful, detailed, and encouraging response based on your general knowledge. "
@@ -557,56 +638,133 @@ def get_cached_companies():
     return cached_companies
 
 def get_chat_response_stream(query):
+    log_print(f"CHAT_DEBUG: Received query: {query}")
+    # Small initial yield to "open" the stream connection immediately
+    yield " " 
     try:
         query_lower = query.lower()
         companies = get_cached_companies()
         
-        # Fast matching
-        found_companies = [c for c in companies if c.lower() in query_lower]
-        found_years = re.findall(r"20\d{2}", query)
+        # 1. RETRIEVAL LOGIC
         context_parts = []
         
+        # Find mentioned companies (case-insensitive, whole words only)
+        found_companies = []
+        for c in companies:
+            if re.search(rf"\b{re.escape(c.lower())}\b", query_lower):
+                found_companies.append(c)
+        
+        # Find years (e.g., 2023)
+        found_years = re.findall(r"20\d{2}", query)
+        
         if found_companies:
-            # Provide more detailed context for better responses
-            docs = list(collection.find({"company_name": {"$in": found_companies}}).sort("academic_year", -1).limit(4))
+            # Get last 5 years of data for these companies
+            docs = list(collection.find({"company_name": {"$in": found_companies}}).sort("academic_year", -1).limit(6))
             for d in docs:
-                total_hired = d['selections']['CE'] + d['selections']['IT'] + d['selections']['E&TC']
+                hires = d['selections']['CE'] + d['selections']['IT'] + d['selections']['E&TC']
+                branches = ", ".join(d['criteria'].get('eligible_branches', []))
                 context_parts.append(
-                    f"{d['company_name']} ({d['academic_year']}): Package {d['salary_lpa']} LPA, "
-                    f"Total Selected: {total_hired} (CE: {d['selections']['CE']}, IT: {d['selections']['IT']}, E&TC: {d['selections']['E&TC']}), "
-                    f"Criteria: {d['criteria']['min_cgpa']} CGPA, "
-                    f"Branches: {', '.join(d['criteria']['eligible_branches'])}"
+                    f"Company: {d['company_name']} ({d['academic_year']}) | "
+                    f"Salary: {d['salary_lpa']} LPA | "
+                    f"Eligibility: {d['criteria']['min_cgpa']} CGPA, Branches: {branches} | "
+                    f"Selections: {hires} total (CE:{d['selections']['CE']}, IT:{d['selections']['IT']}, ENTC:{d['selections']['E&TC']})"
                 )
         
-        context_string = "\n".join(context_parts) if context_parts else "General PICT placement stats: Average Package ~12.5 LPA, Max Package 1.2 Cr (overseas), Top recruiters: Amazon, Microsoft, Barclays, Deutsche Bank."
+        if found_years:
+            # Aggregate stats for specific years
+            for yr in found_years:
+                year_regex = re.compile(f"^{yr}")
+                pipeline = [
+                    {"$match": {"academic_year": year_regex}},
+                    {"$group": {
+                        "_id": "$academic_year",
+                        "avgSalary": {"$avg": "$salary_lpa"},
+                        "maxSalary": {"$max": "$salary_lpa"},
+                        "count": {"$sum": 1},
+                        "totalPlaced": {"$sum": {"$add": ["$selections.CE", "$selections.IT", "$selections.E&TC"]}}
+                    }}
+                ]
+                stats = list(collection.aggregate(pipeline))
+                for s in stats:
+                    context_parts.append(
+                        f"Year {s['_id']} Stats: Avg Salary {s['avgSalary']:.2f} LPA, Max {s['maxSalary']} LPA, "
+                        f"Companies visited: {s['count']}, Total students placed: {s['totalPlaced']}."
+                    )
+        
+        # New: Catch overall/total queries
+        if any(word in query_lower for word in ['total', 'overall', 'all', 'hired', 'placed', 'stats']):
+            # Get data for the most recent year if not specified
+            pipeline = [
+                {"$group": {
+                    "_id": "$academic_year",
+                    "totalPlaced": {"$sum": {"$add": ["$selections.CE", "$selections.IT", "$selections.E&TC"]}},
+                    "avgLPA": {"$avg": "$salary_lpa"},
+                    "maxLPA": {"$max": "$salary_lpa"}
+                }},
+                {"$sort": {"_id": -1}},
+                {"$limit": 3}
+            ]
+            overall_stats = list(collection.aggregate(pipeline))
+            for os_stat in overall_stats:
+                context_parts.append(
+                    f"Overall for {os_stat['_id']}: {os_stat['totalPlaced']} students placed, "
+                    f"Average Package: {os_stat['avgLPA']:.2f} LPA, Highest: {os_stat['maxLPA']} LPA."
+                )
+
+        # Fallback for general questions
+        if not context_parts:
+            context_parts.append("PICT has a strong placement record from 2021 to 2025. Top recruiters include PhonePe, Mastercard, Barclays, and Deutsche Bank.")
+        
+        context_string = "\n".join(context_parts)
 
         if model_gen:
+            # Check for "Hii" greeting logic
+            is_hii = query.strip().lower() == "hii"
+            intro_instruction = "Start your response with 'Hello! I am Saarthi, the Official AI Placement Assistant for PICT.' and then ask how you can help." if is_hii else "CRITICAL: DO NOT start your response with 'Hello! I am Saarthi...' or any introduction. Start answering the user's question directly and concisely."
+
             prompt = (
                 f"You are Saarthi, the Official AI Placement Assistant for PICT. "
-                f"Use this Context Data: {context_string}. "
+                f"{intro_instruction} "
+                f"Context Data: {context_string}. "
                 f"User: {query}. "
-                f"RULES:\n"
-                f"- Respond in structured PARAGRAPHS.\n"
-                f"- BOLD key information like company names, salaries, and eligibility using <b>bold text</b>.\n"
-                f"- Use native bullet points (•) ONLY for lists.\n"
-                f"- NEVER use stars (*) or hashes (#) for formatting.\n"
-                f"- Be ACCURATE and helpful."
+                f"Instructions: Respond in paragraphs, bold key points with <b> and </b>. Use bullet points (•) only if needed."
             )
             response = model_gen.generate_content(prompt, stream=True)
             for chunk in response:
-                if chunk.text: yield chunk.text
+                try:
+                    if hasattr(chunk, 'text') and chunk.text:
+                        yield chunk.text
+                    elif hasattr(chunk, 'candidates') and chunk.candidates:
+                        # If text is blocked, this will show why
+                        finish_reason = chunk.candidates[0].finish_reason
+                        if finish_reason != 1: # 1 is SUCCESS
+                            log_print(f"CHAT_DEBUG: Stream stopped early. Reason: {finish_reason}")
+                except Exception as e:
+                    log_print(f"CHAT_DEBUG: Chunk error: {e}")
+                    continue
         else:
-            yield "Saarthi is briefly offline. Please try again in 10 seconds."
+            yield "I'm having trouble connecting to my AI core. Please check back in a few seconds."
     except Exception as e:
-        yield f"Notice: {str(e)}"
+        log_print(f"CHAT_DEBUG: Global error: {e}")
+        yield f"Notice: Error ({str(e)}). Please try again."
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    data = request.json
-    query = data.get('query', '')
-    if not query: return jsonify({'error': 'No query'}), 400
-    
-    return Response(get_chat_response_stream(query), mimetype='text/plain')
+    log_print("CHAT_ENDPOINT_HIT")
+    try:
+        data = request.json
+        if not data:
+            log_print("CHAT_ERROR: No JSON data received")
+            return jsonify({'error': 'No JSON data'}), 400
+        query = data.get('query', '')
+        log_print(f"CHAT_QUERY: {query}")
+        if not query: 
+            return jsonify({'error': 'No query'}), 400
+        
+        return Response(get_chat_response_stream(query), mimetype='text/plain')
+    except Exception as e:
+        log_print(f"CHAT_ENDPOINT_EXCEPTION: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/placement-stats', methods=['GET'])
 def get_placement_stats():
@@ -751,5 +909,4 @@ def index():
     })
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port, use_reloader=False)
+    app.run(debug=True, port=5000, use_reloader=False)

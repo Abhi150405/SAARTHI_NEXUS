@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, X, BookOpen, ExternalLink } from 'lucide-react';
 import '../styles/Eligibility.css';
+import { API_URL } from '../config';
 
 const Eligibility = () => {
     const [cgpa, setCgpa] = useState(8.5);
@@ -46,7 +47,7 @@ const Eligibility = () => {
     const predictPlacement = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/predict_placement', {
+            const response = await fetch(`${API_URL}/predict_placement`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Calendar, User, ArrowLeft, RefreshCw, Volume2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Notifications.css';
+import { API_URL } from '../config';
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -11,7 +12,7 @@ const Notifications = () => {
     const fetchNotifications = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/api/notifications/all');
+            const response = await fetch(`${API_URL}/api/notifications/all`);
             if (response.ok) {
                 const data = await response.json();
                 setNotifications(data);
