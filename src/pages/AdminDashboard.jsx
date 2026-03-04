@@ -60,6 +60,7 @@ const AdminDashboard = () => {
 
     // Recent registrations state
     const [recentUsers, setRecentUsers] = useState([]);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -156,7 +157,7 @@ const AdminDashboard = () => {
             };
 
             const url = editingFeedbackId
-                ? `http://localhost:5000/api/company-feedback/${editingFeedbackId}`
+                ? `${API_URL}/api/company-feedback/${editingFeedbackId}`
                 : `${API_URL}/api/company-feedback`;
 
             const method = editingFeedbackId ? 'PUT' : 'POST';
@@ -233,7 +234,7 @@ const AdminDashboard = () => {
         if (!window.confirm('Are you sure you want to delete this feedback report?')) return;
 
         try {
-            const response = await fetch(`http://localhost:5000/api/company-feedback/${id}`, {
+            const response = await fetch(`${API_URL}/api/company-feedback/${id}`, {
                 method: 'DELETE'
             });
             if (response.ok) {
@@ -286,13 +287,17 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="admin-dashboard-root">
-            <aside className="admin-sidebar">
+        <div className={`admin-dashboard-root ${sidebarOpen ? 'sidebar-open' : ''}`}>
+            {sidebarOpen && <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
+            <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
                 <div className="admin-sidebar-header">
                     <div className="admin-logo-box">
                         <ShieldCheck size={24} />
                     </div>
                     <span>Nexus Admin</span>
+                    <button className="mobile-close-btn" onClick={() => setSidebarOpen(false)}>
+                        <X size={20} />
+                    </button>
                 </div>
 
                 <nav className="admin-nav">
@@ -354,6 +359,9 @@ const AdminDashboard = () => {
 
             <main className="admin-main">
                 <header className="admin-top-bar">
+                    <button className="admin-menu-toggle" onClick={() => setSidebarOpen(true)}>
+                        <Activity size={24} strokeWidth={2.5} />
+                    </button>
                     <div className="admin-search-box">
                         <Search size={18} />
                         <input type="text" placeholder="Search records, students, or companies..." />

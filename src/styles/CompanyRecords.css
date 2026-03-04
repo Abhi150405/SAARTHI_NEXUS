@@ -294,8 +294,97 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
+    .records-page {
+        height: auto;
+        padding-bottom: 2rem;
+    }
+
     .records-layout {
         grid-template-columns: 1fr;
         height: auto;
+        overflow: visible;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .companies-list-section {
+        overflow: visible;
+        max-height: 400px;
+        /* Limit list height on mobile but allow internal scroll */
+    }
+
+    .companies-scroll-area {
+        max-height: 350px;
+    }
+
+    .details-section {
+        overflow: visible;
+        padding: 0;
+        margin-top: 1rem;
+    }
+
+    .company-detail-view {
+        padding: 1.5rem;
+    }
+
+    .title-block {
+        gap: 1rem;
+    }
+
+    .title-block h2 {
+        font-size: 1.5rem;
+    }
+
+    .timeline-item {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .year-label {
+        padding-top: 0;
+        background: var(--bg-card);
+        display: inline-block;
+        width: fit-content;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 4px;
+    }
+
+    .history-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .main-stat {
+        gap: 1.5rem;
+    }
+
+    .extra-details {
+        text-align: left;
+        width: 100%;
+        border-top: 1px solid var(--border-light);
+        padding-top: 0.75rem;
+    }
+
+    .branch-pills {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .title-block {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .company-logo-type {
+        width: 48px;
+        height: 48px;
+    }
+
+    .stats-row {
+        flex-wrap: wrap;
     }
 }

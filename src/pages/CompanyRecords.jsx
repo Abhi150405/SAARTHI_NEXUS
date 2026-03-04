@@ -9,6 +9,8 @@ const CompanyRecords = () => {
     const [companies, setCompanies] = useState([]);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [detailsLoading, setDetailsLoading] = useState(false);
+    const detailsRef = React.useRef(null);
 
     useEffect(() => {
         fetchCompanies();
@@ -27,12 +29,24 @@ const CompanyRecords = () => {
     };
 
     const fetchCompanyDetails = async (name) => {
+        setDetailsLoading(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/company/${encodeURIComponent(name)}`);
+            const response = await fetch(`${API_URL}/api/company/${encodeURIComponent(name)}`);
+            if (!response.ok) throw new Error('Failed to fetch details');
             const data = await response.json();
             setSelectedCompany(data);
+
+            // On mobile, scroll to details section
+            if (window.innerWidth <= 1024) {
+                setTimeout(() => {
+                    detailsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
         } catch (error) {
             console.error('Error fetching company details:', error);
+            alert('Could not load company details. Please check your connection.');
+        } finally {
+            setDetailsLoading(false);
         }
     };
 
@@ -80,8 +94,13 @@ const CompanyRecords = () => {
                     </div>
                 </div>
 
-                <div className="details-section">
-                    {selectedCompany ? (
+                <div className="details-section" ref={detailsRef}>
+                    {detailsLoading ? (
+                        <div className="empty-details card">
+                            <div className="loader"></div>
+                            <p>Fetching company history...</p>
+                        </div>
+                    ) : selectedCompany ? (
                         <div className="company-detail-view card animate-fade-in">
                             <div className="detail-header">
                                 <div className="title-block">
