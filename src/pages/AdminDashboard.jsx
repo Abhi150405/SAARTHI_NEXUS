@@ -14,7 +14,8 @@ import {
     ClipboardList,
     Send,
     Edit2,
-    Trash2
+    Trash2,
+    X
 } from 'lucide-react';
 import '../styles/AdminDashboard.css';
 import { API_URL } from '../config';
