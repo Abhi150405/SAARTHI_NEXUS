@@ -174,6 +174,34 @@ def signup():
     except Exception as e:
         return jsonify({'error': 'Internal Server Error', 'reason': str(e)}), 500
 
+@app.route('/api/change-password', methods=['POST'])
+def change_password():
+    try:
+        data = request.json
+        email = data.get('email')
+        current_password = data.get('currentPassword')
+        new_password = data.get('newPassword')
+        role = data.get('role', 'student')
+
+        if not all([email, current_password, new_password]):
+            return jsonify({'error': 'Missing information'}), 400
+
+        collection = admins_collection if role == 'admin' else students_collection
+        user = collection.find_one({'email': email})
+
+        if not user or not check_password_hash(user['password'], current_password):
+            return jsonify({'error': 'Incorrect current password'}), 401
+
+        if len(new_password) < 6:
+            return jsonify({'error': 'New password must be at least 6 characters long'}), 400
+
+        hashed_password = generate_password_hash(new_password)
+        collection.update_one({'email': email}, {'$set': {'password': hashed_password}})
+        
+        return jsonify({'message': 'Password changed successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': 'Internal server error', 'reason': str(e)}), 500
+
 @app.route('/api/login', methods=['POST'])
 def login():
     if students_collection is None or admins_collection is None:
@@ -209,7 +237,8 @@ def login():
                 'email': user['email'],
                 'fullName': user.get('full_name'),
                 'role': user.get('role', role),
-                'department': user.get('department')
+                'department': user.get('department'),
+                'idNumber': user.get('id_number')
             }
         }), 200
     except Exception as e:
