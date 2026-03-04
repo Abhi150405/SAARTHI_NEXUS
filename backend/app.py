@@ -269,7 +269,9 @@ def get_notifications():
     
     try:
         # Fetch latest 5 notifications
-        notifications = list(notifications_collection.find({}, {'_id': 0}).sort('created_at', -1).limit(5))
+        notifications = list(notifications_collection.find({}).sort('created_at', -1).limit(5))
+        for n in notifications:
+            n['_id'] = str(n['_id'])
         return jsonify(notifications)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -280,8 +282,47 @@ def get_all_notifications():
         return jsonify({'error': 'Database connection failed'}), 500
     
     try:
-        notifications = list(notifications_collection.find({}, {'_id': 0}).sort('created_at', -1))
+        notifications = list(notifications_collection.find({}).sort('created_at', -1))
+        for n in notifications:
+            n['_id'] = str(n['_id'])
         return jsonify(notifications)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/notifications/<id>', methods=['PUT'])
+def update_notification(id):
+    if notifications_collection is None:
+        return jsonify({'error': 'Database connection failed'}), 500
+    
+    try:
+        data = request.json
+        message = data.get('message')
+        if not message:
+            return jsonify({'error': 'Message is required'}), 400
+            
+        result = notifications_collection.update_one(
+            {'_id': ObjectId(id)},
+            {'$set': {'message': message}}
+        )
+        
+        if result.matched_count == 0:
+            return jsonify({'error': 'Notification not found'}), 404
+            
+        return jsonify({'message': 'Notification updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/notifications/<id>', methods=['DELETE'])
+def delete_notification(id):
+    if notifications_collection is None:
+        return jsonify({'error': 'Database connection failed'}), 500
+    
+    try:
+        result = notifications_collection.delete_one({'_id': ObjectId(id)})
+        if result.deleted_count == 0:
+            return jsonify({'error': 'Notification not found'}), 404
+            
+        return jsonify({'message': 'Notification deleted successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

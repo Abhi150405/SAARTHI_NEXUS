@@ -15,8 +15,13 @@ const NotificationBar = () => {
                 const response = await fetch(`${API_URL}/api/notifications`);
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.length > 0) {
-                        setNotifications(data);
+
+                    // Filter out notifications that user has already closed
+                    const closedIds = JSON.parse(localStorage.getItem('closed_notifications') || '[]');
+                    const newNotifications = data.filter(n => !closedIds.includes(n._id));
+
+                    if (newNotifications.length > 0) {
+                        setNotifications(newNotifications);
                         setIsVisible(true);
                     }
                 }
@@ -26,10 +31,32 @@ const NotificationBar = () => {
         };
 
         fetchNotifications();
-        // Poll for new notifications every 30 seconds
-        const interval = setInterval(fetchNotifications, 30000);
+        // Poll for new notifications every 60 seconds (increased to reduce overhead)
+        const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
     }, []);
+
+    // Auto-close logic: Close after 10 seconds of being visible
+    useEffect(() => {
+        if (isVisible && notifications.length > 0) {
+            const timer = setTimeout(() => {
+                handleClose();
+            }, 10000);
+            return () => clearTimeout(timer);
+        }
+    }, [isVisible, notifications, currentIndex]);
+
+    const handleClose = () => {
+        if (notifications.length > 0) {
+            const currentId = notifications[currentIndex]._id;
+            const closedIds = JSON.parse(localStorage.getItem('closed_notifications') || '[]');
+            if (!closedIds.includes(currentId)) {
+                closedIds.push(currentId);
+                localStorage.setItem('closed_notifications', JSON.stringify(closedIds));
+            }
+        }
+        setIsVisible(false);
+    };
 
     if (!isVisible || notifications.length === 0) return null;
 
@@ -50,7 +77,7 @@ const NotificationBar = () => {
                 </div>
 
                 <div className="notif-controls">
-                    <Link to="/notifications" className="notif-history-link" onClick={() => setIsVisible(false)}>
+                    <Link to="/notifications" className="notif-history-link" onClick={handleClose}>
                         View History
                     </Link>
                     {notifications.length > 1 && (
@@ -59,7 +86,7 @@ const NotificationBar = () => {
                             <button onClick={() => setCurrentIndex((prev) => (prev + 1) % notifications.length)}>Next</button>
                         </div>
                     )}
-                    <button className="notif-close" onClick={() => setIsVisible(false)}>
+                    <button className="notif-close" onClick={handleClose}>
                         <X size={18} />
                     </button>
                 </div>
