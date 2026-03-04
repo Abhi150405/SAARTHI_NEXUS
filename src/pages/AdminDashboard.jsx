@@ -61,6 +61,8 @@ const AdminDashboard = () => {
     // Recent registrations state
     const [recentUsers, setRecentUsers] = useState([]);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [broadcastedNotifications, setBroadcastedNotifications] = useState([]);
+    const [editingNotificationId, setEditingNotificationId] = useState(null);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -104,10 +106,20 @@ const AdminDashboard = () => {
             } catch (err) { console.error('Failed to fetch feedbacks', err); }
         };
 
+        const fetchBroadcasts = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/notifications/all`);
+                if (response.ok) {
+                    setBroadcastedNotifications(await response.json());
+                }
+            } catch (err) { console.error('Failed to fetch broadcasts', err); }
+        };
+
         fetchStats();
         fetchStudents();
         fetchCompanies();
         fetchFeedbacks();
+        fetchBroadcasts();
     }, []);
 
     const observationLabels = {
@@ -277,12 +289,54 @@ const AdminDashboard = () => {
 
             if (response.ok) {
                 alert("Notification broadcasted successfully!");
+                // Refresh broadcasts list
+                const bcRes = await fetch(`${API_URL}/api/notifications/all`);
+                if (bcRes.ok) setBroadcastedNotifications(await bcRes.json());
             } else {
                 alert("Failed to broadcast notification.");
             }
         } catch (err) {
             console.error("Broadcast error:", err);
             alert("Error connecting to server.");
+        }
+    };
+
+    const handleDeleteNotification = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this notification?')) return;
+        try {
+            const response = await fetch(`${API_URL}/api/notifications/${id}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                setBroadcastedNotifications(broadcastedNotifications.filter(n => n._id !== id));
+            } else {
+                alert('Failed to delete notification');
+            }
+        } catch (err) {
+            console.error('Delete notification error:', err);
+        }
+    };
+
+    const handleEditNotification = async (notif) => {
+        const newMessage = prompt("Edit notification message:", notif.message);
+        if (!newMessage || newMessage === notif.message) return;
+
+        try {
+            const response = await fetch(`${API_URL}/api/notifications/${notif._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: newMessage })
+            });
+
+            if (response.ok) {
+                setBroadcastedNotifications(broadcastedNotifications.map(n =>
+                    n._id === notif._id ? { ...n, message: newMessage } : n
+                ));
+            } else {
+                alert('Failed to update notification');
+            }
+        } catch (err) {
+            console.error('Update notification error:', err);
         }
     };
 
@@ -328,6 +382,13 @@ const AdminDashboard = () => {
                     >
                         <ClipboardList size={20} />
                         <span>Company Feedback</span>
+                    </button>
+                    <button
+                        className={`admin-nav-item ${activeTab === 'broadcasts' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('broadcasts')}
+                    >
+                        <Bell size={20} />
+                        <span>Manage Broadcasts</span>
                     </button>
                     <button
                         className={`admin-nav-item ${activeTab === 'reports' ? 'active' : ''}`}
@@ -744,6 +805,57 @@ const AdminDashboard = () => {
                                         )}
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Broadcast Notifications Management */}
+                    {activeTab === 'broadcasts' && (
+                        <div className="admin-panel glass">
+                            <div className="panel-header">
+                                <h2>Broadcast History</h2>
+                                <button className="submit-btn" style={{ width: 'auto', padding: '0.5rem 1rem' }} onClick={handleBroadcast}>
+                                    <Send size={16} /> New Broadcast
+                                </button>
+                            </div>
+                            <div className="panel-content">
+                                <div className="table-responsive">
+                                    <table className="nexus-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Serial</th>
+                                                <th>Message</th>
+                                                <th>Admin</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {broadcastedNotifications.length > 0 ? broadcastedNotifications.map((notif, index) => (
+                                                <tr key={notif._id}>
+                                                    <td>{index + 1}</td>
+                                                    <td style={{ maxWidth: '400px' }}>{notif.message}</td>
+                                                    <td>{notif.admin_name}</td>
+                                                    <td>{new Date(notif.created_at).toLocaleString()}</td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                            <button title="Edit" className="btn-icon" onClick={() => handleEditNotification(notif)}>
+                                                                <Edit2 size={16} />
+                                                            </button>
+                                                            <button title="Delete" className="btn-icon danger" onClick={() => handleDeleteNotification(notif._id)}>
+                                                                <Trash2 size={16} color="#ef4444" />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan="5" style={{ textAlign: 'center', opacity: 0.5, padding: '2rem' }}>No broadcasts found.</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     )}
