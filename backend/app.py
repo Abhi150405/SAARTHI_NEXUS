@@ -868,15 +868,9 @@ def predict_placement():
         data = request.json
         # Expected features: cgpa, tenth_score, twelfth_score, amcat_score, internships, backlogs, projects
         
-        # Create a DataFrame for prediction to match training columns
-        features = pd.DataFrame([data])
-        
-        # Ensure column order matches training (though sklearn usually handles this if names are right in pandas 1.0+, 
-        # but let's be safe and assume the input JSON keys match the training DF columns)
-        # For simplicity, we assume the JSON has the right keys.
-        
-        # Prepare input features
-        input_data = [[
+        # Prepare input features as a DataFrame with column names to avoid sklearn warnings
+        feature_names = ['cgpa', 'tenth_score', 'twelfth_score', 'amcat_score', 'internships', 'backlogs', 'projects']
+        input_df = pd.DataFrame([[
             float(data.get('cgpa', 0)),
             float(data.get('tenth_score', 0)),
             float(data.get('twelfth_score', 0)),
@@ -884,10 +878,10 @@ def predict_placement():
             int(data.get('internships', 0)),
             int(data.get('backlogs', 0)),
             int(data.get('projects', 0))
-        ]]
+        ]], columns=feature_names)
         
-        prediction = model.predict(input_data)[0]
-        probability = model.predict_proba(input_data)[0][1] # Probability of class 1 (Placed)
+        prediction = model.predict(input_df)[0]
+        probability = model.predict_proba(input_df)[0][1] # Probability of class 1 (Placed)
         
         return jsonify({
             'placement_prediction': int(prediction),
