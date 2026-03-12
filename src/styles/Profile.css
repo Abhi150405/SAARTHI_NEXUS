@@ -224,12 +224,64 @@
     }
 }
 
+/* Academic Details Card */
+.academic-card {
+    grid-column: 1 / -1;
+}
+
+.academic-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.academic-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.input-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.academic-loading {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem;
+    font-style: italic;
+}
+
+.academic-save-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Remove number input spinners for a cleaner look */
+.academic-grid input[type="number"]::-webkit-outer-spin-button,
+.academic-grid input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.academic-grid input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 @media (max-width: 968px) {
     .profile-grid {
         grid-template-columns: 1fr;
     }
 
     .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .academic-grid {
         grid-template-columns: 1fr;
     }
 }

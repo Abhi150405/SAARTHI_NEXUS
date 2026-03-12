@@ -202,6 +202,123 @@ def change_password():
     except Exception as e:
         return jsonify({'error': 'Internal server error', 'reason': str(e)}), 500
 
+# --- PROFILE ENDPOINTS ---
+
+@app.route('/api/profile', methods=['GET'])
+def get_profile():
+    """Fetch academic details for a student by email."""
+    if students_collection is None:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    try:
+        email = request.args.get('email')
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
+
+        student = students_collection.find_one(
+            {'email': email},
+            {
+                '_id': 0,
+                'tenth_percentage': 1,
+                'twelfth_percentage': 1,
+                'college_cgpa': 1,
+                'amcat_score': 1
+            }
+        )
+
+        if not student:
+            return jsonify({'error': 'Student not found'}), 404
+
+        return jsonify({
+            'tenth_percentage': student.get('tenth_percentage', ''),
+            'twelfth_percentage': student.get('twelfth_percentage', ''),
+            'college_cgpa': student.get('college_cgpa', ''),
+            'amcat_score': student.get('amcat_score', '')
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/profile', methods=['PUT'])
+def update_profile():
+    """Update academic details for a student."""
+    if students_collection is None:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    try:
+        data = request.json
+        email = data.get('email')
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
+
+        # Validate fields
+        errors = []
+
+        tenth = data.get('tenth_percentage')
+        if tenth is not None and tenth != '':
+            try:
+                tenth = float(tenth)
+                if tenth < 0 or tenth > 100:
+                    errors.append('10th Percentage must be between 0 and 100')
+            except (ValueError, TypeError):
+                errors.append('10th Percentage must be a valid number')
+
+        twelfth = data.get('twelfth_percentage')
+        if twelfth is not None and twelfth != '':
+            try:
+                twelfth = float(twelfth)
+                if twelfth < 0 or twelfth > 100:
+                    errors.append('12th Percentage must be between 0 and 100')
+            except (ValueError, TypeError):
+                errors.append('12th Percentage must be a valid number')
+
+        cgpa = data.get('college_cgpa')
+        if cgpa is not None and cgpa != '':
+            try:
+                cgpa = float(cgpa)
+                if cgpa < 0 or cgpa > 10:
+                    errors.append('College CGPA must be between 0 and 10')
+            except (ValueError, TypeError):
+                errors.append('College CGPA must be a valid number')
+
+        amcat = data.get('amcat_score')
+        if amcat is not None and amcat != '':
+            try:
+                amcat = int(float(amcat))
+                if amcat < 0:
+                    errors.append('AMCAT Score must be a non-negative integer')
+            except (ValueError, TypeError):
+                errors.append('AMCAT Score must be a valid integer')
+
+        if errors:
+            return jsonify({'error': '; '.join(errors)}), 400
+
+        # Build update document
+        update_fields = {}
+        if tenth is not None and tenth != '':
+            update_fields['tenth_percentage'] = float(tenth)
+        if twelfth is not None and twelfth != '':
+            update_fields['twelfth_percentage'] = float(twelfth)
+        if cgpa is not None and cgpa != '':
+            update_fields['college_cgpa'] = float(cgpa)
+        if amcat is not None and amcat != '':
+            update_fields['amcat_score'] = int(float(amcat))
+
+        if not update_fields:
+            return jsonify({'error': 'No valid fields to update'}), 400
+
+        result = students_collection.update_one(
+            {'email': email},
+            {'$set': update_fields}
+        )
+
+        if result.matched_count == 0:
+            return jsonify({'error': 'Student not found'}), 404
+
+        return jsonify({'message': 'Profile updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/login', methods=['POST'])
 def login():
     if students_collection is None or admins_collection is None:
@@ -260,7 +377,12 @@ def get_all_students():
                 "name": s.get('full_name'),
                 "email": s.get('email'),
                 "dept": s.get('department'),
-                "joined": s.get('created_at', '').split('T')[0] if 'T' in s.get('created_at', '') else s.get('created_at')
+                "idNumber": s.get('id_number'),
+                "joined": s.get('created_at', '').split('T')[0] if 'T' in s.get('created_at', '') else s.get('created_at'),
+                "tenth_percentage": s.get('tenth_percentage', ''),
+                "twelfth_percentage": s.get('twelfth_percentage', ''),
+                "college_cgpa": s.get('college_cgpa', ''),
+                "amcat_score": s.get('amcat_score', '')
             })
         return jsonify(formatted_students)
     except Exception as e:

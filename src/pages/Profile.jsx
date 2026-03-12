@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, Mail, Hash, BookOpen, AlertCircle, CheckCircle2, LogOut } from 'lucide-react';
+import { User, Lock, Mail, Hash, BookOpen, AlertCircle, CheckCircle2, LogOut, GraduationCap, Save } from 'lucide-react';
 import { API_URL } from '../config';
 import '../styles/Profile.css';
 
@@ -12,6 +12,40 @@ const Profile = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+
+    // Academic fields state
+    const [tenthPercentage, setTenthPercentage] = useState('');
+    const [twelfthPercentage, setTwelfthPercentage] = useState('');
+    const [collegeCgpa, setCollegeCgpa] = useState('');
+    const [amcatScore, setAmcatScore] = useState('');
+    const [academicLoading, setAcademicLoading] = useState(false);
+    const [academicMessage, setAcademicMessage] = useState({ type: '', text: '' });
+    const [fetchingAcademic, setFetchingAcademic] = useState(true);
+
+    // Fetch academic data on mount
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!user.email) {
+                setFetchingAcademic(false);
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/api/profile?email=${encodeURIComponent(user.email)}`);
+                const data = await res.json();
+                if (res.ok) {
+                    setTenthPercentage(data.tenth_percentage ?? '');
+                    setTwelfthPercentage(data.twelfth_percentage ?? '');
+                    setCollegeCgpa(data.college_cgpa ?? '');
+                    setAmcatScore(data.amcat_score ?? '');
+                }
+            } catch (err) {
+                console.error('Failed to fetch profile:', err);
+            } finally {
+                setFetchingAcademic(false);
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const handleLogout = () => {
         localStorage.clear();
@@ -54,6 +88,59 @@ const Profile = () => {
             setMessage({ type: 'error', text: 'Connection error. Please try again.' });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAcademicSave = async (e) => {
+        e.preventDefault();
+        setAcademicMessage({ type: '', text: '' });
+
+        // Client-side validation
+        const errors = [];
+        if (tenthPercentage !== '' && (isNaN(tenthPercentage) || tenthPercentage < 0 || tenthPercentage > 100)) {
+            errors.push('10th Percentage must be between 0 and 100');
+        }
+        if (twelfthPercentage !== '' && (isNaN(twelfthPercentage) || twelfthPercentage < 0 || twelfthPercentage > 100)) {
+            errors.push('12th Percentage must be between 0 and 100');
+        }
+        if (collegeCgpa !== '' && (isNaN(collegeCgpa) || collegeCgpa < 0 || collegeCgpa > 10)) {
+            errors.push('College CGPA must be between 0 and 10');
+        }
+        if (amcatScore !== '' && (isNaN(amcatScore) || !Number.isInteger(Number(amcatScore)) || Number(amcatScore) < 0)) {
+            errors.push('AMCAT Score must be a non-negative integer');
+        }
+
+        if (errors.length > 0) {
+            setAcademicMessage({ type: 'error', text: errors.join('; ') });
+            return;
+        }
+
+        setAcademicLoading(true);
+
+        try {
+            const response = await fetch(`${API_URL}/api/profile`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: user.email,
+                    tenth_percentage: tenthPercentage,
+                    twelfth_percentage: twelfthPercentage,
+                    college_cgpa: collegeCgpa,
+                    amcat_score: amcatScore
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setAcademicMessage({ type: 'success', text: 'Academic details saved successfully!' });
+            } else {
+                setAcademicMessage({ type: 'error', text: data.error || 'Failed to save academic details' });
+            }
+        } catch (err) {
+            setAcademicMessage({ type: 'error', text: 'Connection error. Please try again.' });
+        } finally {
+            setAcademicLoading(false);
         }
     };
 
@@ -152,6 +239,96 @@ const Profile = () => {
                             {loading ? 'Updating...' : 'Update Password'}
                         </button>
                     </form>
+                </div>
+
+                {/* Academic Details Section */}
+                <div className="profile-card academic-card glass">
+                    <div className="card-header">
+                        <GraduationCap size={20} />
+                        <h2>Academic Details</h2>
+                    </div>
+
+                    {fetchingAcademic ? (
+                        <div className="academic-loading">Loading academic data...</div>
+                    ) : (
+                        <form onSubmit={handleAcademicSave} className="academic-form">
+                            <div className="academic-grid">
+                                <div className="form-group">
+                                    <label>10th Percentage</label>
+                                    <input
+                                        id="tenth-percentage"
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        value={tenthPercentage}
+                                        onChange={(e) => setTenthPercentage(e.target.value)}
+                                        placeholder="e.g. 85.50"
+                                    />
+                                    <span className="input-hint">Between 0 and 100</span>
+                                </div>
+                                <div className="form-group">
+                                    <label>12th Percentage</label>
+                                    <input
+                                        id="twelfth-percentage"
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        value={twelfthPercentage}
+                                        onChange={(e) => setTwelfthPercentage(e.target.value)}
+                                        placeholder="e.g. 78.25"
+                                    />
+                                    <span className="input-hint">Between 0 and 100</span>
+                                </div>
+                                <div className="form-group">
+                                    <label>College CGPA</label>
+                                    <input
+                                        id="college-cgpa"
+                                        type="number"
+                                        min="0"
+                                        max="10"
+                                        step="0.01"
+                                        value={collegeCgpa}
+                                        onChange={(e) => setCollegeCgpa(e.target.value)}
+                                        placeholder="e.g. 8.50"
+                                    />
+                                    <span className="input-hint">Between 0 and 10</span>
+                                </div>
+                                <div className="form-group">
+                                    <label>AMCAT Exam Score</label>
+                                    <input
+                                        id="amcat-score"
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        value={amcatScore}
+                                        onChange={(e) => setAmcatScore(e.target.value)}
+                                        placeholder="e.g. 450"
+                                    />
+                                    <span className="input-hint">Non-negative integer</span>
+                                </div>
+                            </div>
+
+                            {academicMessage.text && (
+                                <div className={`message-banner ${academicMessage.type}`}>
+                                    {academicMessage.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                                    <span>{academicMessage.text}</span>
+                                </div>
+                            )}
+
+                            <button type="submit" className="submit-btn academic-save-btn" disabled={academicLoading}>
+                                {academicLoading ? (
+                                    'Saving...'
+                                ) : (
+                                    <>
+                                        <Save size={16} />
+                                        <span>Save Academic Details</span>
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    )}
                 </div>
             </div>
         </div>

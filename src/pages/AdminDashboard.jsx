@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Users,
     ShieldCheck,
@@ -15,7 +15,11 @@ import {
     Send,
     Edit2,
     Trash2,
-    X
+    X,
+    ArrowUpDown,
+    Eye,
+    ChevronUp,
+    ChevronDown
 } from 'lucide-react';
 import '../styles/AdminDashboard.css';
 import { API_URL } from '../config';
@@ -64,6 +68,49 @@ const AdminDashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [broadcastedNotifications, setBroadcastedNotifications] = useState([]);
     const [editingNotificationId, setEditingNotificationId] = useState(null);
+
+    // Student Records state
+    const [studentSortKey, setStudentSortKey] = useState('');
+    const [studentSortDir, setStudentSortDir] = useState('desc');
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [studentSearch, setStudentSearch] = useState('');
+
+    // Sorted & filtered students
+    const sortedStudents = useMemo(() => {
+        let list = [...recentUsers];
+        // Filter by search
+        if (studentSearch.trim()) {
+            const q = studentSearch.toLowerCase();
+            list = list.filter(s =>
+                (s.name || '').toLowerCase().includes(q) ||
+                (s.email || '').toLowerCase().includes(q) ||
+                (s.dept || '').toLowerCase().includes(q)
+            );
+        }
+        // Sort
+        if (studentSortKey) {
+            list.sort((a, b) => {
+                const aVal = parseFloat(a[studentSortKey]) || 0;
+                const bVal = parseFloat(b[studentSortKey]) || 0;
+                return studentSortDir === 'asc' ? aVal - bVal : bVal - aVal;
+            });
+        }
+        return list;
+    }, [recentUsers, studentSortKey, studentSortDir, studentSearch]);
+
+    const handleStudentSort = (key) => {
+        if (studentSortKey === key) {
+            setStudentSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+        } else {
+            setStudentSortKey(key);
+            setStudentSortDir('desc');
+        }
+    };
+
+    const SortIcon = ({ colKey }) => {
+        if (studentSortKey !== colKey) return <ArrowUpDown size={14} style={{ opacity: 0.3 }} />;
+        return studentSortDir === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />;
+    };
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -551,6 +598,152 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                         </>
+                    )}
+
+                    {/* Student Records Tab */}
+                    {activeTab === 'students' && (
+                        <div className="admin-panel glass">
+                            <div className="panel-header">
+                                <h2>Student Records</h2>
+                                <div className="student-search-box">
+                                    <Search size={16} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search by name, email, or department..."
+                                        value={studentSearch}
+                                        onChange={(e) => setStudentSearch(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="panel-content">
+                                <div className="table-responsive">
+                                    <table className="nexus-table student-records-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Department</th>
+                                                <th className="sortable-th" onClick={() => handleStudentSort('tenth_percentage')}>
+                                                    10th % <SortIcon colKey="tenth_percentage" />
+                                                </th>
+                                                <th className="sortable-th" onClick={() => handleStudentSort('twelfth_percentage')}>
+                                                    12th % <SortIcon colKey="twelfth_percentage" />
+                                                </th>
+                                                <th className="sortable-th" onClick={() => handleStudentSort('college_cgpa')}>
+                                                    CGPA <SortIcon colKey="college_cgpa" />
+                                                </th>
+                                                <th className="sortable-th" onClick={() => handleStudentSort('amcat_score')}>
+                                                    AMCAT <SortIcon colKey="amcat_score" />
+                                                </th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {sortedStudents.length > 0 ? sortedStudents.map((s, i) => (
+                                                <tr key={s.id || i}>
+                                                    <td>{i + 1}</td>
+                                                    <td>
+                                                        <span
+                                                            className="student-name-link"
+                                                            onClick={() => setSelectedStudent(s)}
+                                                        >
+                                                            {s.name}
+                                                        </span>
+                                                    </td>
+                                                    <td>{s.email}</td>
+                                                    <td>{s.dept}</td>
+                                                    <td>{s.tenth_percentage !== '' ? s.tenth_percentage : '—'}</td>
+                                                    <td>{s.twelfth_percentage !== '' ? s.twelfth_percentage : '—'}</td>
+                                                    <td>{s.college_cgpa !== '' ? s.college_cgpa : '—'}</td>
+                                                    <td>{s.amcat_score !== '' ? s.amcat_score : '—'}</td>
+                                                    <td>
+                                                        <button
+                                                            className="btn-icon view-btn"
+                                                            title="View Details"
+                                                            onClick={() => setSelectedStudent(s)}
+                                                        >
+                                                            <Eye size={16} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan="9" style={{ textAlign: 'center', opacity: 0.5, padding: '2rem' }}>
+                                                        {studentSearch ? 'No students match your search.' : 'No students found.'}
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="student-count-footer">
+                                    Showing {sortedStudents.length} of {recentUsers.length} students
+                                    {studentSortKey && (
+                                        <button className="clear-sort-btn" onClick={() => { setStudentSortKey(''); setStudentSortDir('desc'); }}>
+                                            Clear Sort
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Student Detail Modal */}
+                            {selectedStudent && (
+                                <div className="student-modal-overlay" onClick={() => setSelectedStudent(null)}>
+                                    <div className="student-modal" onClick={(e) => e.stopPropagation()}>
+                                        <div className="student-modal-header">
+                                            <h2>Student Profile</h2>
+                                            <button className="modal-close-btn" onClick={() => setSelectedStudent(null)}>
+                                                <X size={20} />
+                                            </button>
+                                        </div>
+                                        <div className="student-modal-body">
+                                            <div className="modal-avatar">
+                                                {selectedStudent.name?.[0] || 'S'}
+                                            </div>
+                                            <h3 className="modal-student-name">{selectedStudent.name}</h3>
+                                            <div className="modal-detail-grid">
+                                                <div className="modal-detail-item">
+                                                    <span className="modal-label">Email</span>
+                                                    <span className="modal-value">{selectedStudent.email}</span>
+                                                </div>
+                                                <div className="modal-detail-item">
+                                                    <span className="modal-label">ID Number</span>
+                                                    <span className="modal-value">{selectedStudent.idNumber || '—'}</span>
+                                                </div>
+                                                <div className="modal-detail-item">
+                                                    <span className="modal-label">Department</span>
+                                                    <span className="modal-value">{selectedStudent.dept}</span>
+                                                </div>
+                                                <div className="modal-detail-item">
+                                                    <span className="modal-label">Joined</span>
+                                                    <span className="modal-value">{selectedStudent.joined || '—'}</span>
+                                                </div>
+                                            </div>
+                                            <div className="modal-section-title">Academic Details</div>
+                                            <div className="modal-detail-grid">
+                                                <div className="modal-detail-item academic">
+                                                    <span className="modal-label">10th Percentage</span>
+                                                    <span className="modal-value highlight">{selectedStudent.tenth_percentage !== '' ? `${selectedStudent.tenth_percentage}%` : '—'}</span>
+                                                </div>
+                                                <div className="modal-detail-item academic">
+                                                    <span className="modal-label">12th Percentage</span>
+                                                    <span className="modal-value highlight">{selectedStudent.twelfth_percentage !== '' ? `${selectedStudent.twelfth_percentage}%` : '—'}</span>
+                                                </div>
+                                                <div className="modal-detail-item academic">
+                                                    <span className="modal-label">College CGPA</span>
+                                                    <span className="modal-value highlight">{selectedStudent.college_cgpa !== '' ? selectedStudent.college_cgpa : '—'}</span>
+                                                </div>
+                                                <div className="modal-detail-item academic">
+                                                    <span className="modal-label">AMCAT Score</span>
+                                                    <span className="modal-value highlight">{selectedStudent.amcat_score !== '' ? selectedStudent.amcat_score : '—'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     )}
 
                     {/* Company Feedback Panel — Institutional Form */}
