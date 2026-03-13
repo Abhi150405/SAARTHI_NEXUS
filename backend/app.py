@@ -49,6 +49,8 @@ model_gen = None
 if GEMINI_API_KEY:
     try:
         log_print(f"Configuring Gemini with key: {GEMINI_API_KEY[:5]}...{GEMINI_API_KEY[-4:]}")
+        import certifi
+        os.environ['SSL_CERT_FILE'] = certifi.where()
         genai.configure(api_key=GEMINI_API_KEY)
         
         # Check available models
