@@ -989,8 +989,11 @@ def chat():
         log_print(f"CHAT_QUERY: {query}")
         if not query: 
             return jsonify({'error': 'No query'}), 400
-        
-        return Response(get_chat_response_stream(query), mimetype='text/plain')
+        response = Response(get_chat_response_stream(query), mimetype='text/plain')
+        response.headers['X-Accel-Buffering'] = 'no'
+        response.headers['Cache-Control'] = 'no-cache'
+        response.headers['Connection'] = 'keep-alive'
+        return response
     except Exception as e:
         log_print(f"CHAT_ENDPOINT_EXCEPTION: {e}")
         return jsonify({'error': str(e)}), 500
