@@ -493,22 +493,42 @@ def get_companies():
                     "totalHires": { "$sum": { "$add": ["$selections.CE", "$selections.IT", "$selections.E&TC"] } },
                     "yearsVisited": { "$addToSet": "$academic_year" },
                     "maxSalary": { "$max": "$salary_lpa" },
-                    "minCgpa": { "$min": "$criteria.min_cgpa" }
+                    "minCgpa": { "$min": "$criteria.min_cgpa" },
+                    "visitDates": { "$addToSet": "$visit_date" }
                 }
             },
             { "$sort": { "_id": 1 } }
         ]
         results = list(collection.aggregate(pipeline))
         
+        import datetime
+        def parse_date(ds):
+            if not ds or str(ds).upper() in ['PPO', 'NC', 'NAN', 'NULL', 'NONE']: return None
+            ds = str(ds).strip()
+            try:
+                parts = ds.split('-')
+                if len(parts) == 3:
+                    if len(parts[2]) == 2:
+                        return datetime.datetime.strptime(ds, '%d-%m-%y')
+                    else:
+                        return datetime.datetime.strptime(ds, '%d-%m-%Y')
+            except: pass
+            return None
+        
         formatted_results = []
         for res in results:
+            parsed_dates = [parse_date(d) for d in res.get('visitDates', [])]
+            valid_dates = [d for d in parsed_dates if d is not None]
+            latest_date_iso = max(valid_dates).isoformat() if valid_dates else None
+
             formatted_results.append({
                 "company": res['_id'],
                 "totalHires": res['totalHires'],
                 "visits": len(res['yearsVisited']),
                 "years": sorted(list(res['yearsVisited']), reverse=True),
                 "maxSalary": f"{res['maxSalary']} LPA",
-                "minCgpa": res['minCgpa']
+                "minCgpa": res['minCgpa'],
+                "latestVisitDate": latest_date_iso
             })
             
         return jsonify(formatted_results)
@@ -529,6 +549,20 @@ def get_company_details(name):
             
         history = []
         total_hires = 0
+        import datetime
+        def parse_date_str(ds):
+            if not ds or str(ds).upper() in ['PPO', 'NC', 'NAN', 'NULL', 'NONE']: return None
+            ds = str(ds).strip()
+            try:
+                parts = ds.split('-')
+                if len(parts) == 3:
+                    if len(parts[2]) == 2:
+                        return datetime.datetime.strptime(ds, '%d-%m-%y').isoformat()
+                    else:
+                        return datetime.datetime.strptime(ds, '%d-%m-%Y').isoformat()
+            except: pass
+            return None
+
         for rec in records:
             hires = rec['selections']['CE'] + rec['selections']['IT'] + rec['selections']['E&TC']
             total_hires += hires
@@ -537,6 +571,9 @@ def get_company_details(name):
                 "salary": f"{rec['salary_lpa']} LPA",
                 "hires": hires,
                 "dept_breakdown": rec['selections'],
+                "gender_breakdown": rec.get('gender_distribution', {"male": 0, "female": 0, "total": 0}),
+                "visit_date": rec.get('visit_date', None),
+                "parsed_visit_date": parse_date_str(rec.get('visit_date')),
                 "criteria": rec['criteria'],
                 "category": rec.get('category', 'N/A')
             })
@@ -964,75 +1001,103 @@ def get_placement_stats():
         return jsonify({'error': 'Database connection failed'}), 500
     
     try:
-        # Define the Aggregation Pipeline
-        pipeline = [
-            {
-                "$group": {
-                    "_id": "$academic_year",
-                    "totalPlaced": { "$sum": { "$add": ["$selections.CE", "$selections.IT", "$selections.E&TC"] } },
-                    "highestPackage": { "$max": "$salary_lpa" },
-                    "avgPackage": { "$avg": "$salary_lpa" },
-                    # Collect salaries for median calculation (in-memory for simplicity unless using $median in MongoDB 7.0+)
-                    "allSalaries": { "$push": { "$multiply": ["$salary_lpa", 1] } }, 
-                     # Dept Distribution
-                    "compCount": { "$sum": "$selections.CE" }, 
-                    "itCount": { "$sum": "$selections.IT" },
-                    "etcCount": { "$sum": "$selections.E&TC" },
-                }
-            },
-            { "$sort": { "_id": -1 } }
-        ]
-
-        # Execute Aggregation
-        results = list(collection.aggregate(pipeline))
-        
-        # Post-process data for frontend format
+        results = list(collection.find())
+        yearly_raw = {}
+        for r in results:
+            year = r.get('academic_year')
+            if not year: continue
+            if year not in yearly_raw:
+                yearly_raw[year] = []
+            yearly_raw[year].append(r)
+            
         yearly_data = {}
-        for res in results:
-            year = res['_id']
+        for year, records in yearly_raw.items():
+            compCount = sum(r.get('selections', {}).get('CE', 0) for r in records)
+            itCount = sum(r.get('selections', {}).get('IT', 0) for r in records)
+            etcCount = sum(r.get('selections', {}).get('E&TC', 0) for r in records)
+            totalPlaced = compCount + itCount + etcCount
             
-            # Sub-pipeline for Top Companies per Year
-            top_companies_pipeline = [
-                { "$match": { "academic_year": year } },
-                { "$project": { 
-                    "company_name": 1, 
-                    "total_selected": { "$add": ["$selections.CE", "$selections.IT", "$selections.E&TC"] } 
-                }},
-                { "$sort": { "total_selected": -1 } },
-                { "$limit": 5 }
-            ]
-            top_companies_list = list(collection.aggregate(top_companies_pipeline))
+            salaries = []
+            ce_salaries = []
+            it_salaries = []
+            etc_salaries = []
             
-            top_labels = [c['company_name'] for c in top_companies_list]
-            top_data = [c.get('total_selected', 0) for c in top_companies_list]
-
-            # Calculate Median
-            salaries = sorted(res.get('allSalaries', []))
-            n = len(salaries)
-            if n == 0:
-                median = 0
-            elif n % 2 == 1:
-                median = salaries[n // 2]
-            else:
-                median = (salaries[n // 2 - 1] + salaries[n // 2]) / 2
-
-            # Format Response
+            company_hires = {}
+            for r in records:
+                s = float(r.get('salary_lpa', 0))
+                if s > 0:
+                    salaries.append(s)
+                
+                ce_hired = r.get('selections', {}).get('CE', 0)
+                it_hired = r.get('selections', {}).get('IT', 0)
+                etc_hired = r.get('selections', {}).get('E&TC', 0)
+                
+                if ce_hired > 0: ce_salaries.append(s)
+                if it_hired > 0: it_salaries.append(s)
+                if etc_hired > 0: etc_salaries.append(s)
+                
+                c_name = r.get('company_name', 'Unknown')
+                company_hires[c_name] = company_hires.get(c_name, 0) + ce_hired + it_hired + etc_hired
+            
+            # top companies
+            sorted_companies = sorted(company_hires.items(), key=lambda x: x[1], reverse=True)[:5]
+            top_labels = [c[0] for c in sorted_companies]
+            top_data = [c[1] for c in sorted_companies]
+            
+            def get_stats(sal_list):
+                if not sal_list: return {"avg": "0 LPA", "median": "0 LPA", "highest": "0 LPA"}
+                sal_list.sort()
+                avg = sum(sal_list) / len(sal_list)
+                highest = sal_list[-1]
+                n = len(sal_list)
+                if n % 2 == 1:
+                    median = sal_list[n//2]
+                else:
+                    median = (sal_list[n//2 - 1] + sal_list[n//2]) / 2
+                return {"avg": f"{avg:.2f} LPA", "median": f"{median:.2f} LPA", "highest": f"{highest} LPA"}
+                
+            overall_stats = get_stats(salaries)
+            ce_stats = get_stats(ce_salaries)
+            it_stats = get_stats(it_salaries)
+            etc_stats = get_stats(etc_salaries)
+            
             yearly_data[year] = {
-                "avgPackage": f"{res['avgPackage']:.2f} LPA",
-                "medianPackage": f"{median:.2f} LPA",
-                "highestPackage": f"{res['highestPackage']} LPA",
-                "totalPlaced": str(res['totalPlaced']),
-                "deptDistribution": [res['compCount'], res['itCount'], res['etcCount']],
+                "avgPackage": overall_stats['avg'],
+                "medianPackage": overall_stats['median'],
+                "highestPackage": overall_stats['highest'],
+                "totalPlaced": str(totalPlaced),
+                "deptDistribution": [compCount, itCount, etcCount],
                 "topCompanies": {
                      "labels": top_labels, 
                      "data": top_data
+                },
+                "branchStats": {
+                    "CE": {
+                        "totalPlaced": str(compCount),
+                        "avgPackage": ce_stats['avg'],
+                        "medianPackage": ce_stats['median'],
+                        "highestPackage": ce_stats['highest']
+                    },
+                    "IT": {
+                        "totalPlaced": str(itCount),
+                        "avgPackage": it_stats['avg'],
+                        "medianPackage": it_stats['median'],
+                        "highestPackage": it_stats['highest']
+                    },
+                    "E&TC": {
+                        "totalPlaced": str(etcCount),
+                        "avgPackage": etc_stats['avg'],
+                        "medianPackage": etc_stats['median'],
+                        "highestPackage": etc_stats['highest']
+                    }
                 }
             }
-
-        return jsonify(yearly_data)
+            
+        sorted_yearly_data = {k: yearly_data[k] for k in sorted(yearly_data.keys(), reverse=True)}
+        return jsonify(sorted_yearly_data)
 
     except Exception as e:
-        print(f"Error in aggregation: {e}")
+        print(f"Error computing placement stats: {e}")
         return jsonify({'error': str(e)}), 500
 
 # Load the trained model

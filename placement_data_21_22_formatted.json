@@ -2223,12 +2223,12 @@
     },
     {
         "academic_year": "2021-22",
-        "company_name": "Unknown",
+        "company_name": "T Systems",
         "category": "Group I: Niche Companies (Salary above 5.0 LPA)",
         "salary_lpa": 7.5,
         "visit_date": "07-07-22",
         "criteria": {
-            "min_cgpa": "T",
+            "min_cgpa": "-",
             "eligible_branches": "Systems All(UG)"
         },
         "selections": {
@@ -2245,12 +2245,12 @@
     },
     {
         "academic_year": "2021-22",
-        "company_name": "Unknown",
+        "company_name": "Tripstack",
         "category": "Group I: Niche Companies (Salary above 5.0 LPA)",
         "salary_lpa": 5.5,
         "visit_date": "01-06-22",
         "criteria": {
-            "min_cgpa": "Tripstack",
+            "min_cgpa": "-",
             "eligible_branches": "All(UG)"
         },
         "selections": {
@@ -2267,12 +2267,12 @@
     },
     {
         "academic_year": "2021-22",
-        "company_name": "Unknown",
+        "company_name": "Finvu",
         "category": "Group I: Niche Companies (Salary above 5.0 LPA)",
         "salary_lpa": 7.5,
         "visit_date": "05-08-22",
         "criteria": {
-            "min_cgpa": "Finvu",
+            "min_cgpa": "-",
             "eligible_branches": "All(UG)"
         },
         "selections": {
@@ -2289,12 +2289,12 @@
     },
     {
         "academic_year": "2021-22",
-        "company_name": "Unknown",
+        "company_name": "Cumulus",
         "category": "Group I: Niche Companies (Salary above 5.0 LPA)",
         "salary_lpa": 8.53,
         "visit_date": "08-08-22",
         "criteria": {
-            "min_cgpa": "Cumulus",
+            "min_cgpa": "-",
             "eligible_branches": "All(UG)"
         },
         "selections": {

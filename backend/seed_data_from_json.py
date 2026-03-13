@@ -2,11 +2,14 @@ import os
 import json
 import glob
 from pymongo import MongoClient
+from dotenv import load_dotenv
 
 def seed_data():
     try:
-        # Connect to local MongoDB
-        client = MongoClient('mongodb://localhost:27017/')
+        load_dotenv()
+        mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+        # Connect to MongoDB
+        client = MongoClient(mongo_uri)
         db = client['saarthi_nexus']
         collection = db['placement_records']
         

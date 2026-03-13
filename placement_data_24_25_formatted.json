@@ -1,0 +1,2004 @@
+[
+    {
+        "academic_year": "2024-25",
+        "company_name": "BMC Softwares",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 14.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 3,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 2,
+            "total": 6
+        },
+        "total_salary_lpa": 84.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Siemens",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 11.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 5,
+            "IT": 3,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 9,
+            "total": 12
+        },
+        "total_salary_lpa": 132.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Arista",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 29.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 88.50 
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Mastercard_",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 13.40,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 8,
+            "IT": 3,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 4,
+            "total": 11
+        },
+        "total_salary_lpa": 147.50 
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Barclays_",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 14.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 10,
+            "IT": 4,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 7,
+            "total": 14
+        },
+        "total_salary_lpa": 196.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "General Mills",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 12.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 24.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Phonepe",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 33.57,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 1,
+            "total": 3
+        },
+        "total_salary_lpa": 100.71
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Ittiam",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 33.57,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 48.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Ion Group",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 17.3,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8.43",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 10,
+            "IT": 10,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 12,
+            "female": 10,
+            "total": 22
+        },
+        "total_salary_lpa": 380.6
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "ZS Associates",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 13.65,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.0",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 8,
+            "IT": 6,
+            "E&TC": 8
+        },
+        "gender_distribution": {
+            "male": 16,
+            "female": 6,
+            "total": 22
+        },
+        "total_salary_lpa": 300.3
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Siemens Regular",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 11.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 2,
+            "total": 4
+        },
+        "total_salary_lpa": 44.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Wissen technology",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 2,
+            "total": 4
+        },
+        "total_salary_lpa": 32.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Druva",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 17.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 34.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "IDeaS",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 12.40,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 70.2
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Northern Trust",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 11.7,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 6,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 3,
+            "total": 6
+        },
+        "total_salary_lpa": 70.2
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Arista",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 29.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "9",
+            "eligible_branches": "ALLUG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 4,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 0,
+            "total": 5
+        },
+        "total_salary_lpa": 147.5
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Barclays",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 14.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 1,
+            "total": 4
+        },
+        "total_salary_lpa": 56.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Barclays 2",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 14.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 15,
+            "IT": 4,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 14,
+            "female": 9,
+            "total": 23
+        },
+        "total_salary_lpa": 322.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Toshiba",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 11.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.86",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 0,
+            "total": 6
+        },
+        "total_salary_lpa": 69.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Pubmatic",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 13.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.3",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 1,
+            "total": 4
+        },
+        "total_salary_lpa": 52.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Principal Global",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.7",
+            "eligible_branches": "ALL UG"
+        },
+        "selections": {
+            "CE": 6,
+            "IT": 2,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 7,
+            "total": 11
+        },
+        "total_salary_lpa": 88.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Nice",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.82",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 4,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 2,
+            "total": 8
+        },
+        "total_salary_lpa": 64.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Energy Exemplar",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.82",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 0,
+            "total": 4
+        },
+        "total_salary_lpa": 44.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Merilyties",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 6.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 17.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Quantiphi",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.8",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 17.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Entrata",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 4,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 3,
+            "total": 8
+        },
+        "total_salary_lpa": 56.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "CloudLex",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 10.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8.0",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 0,
+            "total": 4
+        },
+        "total_salary_lpa": 40.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Sedemac",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.0",
+            "eligible_branches": "E&TC"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 1,
+            "total": 1
+        },
+        "total_salary_lpa": 8.00
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "HSBC",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.74",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 20,
+            "IT": 19,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 33,
+            "female": 6,
+            "total": 39
+        },
+        "total_salary_lpa": 351.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Mastercard",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 11.55,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "15",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 6,
+            "IT": 4,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 5,
+            "total": 11
+        },
+        "total_salary_lpa": 127.05
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Infosys",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 9.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 3,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 3,
+            "total": 8
+        },
+        "total_salary_lpa": 76.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "ACI Worldwide",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 12.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "87",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 10,
+            "IT": 4,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 8,
+            "female": 7,
+            "total": 15
+        },
+        "total_salary_lpa": 187.5
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "eQ Technologic (SDE)",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 13.4,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 6,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 8,
+            "female": 0,
+            "total": 8
+        },
+        "total_salary_lpa": 107.2
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "eQ Technologic (QA)",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 11.13,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 6
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 1,
+            "total": 7
+        },
+        "total_salary_lpa": 77.91
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Promobi",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 2,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 1,
+            "total": 5
+        },
+        "total_salary_lpa": 40.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Palo Alto",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 33.33,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 66.66
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Sell.do",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 1,
+            "total": 3
+        },
+        "total_salary_lpa": 22.5
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Incubyte",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 7.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Kylas",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 3,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 0,
+            "total": 6
+        },
+        "total_salary_lpa": 48.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Metro GSC",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "PPO",
+            "eligible_branches": "ALL UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 2,
+            "total": 2
+        },
+        "total_salary_lpa": 18.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Emerson",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 2,
+            "total": 3
+        },
+        "total_salary_lpa": 24.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "DeltaX",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "5.61",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 14.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Equifax",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 2,
+            "total": 2
+        },
+        "total_salary_lpa": 14.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Rockwell",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 4,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 3,
+            "total": 8
+        },
+        "total_salary_lpa": 64.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Oracle",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.27,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 5,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 5,
+            "total": 11
+        },
+        "total_salary_lpa": 79.97
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Xceedance",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 5,
+            "IT": 4,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 10,
+            "female": 2,
+            "total": 12
+        },
+        "total_salary_lpa": 84.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Rhythmflow",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8.0",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 1,
+            "total": 6
+        },
+        "total_salary_lpa": 42.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "(NTT solutions)SAP ",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.0",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 5
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 2,
+            "total": 5
+        },
+        "total_salary_lpa": 35.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "TCS R&I",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 27.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "TCS Digital",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.74",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 0,
+            "total": 4
+        },
+        "total_salary_lpa": 28.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Ciklum",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 6,
+            "IT": 3,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 9,
+            "female": 0,
+            "total": 9
+        },
+        "total_salary_lpa": 72.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "miniOrange",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 6.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 5,
+            "IT": 2,
+            "E&TC": 5
+        },
+        "gender_distribution": {
+            "male": 10,
+            "female": 2,
+            "total": 12
+        },
+        "total_salary_lpa": 72.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "HelpShift",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.75",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 0,
+            "total": 5
+        },
+        "total_salary_lpa": 42.5
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "SAS",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 10.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "9",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 30.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Mphasis",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 1,
+            "E&TC": 6
+        },
+        "gender_distribution": {
+            "male": 9,
+            "female": 2,
+            "total": 11
+        },
+        "total_salary_lpa": 77.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Rahi Technolgies",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 1,
+            "total": 3
+        },
+        "total_salary_lpa": 22.50
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Invimatic",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 5.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 3,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 1,
+            "total": 5
+        },
+        "total_salary_lpa": 25.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Altometa",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 11.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 1,
+            "total": 2
+        },
+        "total_salary_lpa": 22.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Cognizant GenC Next",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 6.75,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 6.75
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Harman",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 5.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 8,
+            "female": 1,
+            "total": 9
+        },
+        "total_salary_lpa": 49.5
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Zensar",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 10.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.3",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 0,
+            "total": 4
+        },
+        "total_salary_lpa": 40.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Dataeaze",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 6.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 2,
+            "total": 5
+        },
+        "total_salary_lpa": 30.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Altizon",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 0,
+            "total": 5
+        },
+        "total_salary_lpa": 45.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Avegen",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 10.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 2,
+            "total": 2
+        },
+        "total_salary_lpa": 20.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Ciena",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 16.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 4,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 6,
+            "female": 0,
+            "total": 6
+        },
+        "total_salary_lpa": 96.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "TIAA",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 10.48,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.74",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 0,
+            "total": 3
+        },
+        "total_salary_lpa": 31.44
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Honeywell",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.74",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 3,
+            "total": 3
+        },
+        "total_salary_lpa": 21.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "ConcentricAl",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 14.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 0,
+            "total": 2
+        },
+        "total_salary_lpa": 28.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Cencora",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "15",
+            "eligible_branches": "ALLUG"
+        },
+        "selections": {
+            "CE": 4,
+            "IT": 4,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 10,
+            "female": 1,
+            "total": 11
+        },
+        "total_salary_lpa": 77.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "NCS",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 5.62,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "15",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 5,
+            "female": 1,
+            "total": 6
+        },
+        "total_salary_lpa": 33.72
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Qualys",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 6.50,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 8,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 10,
+            "female": 0,
+            "total": 10
+        },
+        "total_salary_lpa": 65
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Ria Advisory",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 6,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 2,
+            "total": 9
+        },
+        "total_salary_lpa": 63.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Oro Labs.AL",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "ALLUG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 4
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 1,
+            "total": 4
+        },
+        "total_salary_lpa": 28.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Oro Labs.Al Dev",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 2,
+            "E&TC": 3
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 1,
+            "total": 8
+        },
+        "total_salary_lpa": 72.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Godrej & Boyce",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.75,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 2,
+            "total": 2
+        },
+        "total_salary_lpa": 15.50
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "CerenceAl",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 1,
+            "total": 1
+        },
+        "total_salary_lpa": 8.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Johnson Control",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 6.50,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 6.50
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Quorum",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.5,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "8.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 2,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 3,
+            "total": 5
+        },
+        "total_salary_lpa": 37.5
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "SigLens",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 15.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 0,
+            "total": 0
+        },
+        "total_salary_lpa": 0.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Cadence",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 15.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "E&TC"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 0,
+            "total": 0
+        },
+        "total_salary_lpa": 0.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "HashedIn Technologies",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 8.1,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 8.1
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "FlexTrade",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 9.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "cs"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 1,
+            "female": 0,
+            "total": 1
+        },
+        "total_salary_lpa": 9.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "PayU",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "CS & IT"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 1,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 2,
+            "female": 1,
+            "total": 3
+        },
+        "total_salary_lpa": 21.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Accelya",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 7.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7.5",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 1,
+            "IT": 1,
+            "E&TC": 9
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 8,
+            "total": 1
+        },
+        "total_salary_lpa": 77.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Dell technologies",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 21.96,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "ALLPG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 0,
+            "total": 0
+        },
+        "total_salary_lpa": 0.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Michelin",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 10.40,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "ALL PG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 0,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 0,
+            "total": 0
+        },
+        "total_salary_lpa": 0.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Oracle 2",
+        "category": "Group I: Niche Companies (Salary above 5 LPA)",
+        "salary_lpa": 9.34,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "7",
+            "eligible_branches": "All UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 3,
+            "E&TC": 11
+        },
+        "gender_distribution": {
+            "male": 11,
+            "female": 5,
+            "total": 16
+        },
+        "total_salary_lpa": 149.44
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Cognizant GenC",
+        "category": "Group II: Variant Recruiters (Salary below 5 LPA)",
+        "salary_lpa": 4.0,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "ALL UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 0,
+            "E&TC": 2
+        },
+        "gender_distribution": {
+            "male": 3,
+            "female": 1,
+            "total": 4
+        },
+        "total_salary_lpa": 16.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "TATA Technologies",
+        "category": "Group II: Variant Recruiters (Salary below 5 LPA)",
+        "salary_lpa": 4.50,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6.74",
+            "eligible_branches": "ALL UG"
+        },
+        "selections": {
+            "CE": 2,
+            "IT": 4,
+            "E&TC": 0
+        },
+        "gender_distribution": {
+            "male": 4,
+            "female": 2,
+            "total": 6
+        },
+        "total_salary_lpa": 27.0
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "TCS Ninja",
+        "category": "Group II: Variant Recruiters (Salary below 5 LPA)",
+        "salary_lpa": 3.30,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "-",
+            "eligible_branches": "ALL UG"
+        },
+        "selections": {
+            "CE": 3,
+            "IT": 1,
+            "E&TC": 11
+        },
+        "gender_distribution": {
+            "male": 7,
+            "female": 8,
+            "total": 15
+        },
+        "total_salary_lpa": 49.50
+    },
+    {
+        "academic_year": "2024-25",
+        "company_name": "Cognizant GenC",
+        "category": "Group II: Variant Recruiters (Salary below 5 LPA)",
+        "salary_lpa": 4.50,
+        "visit_date": null,
+        "criteria": {
+            "min_cgpa": "6",
+            "eligible_branches": "ALL UG"
+        },
+        "selections": {
+            "CE": 0,
+            "IT": 1,
+            "E&TC": 1
+        },
+        "gender_distribution": {
+            "male": 0,
+            "female": 2,
+            "total": 2
+        },
+        "total_salary_lpa": 9.00
+    }
+]

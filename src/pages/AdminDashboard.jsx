@@ -21,11 +21,38 @@ import {
     ChevronUp,
     ChevronDown
 } from 'lucide-react';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+import { Line, Bar, Pie } from 'react-chartjs-2';
 import '../styles/AdminDashboard.css';
 import { API_URL } from '../config';
 
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend
+);
+
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
+    const [yearlyData, setYearlyData] = useState(null);
+    const [adminSelectedBranch, setAdminSelectedBranch] = useState('All');
     const [stats, setStats] = useState({
         totalStudents: 0,
         totalCompanies: 0,
@@ -118,12 +145,15 @@ const AdminDashboard = () => {
                 const response = await fetch(`${API_URL}/api/placement-stats`);
                 if (response.ok) {
                     const data = await response.json();
-                    const currentYear = Object.keys(data)[0];
+                    setYearlyData(data); // Assume we also add state yearlyData
+                    const sortedYears = Object.keys(data).sort((a, b) => b.localeCompare(a));
+                    const currentYear = sortedYears[0];
                     if (currentYear) {
+                        const displayData = adminSelectedBranch === 'All' ? data[currentYear] : (data[currentYear].branchStats?.[adminSelectedBranch] || data[currentYear]);
                         setStats({
-                            totalStudents: data[currentYear].totalPlaced,
-                            totalCompanies: data[currentYear].topCompanies.labels.length,
-                            averagePackage: data[currentYear].avgPackage,
+                            totalStudents: displayData.totalPlaced,
+                            totalCompanies: data[currentYear].topCompanies?.labels?.length || 0,
+                            averagePackage: String(displayData.avgPackage).includes('₹') ? displayData.avgPackage : `₹ ${displayData.avgPackage}`,
                             activeOpportunities: 12
                         });
                     }
@@ -168,7 +198,7 @@ const AdminDashboard = () => {
         fetchCompanies();
         fetchFeedbacks();
         fetchBroadcasts();
-    }, []);
+    }, [adminSelectedBranch]);
 
     const observationLabels = {
         aptitude: 'Aptitude',
@@ -492,9 +522,24 @@ const AdminDashboard = () => {
                 </header>
 
                 <div className="admin-content">
-                    <div className="admin-welcome-section">
-                        <h1>Command Center</h1>
-                        <p>Welcome back, Administrator. System status is normal.</p>
+                    <div className="admin-welcome-section" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h1>Command Center</h1>
+                            <p>Welcome back, Administrator. System status is normal.</p>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border shadow-sm filter-container" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                            <select
+                                value={adminSelectedBranch}
+                                onChange={(e) => setAdminSelectedBranch(e.target.value)}
+                                className="bg-transparent border-none outline-none text-sm font-medium"
+                                style={{ color: 'inherit', background: 'transparent' }}
+                            >
+                                <option style={{ color: '#333' }} value="All">All Branches</option>
+                                <option style={{ color: '#333' }} value="CE">Computer Engineering</option>
+                                <option style={{ color: '#333' }} value="IT">Information Technology</option>
+                                <option style={{ color: '#333' }} value="E&TC">E&TC</option>
+                            </select>
+                        </div>
                     </div>
 
                     {activeTab === 'overview' && (
@@ -534,6 +579,62 @@ const AdminDashboard = () => {
                                     <div className="stat-data">
                                         <span className="stat-value">{stats.activeOpportunities}</span>
                                         <span className="stat-label">Active Drives</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="admin-main-grid" style={{ marginBottom: '1.5rem' }}>
+                                <div className="admin-panel glass full-width" style={{ gridColumn: '1 / -1' }}>
+                                    <div className="panel-header">
+                                        <h2>{adminSelectedBranch !== 'All' ? `${adminSelectedBranch} Branch Performance` : 'Branch-wise Performance Comparison'}</h2>
+                                    </div>
+                                    <div className="panel-content" style={{ height: '300px', padding: '1rem' }}>
+                                        {(() => {
+                                            if (yearlyData && Object.keys(yearlyData).length > 0) {
+                                                const sortedKeys = Object.keys(yearlyData).sort((a,b) => b.localeCompare(a));
+                                                const latestYearKey = sortedKeys[0];
+                                                const yearData = yearlyData[latestYearKey];
+
+                                                return (
+                                                    <Bar
+                                                        data={{
+                                                            labels: ['Computer', 'IT', 'E&TC'],
+                                                            datasets: [
+                                                                {
+                                                                    label: `Avg Package (LPA) - ${latestYearKey}`,
+                                                                    data: yearData.branchStats ? [
+                                                                        parseFloat(String(yearData.branchStats['CE'].avgPackage).replace(/[^0-9.]/g, '')) || 0,
+                                                                        parseFloat(String(yearData.branchStats['IT'].avgPackage).replace(/[^0-9.]/g, '')) || 0,
+                                                                        parseFloat(String(yearData.branchStats['E&TC'].avgPackage).replace(/[^0-9.]/g, '')) || 0
+                                                                    ] : [],
+                                                                    backgroundColor: '#4F46E5',
+                                                                },
+                                                                {
+                                                                    label: `Highest Package (LPA) - ${latestYearKey}`,
+                                                                    data: yearData.branchStats ? [
+                                                                        parseFloat(String(yearData.branchStats['CE'].highestPackage).replace(/[^0-9.]/g, '')) || 0,
+                                                                        parseFloat(String(yearData.branchStats['IT'].highestPackage).replace(/[^0-9.]/g, '')) || 0,
+                                                                        parseFloat(String(yearData.branchStats['E&TC'].highestPackage).replace(/[^0-9.]/g, '')) || 0
+                                                                    ] : [],
+                                                                    backgroundColor: '#818CF8',
+                                                                }
+                                                            ]
+                                                        }}
+                                                        options={{
+                                                            responsive: true,
+                                                            maintainAspectRatio: false,
+                                                            plugins: { legend: { position: 'top' } },
+                                                            scales: { y: { beginAtZero: true, title: { display: true, text: 'LPA' } } }
+                                                        }}
+                                                    />
+                                                );
+                                            }
+                                            return (
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#888' }}>
+                                                    Data not available for branch comparison
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                             </div>
@@ -1054,8 +1155,8 @@ const AdminDashboard = () => {
                         </div>
                     )}
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 };
 
