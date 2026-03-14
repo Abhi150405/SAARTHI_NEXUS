@@ -594,28 +594,31 @@ const AdminDashboard = () => {
                                                 const sortedKeys = Object.keys(yearlyData).sort((a,b) => b.localeCompare(a));
                                                 const latestYearKey = sortedKeys[0];
                                                 const yearData = yearlyData[latestYearKey];
+                                                const branchLabelsMap = {
+                                                    'CE': 'Computer',
+                                                    'IT': 'IT',
+                                                    'E&TC': 'E&TC'
+                                                };
+                                                const compLabels = adminSelectedBranch === 'All' ? ['Computer', 'IT', 'E&TC'] : [branchLabelsMap[adminSelectedBranch]];
+                                                const compKeys = adminSelectedBranch === 'All' ? ['CE', 'IT', 'E&TC'] : [adminSelectedBranch];
 
                                                 return (
                                                     <Bar
                                                         data={{
-                                                            labels: ['Computer', 'IT', 'E&TC'],
+                                                            labels: compLabels,
                                                             datasets: [
                                                                 {
                                                                     label: `Avg Package (LPA) - ${latestYearKey}`,
-                                                                    data: yearData.branchStats ? [
-                                                                        parseFloat(String(yearData.branchStats['CE'].avgPackage).replace(/[^0-9.]/g, '')) || 0,
-                                                                        parseFloat(String(yearData.branchStats['IT'].avgPackage).replace(/[^0-9.]/g, '')) || 0,
-                                                                        parseFloat(String(yearData.branchStats['E&TC'].avgPackage).replace(/[^0-9.]/g, '')) || 0
-                                                                    ] : [],
+                                                                    data: yearData.branchStats ? compKeys.map(k =>
+                                                                        parseFloat(String(yearData.branchStats[k].avgPackage).replace(/[^0-9.]/g, '')) || 0
+                                                                    ) : [],
                                                                     backgroundColor: '#4F46E5',
                                                                 },
                                                                 {
                                                                     label: `Highest Package (LPA) - ${latestYearKey}`,
-                                                                    data: yearData.branchStats ? [
-                                                                        parseFloat(String(yearData.branchStats['CE'].highestPackage).replace(/[^0-9.]/g, '')) || 0,
-                                                                        parseFloat(String(yearData.branchStats['IT'].highestPackage).replace(/[^0-9.]/g, '')) || 0,
-                                                                        parseFloat(String(yearData.branchStats['E&TC'].highestPackage).replace(/[^0-9.]/g, '')) || 0
-                                                                    ] : [],
+                                                                    data: yearData.branchStats ? compKeys.map(k =>
+                                                                        parseFloat(String(yearData.branchStats[k].highestPackage).replace(/[^0-9.]/g, '')) || 0
+                                                                    ) : [],
                                                                     backgroundColor: '#818CF8',
                                                                 }
                                                             ]

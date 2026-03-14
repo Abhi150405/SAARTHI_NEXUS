@@ -12,7 +12,7 @@ import {
     Legend,
 } from 'chart.js';
 import { Line, Bar, Pie } from 'react-chartjs-2';
-import { Filter, DollarSign, TrendingUp, Users, Target, BookOpen } from 'lucide-react';
+import { Filter, IndianRupee, TrendingUp, Users, Target, BookOpen } from 'lucide-react';
 import '../styles/Dashboard.css';
 import { API_URL } from '../config';
 
@@ -135,34 +135,37 @@ const Dashboard = () => {
         ],
     };
 
+    const branchLabelsMap = {
+        'CE': 'Computer',
+        'IT': 'IT',
+        'E&TC': 'E&TC'
+    };
+
+    const compLabels = selectedBranch === 'All' ? ['Computer', 'IT', 'E&TC'] : [branchLabelsMap[selectedBranch]];
+    const compKeys = selectedBranch === 'All' ? ['CE', 'IT', 'E&TC'] : [selectedBranch];
+
     const branchComparisonData = {
-        labels: ['Computer', 'IT', 'E&TC'],
+        labels: compLabels,
         datasets: [
             {
                 label: 'Avg Package (LPA)',
-                data: currentData.branchStats ? [
-                    parseFloat(String(currentData.branchStats['CE'].avgPackage).replace(/[^0-9.]/g, '')) || 0,
-                    parseFloat(String(currentData.branchStats['IT'].avgPackage).replace(/[^0-9.]/g, '')) || 0,
-                    parseFloat(String(currentData.branchStats['E&TC'].avgPackage).replace(/[^0-9.]/g, '')) || 0
-                ] : [],
+                data: currentData.branchStats ? compKeys.map(k => 
+                    parseFloat(String(currentData.branchStats[k].avgPackage).replace(/[^0-9.]/g, '')) || 0
+                ) : [],
                 backgroundColor: '#4F46E5',
             },
             {
                 label: 'Median Package (LPA)',
-                data: currentData.branchStats ? [
-                    parseFloat(String(currentData.branchStats['CE'].medianPackage).replace(/[^0-9.]/g, '')) || 0,
-                    parseFloat(String(currentData.branchStats['IT'].medianPackage).replace(/[^0-9.]/g, '')) || 0,
-                    parseFloat(String(currentData.branchStats['E&TC'].medianPackage).replace(/[^0-9.]/g, '')) || 0
-                ] : [],
+                data: currentData.branchStats ? compKeys.map(k => 
+                    parseFloat(String(currentData.branchStats[k].medianPackage).replace(/[^0-9.]/g, '')) || 0
+                ) : [],
                 backgroundColor: '#3B82F6',
             },
             {
                 label: 'Highest Package (LPA)',
-                data: currentData.branchStats ? [
-                    parseFloat(String(currentData.branchStats['CE'].highestPackage).replace(/[^0-9.]/g, '')) || 0,
-                    parseFloat(String(currentData.branchStats['IT'].highestPackage).replace(/[^0-9.]/g, '')) || 0,
-                    parseFloat(String(currentData.branchStats['E&TC'].highestPackage).replace(/[^0-9.]/g, '')) || 0
-                ] : [],
+                data: currentData.branchStats ? compKeys.map(k => 
+                    parseFloat(String(currentData.branchStats[k].highestPackage).replace(/[^0-9.]/g, '')) || 0
+                ) : [],
                 backgroundColor: '#818CF8',
             }
         ]
@@ -222,7 +225,7 @@ const Dashboard = () => {
             <div className="metrics-grid">
                 <div className="metric-card">
                     <div className="metric-icon">
-                        <DollarSign size={24} />
+                        <IndianRupee size={24} />
                     </div>
                     <div className="metric-content">
                         <p className="metric-label">Average CTC</p>
