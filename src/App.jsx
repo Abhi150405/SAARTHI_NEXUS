@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { API_URL } from './config';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
@@ -15,7 +16,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Signup from './pages/Signup';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
-import ThemeToggle from './components/ThemeToggle';
+
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -48,9 +49,28 @@ const HomeRedirect = () => {
 };
 
 function App() {
+  useEffect(() => {
+    // Wake up the backend on load and periodic ping to keep it alive
+    const wakeBackend = async () => {
+      try {
+        await fetch(`${API_URL}/health`);
+        console.log('🚀 Backend waking process initiated');
+      } catch (err) {
+        console.error('⚠️ Backend waking failed:', err);
+      }
+    };
+
+    wakeBackend();
+
+    // Ping every 10 minutes to keep Render alive while user is active
+    const intervalId = setInterval(wakeBackend, 10 * 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <Router>
-      <ThemeToggle />
+
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />

@@ -4,12 +4,16 @@ import { ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Hero3SVG, Hero4SVG, Hero6SVG } from './SVGs';
 
-const FeatureRows = ({ isAuthenticated }) => {
+const FeatureRows = ({ isAuthenticated, user }) => {
     const navigate = useNavigate();
 
     const handleNavigation = (path) => {
         if (isAuthenticated) {
-            navigate(path);
+            if (user?.role === 'admin' && path.startsWith('/app/')) {
+                navigate('/admin/dashboard');
+            } else {
+                navigate(path);
+            }
         } else {
             navigate('/signup');
         }
@@ -49,7 +53,7 @@ const FeatureRows = ({ isAuthenticated }) => {
                     <p className="text-[15px] text-[#A3A3A3] leading-[1.7] mb-5">
                         Our matching engine cross-references your CGPA and branch against every active drive in real time — no manual filtering required.
                     </p>
-                    <div onClick={() => handleNavigation('/eligibility')} className="inline-flex items-center gap-1 text-[14px] text-[#F97316] cursor-pointer hover:opacity-75 transition-opacity duration-150">
+                    <div onClick={() => handleNavigation('/app/eligibility')} className="inline-flex items-center gap-1 text-[14px] text-[#F97316] cursor-pointer hover:opacity-75 transition-opacity duration-150">
                         Explore Eligibility <ChevronRight size={14} />
                     </div>
                 </motion.div>
@@ -107,7 +111,7 @@ const FeatureRows = ({ isAuthenticated }) => {
                     <p className="text-[15px] text-[#A3A3A3] leading-[1.7] mb-5">
                         Upload your resume and get an instant keyword match score against the exact role requirements posted by recruiting companies.
                     </p>
-                    <div onClick={() => handleNavigation('/resume')} className="inline-flex items-center gap-1 text-[14px] text-[#F97316] cursor-pointer hover:opacity-75 transition-opacity duration-150">
+                    <div onClick={() => handleNavigation('/app/resume')} className="inline-flex items-center gap-1 text-[14px] text-[#F97316] cursor-pointer hover:opacity-75 transition-opacity duration-150">
                         Try Resume Analyzer <ChevronRight size={14} />
                     </div>
                 </motion.div>
@@ -130,7 +134,7 @@ const FeatureRows = ({ isAuthenticated }) => {
                     <p className="text-[15px] text-[#A3A3A3] leading-[1.7] mb-5">
                         Powered by Gemini with RAG — our chatbot retrieves real placement data from your institution to answer questions that generic AI tools simply cannot.
                     </p>
-                    <div onClick={() => handleNavigation('/help')} className="inline-flex items-center gap-1 text-[14px] text-[#F97316] cursor-pointer hover:opacity-75 transition-opacity duration-150">
+                    <div onClick={() => handleNavigation('/app/help')} className="inline-flex items-center gap-1 text-[14px] text-[#F97316] cursor-pointer hover:opacity-75 transition-opacity duration-150">
                         Talk to SAARTHI AI <ChevronRight size={14} />
                     </div>
                 </motion.div>

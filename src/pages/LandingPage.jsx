@@ -22,10 +22,10 @@ const LandingPage = () => {
     return (
         <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F5] overflow-x-hidden">
             <Navbar isAuthenticated={isAuthenticated} user={user} handleLogout={handleLogout} />
-            <HeroSection isAuthenticated={isAuthenticated} />
+            <HeroSection isAuthenticated={isAuthenticated} user={user} />
             <StatStrip />
-            <FeatureRows isAuthenticated={isAuthenticated} />
-            <FeatureGrid isAuthenticated={isAuthenticated} />
+            <FeatureRows isAuthenticated={isAuthenticated} user={user} />
+            <FeatureGrid isAuthenticated={isAuthenticated} user={user} />
             <CTASection isAuthenticated={isAuthenticated} />
             <Footer />
         </div>

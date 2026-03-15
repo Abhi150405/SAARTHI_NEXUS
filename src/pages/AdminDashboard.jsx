@@ -488,7 +488,7 @@ const AdminDashboard = () => {
                             localStorage.clear();
                             window.location.href = '/';
                         }}
-                        style={{ marginTop: '0.5rem', color: '#f87171' }}
+                        style={{ marginTop: '0.5rem', color: 'var(--admin-accent)' }}
                     >
                         <LogOut size={20} />
                         <span>Sign Out</span>
@@ -534,10 +534,10 @@ const AdminDashboard = () => {
                                 className="bg-transparent border-none outline-none text-sm font-medium"
                                 style={{ color: 'inherit', background: 'transparent' }}
                             >
-                                <option style={{ color: '#333' }} value="All">All Branches</option>
-                                <option style={{ color: '#333' }} value="CE">Computer Engineering</option>
-                                <option style={{ color: '#333' }} value="IT">Information Technology</option>
-                                <option style={{ color: '#333' }} value="E&TC">E&TC</option>
+                                <option value="All">All Branches</option>
+                                <option value="CE">Computer Engineering</option>
+                                <option value="IT">Information Technology</option>
+                                <option value="E&TC">E&TC</option>
                             </select>
                         </div>
                     </div>
@@ -612,14 +612,14 @@ const AdminDashboard = () => {
                                                                     data: yearData.branchStats ? compKeys.map(k =>
                                                                         parseFloat(String(yearData.branchStats[k].avgPackage).replace(/[^0-9.]/g, '')) || 0
                                                                     ) : [],
-                                                                    backgroundColor: '#4F46E5',
+                                                                     backgroundColor: '#F97316',
                                                                 },
                                                                 {
                                                                     label: `Highest Package (LPA) - ${latestYearKey}`,
                                                                     data: yearData.branchStats ? compKeys.map(k =>
                                                                         parseFloat(String(yearData.branchStats[k].highestPackage).replace(/[^0-9.]/g, '')) || 0
                                                                     ) : [],
-                                                                    backgroundColor: '#818CF8',
+                                                                     backgroundColor: '#FB923C',
                                                                 }
                                                             ]
                                                         }}
@@ -720,52 +720,101 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                             <div className="panel-content">
+                                {/* Summary row */}
+                                <div className="student-summary-row">
+                                    <div className="summary-card">
+                                        <span className="label">Total Records</span>
+                                        <span className="value">{recentUsers.length}</span>
+                                    </div>
+                                    <div className="summary-card">
+                                        <span className="label">High CGPA (&ge; 9.0)</span>
+                                        <span className="value">
+                                            {recentUsers.filter(u => parseFloat(u.college_cgpa) >= 9.0).length}
+                                        </span>
+                                    </div>
+                                    <div className="summary-card">
+                                        <span className="label">Avg AMCAT</span>
+                                        <span className="value">
+                                            {Math.round(recentUsers.reduce((acc, curr) => acc + (parseInt(curr.amcat_score) || 0), 0) / (recentUsers.length || 1))}
+                                        </span>
+                                    </div>
+                                </div>
                                 <div className="table-responsive">
                                     <table className="nexus-table student-records-table">
                                         <thead>
                                             <tr>
-                                                <th>#</th>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Department</th>
-                                                <th className="sortable-th" onClick={() => handleStudentSort('tenth_percentage')}>
-                                                    10th % <SortIcon colKey="tenth_percentage" />
+                                                <th style={{ width: '40px' }}>#</th>
+                                                <th style={{ minWidth: '160px' }}>Name</th>
+                                                <th style={{ minWidth: '180px' }}>Email</th>
+                                                <th style={{ minWidth: '120px' }}>Department</th>
+                                                <th className="sortable-th" style={{ minWidth: '90px' }} onClick={() => handleStudentSort('tenth_percentage')}>
+                                                    <div className="flex items-center justify-between">
+                                                        <span>10th %</span>
+                                                        <SortIcon colKey="tenth_percentage" />
+                                                    </div>
                                                 </th>
-                                                <th className="sortable-th" onClick={() => handleStudentSort('twelfth_percentage')}>
-                                                    12th % <SortIcon colKey="twelfth_percentage" />
+                                                <th className="sortable-th" style={{ minWidth: '90px' }} onClick={() => handleStudentSort('twelfth_percentage')}>
+                                                    <div className="flex items-center justify-between">
+                                                        <span>12th %</span>
+                                                        <SortIcon colKey="twelfth_percentage" />
+                                                    </div>
                                                 </th>
-                                                <th className="sortable-th" onClick={() => handleStudentSort('college_cgpa')}>
-                                                    CGPA <SortIcon colKey="college_cgpa" />
+                                                <th className="sortable-th" style={{ minWidth: '85px' }} onClick={() => handleStudentSort('college_cgpa')}>
+                                                    <div className="flex items-center justify-between">
+                                                        <span>CGPA</span>
+                                                        <SortIcon colKey="college_cgpa" />
+                                                    </div>
                                                 </th>
-                                                <th className="sortable-th" onClick={() => handleStudentSort('amcat_score')}>
-                                                    AMCAT <SortIcon colKey="amcat_score" />
+                                                <th className="sortable-th" style={{ minWidth: '95px' }} onClick={() => handleStudentSort('amcat_score')}>
+                                                    <div className="flex items-center justify-between">
+                                                        <span>AMCAT</span>
+                                                        <SortIcon colKey="amcat_score" />
+                                                    </div>
                                                 </th>
-                                                <th>Action</th>
+                                                <th style={{ width: '60px' }}>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {sortedStudents.length > 0 ? sortedStudents.map((s, i) => (
                                                 <tr key={s.id || i}>
-                                                    <td>{i + 1}</td>
+                                                    <td style={{ opacity: 0.4 }}>{i + 1}</td>
                                                     <td>
-                                                        <span
-                                                            className="student-name-link"
-                                                            onClick={() => setSelectedStudent(s)}
-                                                        >
-                                                            {s.name}
-                                                        </span>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded bg-accent/10 flex items-center justify-center text-accent font-bold text-xs" style={{ background: 'rgba(249, 115, 22, 0.1)', minWidth: '32px' }}>
+                                                                {s.name?.[0]}
+                                                            </div>
+                                                            <span
+                                                                className="student-name-link"
+                                                                onClick={() => setSelectedStudent(s)}
+                                                            >
+                                                                {s.name}
+                                                            </span>
+                                                        </div>
                                                     </td>
-                                                    <td>{s.email}</td>
-                                                    <td>{s.dept}</td>
-                                                    <td>{s.tenth_percentage !== '' ? s.tenth_percentage : '—'}</td>
-                                                    <td>{s.twelfth_percentage !== '' ? s.twelfth_percentage : '—'}</td>
-                                                    <td>{s.college_cgpa !== '' ? s.college_cgpa : '—'}</td>
-                                                    <td>{s.amcat_score !== '' ? s.amcat_score : '—'}</td>
+                                                    <td style={{ fontSize: '0.8rem', color: 'var(--admin-text-muted)' }}>{s.email}</td>
+                                                    <td><span className="dept-pill" style={{ background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>{s.dept}</span></td>
+                                                    <td>
+                                                        <div className={`score-tag ${parseFloat(s.tenth_percentage) >= 90 ? 'high' : parseFloat(s.tenth_percentage) >= 75 ? 'mid' : 'low'}`}>
+                                                            {s.tenth_percentage || '—'}%
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div className={`score-tag ${parseFloat(s.twelfth_percentage) >= 90 ? 'high' : parseFloat(s.twelfth_percentage) >= 75 ? 'mid' : 'low'}`}>
+                                                            {s.twelfth_percentage || '—'}%
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div className={`score-tag ${parseFloat(s.college_cgpa) >= 9.0 ? 'high' : parseFloat(s.college_cgpa) >= 8.0 ? 'mid' : 'low'}`}>
+                                                            {s.college_cgpa || '—'}
+                                                        </div>
+                                                    </td>
+                                                    <td>{s.amcat_score || '—'}</td>
                                                     <td>
                                                         <button
                                                             className="btn-icon view-btn"
                                                             title="View Details"
                                                             onClick={() => setSelectedStudent(s)}
+                                                            style={{ border: 'none', background: 'transparent' }}
                                                         >
                                                             <Eye size={16} />
                                                         </button>
@@ -802,45 +851,47 @@ const AdminDashboard = () => {
                                             </button>
                                         </div>
                                         <div className="student-modal-body">
-                                            <div className="modal-avatar">
-                                                {selectedStudent.name?.[0] || 'S'}
-                                            </div>
-                                            <h3 className="modal-student-name">{selectedStudent.name}</h3>
-                                            <div className="modal-detail-grid">
-                                                <div className="modal-detail-item">
-                                                    <span className="modal-label">Email</span>
-                                                    <span className="modal-value">{selectedStudent.email}</span>
+                                            <div className="modal-profile-header">
+                                                <div className="modal-avatar-large">
+                                                    {selectedStudent.name?.[0] || 'S'}
                                                 </div>
-                                                <div className="modal-detail-item">
-                                                    <span className="modal-label">ID Number</span>
-                                                    <span className="modal-value">{selectedStudent.idNumber || '—'}</span>
-                                                </div>
-                                                <div className="modal-detail-item">
-                                                    <span className="modal-label">Department</span>
-                                                    <span className="modal-value">{selectedStudent.dept}</span>
-                                                </div>
-                                                <div className="modal-detail-item">
-                                                    <span className="modal-label">Joined</span>
-                                                    <span className="modal-value">{selectedStudent.joined || '—'}</span>
+                                                <div className="modal-header-info">
+                                                    <h3>{selectedStudent.name}</h3>
+                                                    <span className="dept-pill">{selectedStudent.dept}</span>
                                                 </div>
                                             </div>
-                                            <div className="modal-section-title">Academic Details</div>
-                                            <div className="modal-detail-grid">
-                                                <div className="modal-detail-item academic">
-                                                    <span className="modal-label">10th Percentage</span>
-                                                    <span className="modal-value highlight">{selectedStudent.tenth_percentage !== '' ? `${selectedStudent.tenth_percentage}%` : '—'}</span>
+
+                                            <div className="modal-grid-3">
+                                                <div className="metric-card">
+                                                    <span className="m-label">CGPA</span>
+                                                    <span className="m-value">{selectedStudent.college_cgpa || '—'}</span>
                                                 </div>
-                                                <div className="modal-detail-item academic">
-                                                    <span className="modal-label">12th Percentage</span>
-                                                    <span className="modal-value highlight">{selectedStudent.twelfth_percentage !== '' ? `${selectedStudent.twelfth_percentage}%` : '—'}</span>
+                                                <div className="metric-card">
+                                                    <span className="m-label">12th %</span>
+                                                    <span className="m-value">{selectedStudent.twelfth_percentage || '—'}</span>
                                                 </div>
-                                                <div className="modal-detail-item academic">
-                                                    <span className="modal-label">College CGPA</span>
-                                                    <span className="modal-value highlight">{selectedStudent.college_cgpa !== '' ? selectedStudent.college_cgpa : '—'}</span>
+                                                <div className="metric-card">
+                                                    <span className="m-label">10th %</span>
+                                                    <span className="m-value">{selectedStudent.tenth_percentage || '—'}</span>
                                                 </div>
-                                                <div className="modal-detail-item academic">
-                                                    <span className="modal-label">AMCAT Score</span>
-                                                    <span className="modal-value highlight">{selectedStudent.amcat_score !== '' ? selectedStudent.amcat_score : '—'}</span>
+                                                <div className="metric-card">
+                                                    <span className="m-label">AMCAT</span>
+                                                    <span className="m-value">{selectedStudent.amcat_score || '—'}</span>
+                                                </div>
+                                                <div className="metric-card" style={{ gridColumn: 'span 2' }}>
+                                                    <span className="m-label">Joined On</span>
+                                                    <span className="m-value">{new Date(selectedStudent.joined).toLocaleDateString() || '—'}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="contact-info-list" style={{ marginTop: '2rem' }}>
+                                                <div className="contact-item">
+                                                    <Send size={16} />
+                                                    <span>{selectedStudent.email}</span>
+                                                </div>
+                                                <div className="contact-item">
+                                                    <Database size={16} />
+                                                    <span>ID: {selectedStudent.idNumber || 'Not provided'}</span>
                                                 </div>
                                             </div>
                                         </div>

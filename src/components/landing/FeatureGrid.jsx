@@ -3,23 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, TrendingUp, Bell, BarChart2, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const FeatureGrid = ({ isAuthenticated }) => {
+const FeatureGrid = ({ isAuthenticated, user }) => {
     const navigate = useNavigate();
 
     const handleNavigation = (path) => {
         if (isAuthenticated) {
-            navigate(path);
+            if (user?.role === 'admin' && path.startsWith('/app/')) {
+                navigate('/admin/dashboard');
+            } else {
+                navigate(path);
+            }
         } else {
             navigate('/signup');
         }
     };
 
     const features = [
-        { icon: LayoutDashboard, title: "Live Drive Dashboard", body: "All active drives in one real-time view.", path: "/dashboard" },
-        { icon: BookOpen, title: "Interview Vault", body: "Peer-reviewed notes from past interview rounds.", path: "/experiences" },
-        { icon: TrendingUp, title: "Skill Gap Map", body: "Compare your skills against market demand.", path: "/skills" },
-        { icon: Bell, title: "Smart Alerts", body: "Deadline reminders and drive updates instantly.", path: "/notifications" },
-        { icon: BarChart2, title: "Placement Analytics", body: "Year-over-year placement stats and trends.", path: "/records" },
+        { icon: LayoutDashboard, title: "Live Drive Dashboard", body: "All active drives in one real-time view.", path: "/app/dashboard" },
+        { icon: BookOpen, title: "Interview Vault", body: "Peer-reviewed notes from past interview rounds.", path: "/app/experiences" },
+        { icon: TrendingUp, title: "Skill Gap Map", body: "Compare your skills against market demand.", path: "/app/skills" },
+        { icon: Bell, title: "Smart Alerts", body: "Deadline reminders and drive updates instantly.", path: "/app/notifications" },
+        { icon: BarChart2, title: "Placement Analytics", body: "Year-over-year placement stats and trends.", path: "/app/records" },
         { icon: Shield, title: "Admin Control Center", body: "Full CRUD for drives, students, companies.", path: "/admin/dashboard", admin: true }
     ];
 

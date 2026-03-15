@@ -4,12 +4,17 @@ import { BarChart2, CheckCircle, BrainCircuit, ChevronRight } from 'lucide-react
 import { motion } from 'framer-motion';
 import { Hero1SVG, Hero2SVG, Hero5SVG } from './SVGs';
 
-const HeroSection = ({ isAuthenticated }) => {
+const HeroSection = ({ isAuthenticated, user }) => {
     const navigate = useNavigate();
 
     const handleNavigation = (path) => {
         if (isAuthenticated) {
-            navigate(path);
+            // If user is admin and trying to go to general dashboard, send to admin dashboard
+            if (user?.role === 'admin' && path === '/app/dashboard') {
+                navigate('/admin/dashboard');
+            } else {
+                navigate(path);
+            }
         } else {
             navigate('/signup');
         }
@@ -76,13 +81,13 @@ const HeroSection = ({ isAuthenticated }) => {
 
                     {/* CTA Buttons */}
                     <motion.div variants={itemVariants} className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                        <button onClick={() => handleNavigation('/dashboard')} className="btn btn-primary">
+                        <button onClick={() => handleNavigation('/app/dashboard')} className="btn btn-primary">
                             View Analytics <BarChart2 size={15} />
                         </button>
-                        <button onClick={() => handleNavigation('/eligibility')} className="btn btn-outline">
+                        <button onClick={() => handleNavigation('/app/eligibility')} className="btn btn-outline">
                             Check Eligibility <CheckCircle size={15} />
                         </button>
-                        <button onClick={() => handleNavigation('/skills')} className="btn btn-outline">
+                        <button onClick={() => handleNavigation('/app/skills')} className="btn btn-outline">
                             Analyze Skills <BrainCircuit size={15} />
                         </button>
                     </motion.div>
