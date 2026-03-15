@@ -486,7 +486,7 @@ const AdminDashboard = () => {
                         className="admin-nav-item logout-red"
                         onClick={() => {
                             localStorage.clear();
-                            window.location.href = '/#/login/admin';
+                            window.location.href = '/';
                         }}
                         style={{ marginTop: '0.5rem', color: '#f87171' }}
                     >
@@ -693,7 +693,7 @@ const AdminDashboard = () => {
                                         </button>
                                         <button className="quick-action-btn logout" onClick={() => {
                                             localStorage.clear();
-                                            window.location.href = '/#/login/admin';
+                                            window.location.href = '/';
                                         }}>
                                             <LogOut size={20} />
                                             <span>Sign Out</span>

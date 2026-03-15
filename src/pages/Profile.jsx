@@ -49,7 +49,7 @@ const Profile = () => {
 
     const handleLogout = () => {
         localStorage.clear();
-        navigate('/login');
+        navigate('/');
     };
 
     const handlePasswordChange = async (e) => {

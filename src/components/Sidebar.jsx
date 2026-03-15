@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('isAuthenticated');
-    navigate('/login');
+    navigate('/');
   };
 
   return (

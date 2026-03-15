@@ -23,7 +23,7 @@ const Topbar = () => {
     const handleLogout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('isAuthenticated');
-        navigate('/login');
+        navigate('/');
     };
 
     return (
