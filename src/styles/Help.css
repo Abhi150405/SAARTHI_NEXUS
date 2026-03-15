@@ -35,7 +35,7 @@
     align-items: center;
     justify-content: center;
     color: white;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
 }
 
 .chat-body {
@@ -82,7 +82,7 @@
     background: var(--gradient-primary);
     color: white;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
 }
 
 .suggestions {
@@ -111,7 +111,7 @@
     color: white;
     border-color: transparent;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
 }
 
 .chat-input-area {
@@ -149,12 +149,12 @@
     align-items: center;
     justify-content: center;
     transition: all var(--transition-spring);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }
 
 .send-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
 }
 
 .send-btn:active {

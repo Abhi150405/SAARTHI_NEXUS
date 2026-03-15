@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, MessageSquare, Sparkles } from 'lucide-react';
 import '../styles/Help.css';
+import { API_URL } from '../config';
 
 const Help = () => {
     const [query, setQuery] = useState('');
@@ -25,7 +26,7 @@ const Help = () => {
         setIsTyping(true);
 
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/chat', {
+            const response = await fetch(`${API_URL}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: text })

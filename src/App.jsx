@@ -11,8 +11,6 @@ import Help from './pages/Help';
 import AboutUs from './pages/AboutUs';
 import Experiences from './pages/Experiences';
 import Login from './pages/Login';
-import StudentLogin from './pages/StudentLogin';
-import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Signup from './pages/Signup';
 import Notifications from './pages/Notifications';
@@ -55,9 +53,10 @@ function App() {
       <ThemeToggle />
       <Routes>
         {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Navigate to="/login/student" replace />} />
-        <Route path="/login/student" element={<StudentLogin />} />
-        <Route path="/login/admin" element={<AdminLogin />} />
+        <Route path="/login/student" element={<Login defaultRole="student" />} />
+        <Route path="/login/admin" element={<Login defaultRole="admin" />} />
         <Route path="/signup" element={<Signup />} />
 
         {/* Admin Dashboard - Separate from main layout */}
@@ -68,12 +67,12 @@ function App() {
         } />
 
         {/* Protected Application Routes (Primary Student Routes) */}
-        <Route path="/" element={
+        <Route path="/app" element={
           <ProtectedRoute allowedRoles={['student']}>
-            <HomeRedirect />
+            <Layout />
           </ProtectedRoute>
         }>
-          <Route index element={<LandingPage />} />
+          <Route index element={<Navigate to="/app/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="skills" element={<SkillAnalysis />} />
           <Route path="eligibility" element={<Eligibility />} />

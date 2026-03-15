@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-    GraduationCap,
     User,
     Lock,
     Eye,
@@ -9,10 +9,235 @@ import {
     ArrowRight,
     Mail,
     IdCard,
-    BookOpen
+    BookOpen,
+    ChevronRight,
+    ShieldCheck
 } from 'lucide-react';
 import '../styles/Login.css';
 import { API_URL } from '../config';
+
+// ─── Inline SVG Components ────────────────────────────────────────────────────
+
+/** Subtle dot-cross grid placed behind the left panel */
+const AuthBgLeft = ({ className = '' }) => (
+    <svg
+        viewBox="0 0 720 900"
+        xmlns="http://www.w3.org/2000/svg"
+        className={className}
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+    >
+        <defs>
+            <pattern id="cross-l" width="48" height="48" patternUnits="userSpaceOnUse">
+                <line x1="24" y1="20" x2="24" y2="28" stroke="#1F1F1F" strokeWidth="0.8" />
+                <line x1="20" y1="24" x2="28" y2="24" stroke="#1F1F1F" strokeWidth="0.8" />
+            </pattern>
+            <radialGradient id="xfade-l" cx="50%" cy="45%" r="55%">
+                <stop offset="0%" stopColor="white" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </radialGradient>
+            <mask id="xmask-l">
+                <rect width="720" height="900" fill="url(#xfade-l)" />
+            </mask>
+        </defs>
+        <rect width="720" height="900" fill="url(#cross-l)" mask="url(#xmask-l)" />
+        <circle cx="620" cy="120" r="180" fill="#F97316" opacity="0.02" />
+        <circle cx="100" cy="780" r="150" fill="#3B82F6" opacity="0.015" />
+    </svg>
+);
+
+/** Same grid pattern for the right background panel */
+const AuthBgRight = ({ className = '' }) => (
+    <svg
+        viewBox="0 0 720 900"
+        xmlns="http://www.w3.org/2000/svg"
+        className={className}
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+    >
+        <defs>
+            <pattern id="cross-r" width="48" height="48" patternUnits="userSpaceOnUse">
+                <line x1="24" y1="20" x2="24" y2="28" stroke="#1F1F1F" strokeWidth="0.8" />
+                <line x1="20" y1="24" x2="28" y2="24" stroke="#1F1F1F" strokeWidth="0.8" />
+            </pattern>
+            <radialGradient id="xfade-r" cx="50%" cy="45%" r="55%">
+                <stop offset="0%" stopColor="white" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </radialGradient>
+            <mask id="xmask-r">
+                <rect width="720" height="900" fill="url(#xfade-r)" />
+            </mask>
+        </defs>
+        <rect width="720" height="900" fill="url(#cross-r)" mask="url(#xmask-r)" />
+        <circle cx="620" cy="120" r="180" fill="#F97316" opacity="0.02" />
+        <circle cx="100" cy="780" r="150" fill="#3B82F6" opacity="0.015" />
+    </svg>
+);
+
+/** Animated SAARTHI Nexus dashboard illustration */
+const AuthIllustration = () => (
+    <svg
+        viewBox="-10 -10 420 340"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-auto drop-shadow-2xl"
+        aria-label="SAARTHI Nexus Dashboard Preview"
+    >
+        <style>{`
+            @keyframes cardAppear {
+                from { opacity:0; transform:translateY(12px); }
+                to   { opacity:1; transform:translateY(0); }
+            }
+            @keyframes countUp {
+                from { opacity:0; transform:translateY(4px); }
+                to   { opacity:1; transform:translateY(0); }
+            }
+            @keyframes growBar {
+                from { transform:scaleX(0); }
+                to   { transform:scaleX(1); }
+            }
+            @keyframes badgeFloat {
+                0%,100% { transform:translateY(0); }
+                50%     { transform:translateY(-4px); }
+            }
+        `}</style>
+
+        <g style={{ animation:'cardAppear .7s ease .2s both', transformBox:'fill-box', transformOrigin:'center' }}>
+            <rect x="20" y="10" width="360" height="295" rx="16" fill="#111111" stroke="#2A2A2A" />
+            <rect x="20" y="10" width="360" height="44" rx="16" fill="#111111" stroke="#2A2A2A" />
+            <line x1="20" y1="54" x2="380" y2="54" stroke="#1F1F1F" />
+            <circle cx="44" cy="32" r="5" fill="#EF4444" opacity="0.7" />
+            <circle cx="60" cy="32" r="5" fill="#F97316" opacity="0.7" />
+            <circle cx="76" cy="32" r="5" fill="#22C55E" opacity="0.7" />
+            <text x="96" y="32" fontSize="11" fill="#525252" dominantBaseline="central">SAARTHI Nexus — Live Dashboard</text>
+
+            <rect x="34" y="70" width="96" height="52" rx="8" fill="#1A1A1A" stroke="#2A2A2A" strokeWidth="0.5" />
+            <text x="82" y="82" fontSize="8" fill="#525252" textAnchor="middle">Placement Rate</text>
+            <text x="82" y="104" fontSize="18" fontWeight="700" fill="#F97316" textAnchor="middle"
+                style={{ animation:'countUp .5s ease .8s both', transformBox:'fill-box', transformOrigin:'center' }}>95%</text>
+
+            <rect x="142" y="70" width="96" height="52" rx="8" fill="#1A1A1A" stroke="#2A2A2A" strokeWidth="0.5" />
+            <text x="190" y="82" fontSize="8" fill="#525252" textAnchor="middle">Active Drives</text>
+            <text x="190" y="104" fontSize="18" fontWeight="700" fill="#22C55E" textAnchor="middle"
+                style={{ animation:'countUp .5s ease 1s both', transformBox:'fill-box', transformOrigin:'center' }}>34</text>
+
+            <rect x="250" y="70" width="96" height="52" rx="8" fill="#1A1A1A" stroke="#2A2A2A" strokeWidth="0.5" />
+            <text x="298" y="82" fontSize="8" fill="#525252" textAnchor="middle">Avg Package</text>
+            <text x="298" y="104" fontSize="18" fontWeight="700" fill="#F5F5F5" textAnchor="middle"
+                style={{ animation:'countUp .5s ease 1.2s both', transformBox:'fill-box', transformOrigin:'center' }}>₹8.4L</text>
+
+            <text x="34" y="148" fontSize="9" fill="#525252">BRANCH-WISE PLACEMENT RATE</text>
+            {[
+                { label:'CSE', y:166, width:209, pct:'95%', delay:'1.4s' },
+                { label:'IT',  y:180, width:194, pct:'88%', delay:'1.5s' },
+                { label:'ECE', y:194, width:163, pct:'74%', delay:'1.6s' },
+                { label:'ME',  y:208, width:134, pct:'61%', delay:'1.7s' },
+                { label:'CE',  y:222, width:121, pct:'55%', delay:'1.8s' },
+            ].map(({ label, y, width, pct, delay }) => (
+                <g key={label}>
+                    <text x="34" y={y} fontSize="8" fill="#525252">{label}</text>
+                    <rect x="70" y={y - 8} width="220" height="8" rx="4" fill="#1A1A1A" />
+                    <rect x="70" y={y - 8} width={width} height="8" rx="4" fill="#F97316"
+                        style={{ transformBox:'fill-box', transformOrigin:'left center', animation:`growBar .8s ease ${delay} forwards` }} />
+                    <text x="300" y={y} fontSize="8" fill="#A3A3A3">{pct}</text>
+                </g>
+            ))}
+
+            <text x="34" y="244" fontSize="9" fill="#525252">RECENT ACTIVITY</text>
+            <circle cx="34" cy="258" r="3" fill="#22C55E" />
+            <text x="44" y="258" fontSize="9" fill="#A3A3A3" dominantBaseline="central">Infosys drive posted · 2h ago</text>
+            <circle cx="34" cy="274" r="3" fill="#F97316" />
+            <text x="44" y="274" fontSize="9" fill="#525252" dominantBaseline="central">TCS shortlist published · 5h ago</text>
+        </g>
+
+        {/* Floating badge moved to bottom to render on top (Z-index fix) */}
+        <g style={{ animation:'badgeFloat 3s ease-in-out infinite', transformBox:'fill-box', transformOrigin:'center' }}>
+            <rect x="280" y="0" width="120" height="24" rx="12" fill="#22C55E" opacity="0.12" stroke="#22C55E" strokeWidth="0.5" />
+            <circle cx="294" cy="12" r="4" fill="#22C55E" />
+            <text x="304" y="12" fontSize="9" fill="#22C55E" dominantBaseline="central" fontWeight="600">Live Placement Data</text>
+        </g>
+    </svg>
+);
+
+/** Animated success checkmark */
+const AuthSuccess = () => (
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" className="w-20 h-20" aria-label="Success">
+        <style>{`
+            @keyframes outerPulse {
+                0%   { transform:scale(1);    opacity:.5; }
+                100% { transform:scale(1.45); opacity:0; }
+            }
+            @keyframes circleGrow {
+                from { stroke-dasharray:0 176; }
+                to   { stroke-dasharray:176 0; }
+            }
+            @keyframes checkDraw {
+                from { stroke-dashoffset:40; }
+                to   { stroke-dashoffset:0; }
+            }
+            @keyframes bgFill {
+                from { opacity:0; }
+                to   { opacity:.08; }
+            }
+        `}</style>
+        <circle cx="40" cy="40" r="36" fill="none" stroke="#22C55E" strokeWidth="1" opacity="0"
+            style={{ animation:'outerPulse 1.5s ease-out .6s infinite', transformBox:'fill-box', transformOrigin:'center' }} />
+        <circle cx="40" cy="40" r="28" fill="none" stroke="#1A1A1A" strokeWidth="3" />
+        <circle cx="40" cy="40" r="28" fill="#22C55E" opacity="0"
+            style={{ animation:'bgFill .3s ease .9s forwards' }} />
+        <circle cx="40" cy="40" r="28" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round"
+            transform="rotate(-90 40 40)"
+            style={{ strokeDasharray:'0 176', animation:'circleGrow .6s cubic-bezier(.4,0,.2,1) .1s forwards' }} />
+        <path d="M26 40 L36 50 L54 30" fill="none" stroke="#22C55E" strokeWidth="3"
+            strokeLinecap="round" strokeLinejoin="round"
+            strokeDasharray="40 40"
+            style={{ strokeDashoffset:40, animation:'checkDraw .4s ease .7s forwards' }} />
+    </svg>
+);
+
+/** Actual SAARTHI Nexus Logo */
+const LogoSVG = ({ className = "" }) => (
+    <svg width="220" height="48" viewBox="0 0 220 48" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <g stroke="#F97316" strokeWidth="2" fill="#F97316">
+            <line x1="20" y1="32" x2="30" y2="16" />
+            <line x1="30" y1="16" x2="40" y2="32" />
+            <circle cx="20" cy="32" r="2.8"/>
+            <circle cx="30" cy="16" r="2.8"/>
+            <circle cx="40" cy="32" r="2.8"/>
+        </g>
+        <text x="56" y="26" style={{ fontFamily: 'var(--font-sans)' }} font-size="16" font-weight="700" fill="#F5F5F5" letter-spacing="1">SAARTHI</text>
+        <text x="56" y="40" style={{ fontFamily: 'var(--font-sans)' }} font-size="12" font-weight="300" fill="#A3A3A3" letter-spacing="0.5">Nexus</text>
+    </svg>
+);
+
+// ─── Animation Variants ───────────────────────────────────────────────────────
+
+const pageVariant = {
+    hidden: { opacity: 0, y: 24 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { type: 'spring', stiffness: 90, damping: 18, delay: 0.08 },
+    },
+};
+
+const successVariant = {
+    hidden: { opacity: 0, scale: 0.88, y: 10 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        transition: { type: 'spring', stiffness: 120, damping: 16 },
+    },
+    exit: { opacity: 0, scale: 0.92, y: -8, transition: { duration: 0.2 } },
+};
+
+const formVariant = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.2 } },
+    exit:   { opacity: 0, transition: { duration: 0.15 } },
+};
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -27,26 +252,29 @@ const Signup = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState({});
+    const [success, setSuccess] = useState(false);
 
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         if (fieldErrors[e.target.name]) {
-            const newFieldErrors = { ...fieldErrors };
-            delete newFieldErrors[e.target.name];
-            setFieldErrors(newFieldErrors);
+            setFieldErrors(prev => {
+                const next = { ...prev };
+                delete next[e.target.name];
+                return next;
+            });
         }
         setError('');
     };
 
     const validateForm = () => {
         const errors = {};
-        if (formData.fullName.trim().length < 3) errors.fullName = "Full name must be at least 3 characters";
-        if (!formData.email.includes('@')) errors.email = "Invalid email address";
-        if (formData.idNumber.trim().length < 5) errors.idNumber = "Incomplete ID number";
-        if (formData.password.length < 6) errors.password = "Password must be at least 6 characters";
-        if (formData.password !== formData.confirmPassword) errors.confirmPassword = "Passwords do not match";
+        if (formData.fullName.trim().length < 3) errors.fullName = "Too short";
+        if (!formData.email.includes('@')) errors.email = "Invalid email";
+        if (formData.idNumber.trim().length < 5) errors.idNumber = "Too short";
+        if (formData.password.length < 6) errors.password = "Min 6 chars";
+        if (formData.password !== formData.confirmPassword) errors.confirmPassword = "Mismatch";
 
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
@@ -58,7 +286,7 @@ const Signup = () => {
         setError('');
 
         if (!validateForm()) {
-            setError("Please correct the highlighted fields");
+            setError("Please fix errors");
             setLoading(false);
             return;
         }
@@ -73,205 +301,398 @@ const Signup = () => {
             const data = await response.json();
 
             if (response.ok) {
-                console.log('Account created successfully');
+                setSuccess(true);
+                await new Promise(r => setTimeout(r, 1400));
                 navigate('/login/student');
             } else {
-                const serverReason = data.reason || 'Please check your details and try again.';
-                setError(serverReason);
-
-                const lowerReason = serverReason.toLowerCase();
-                const newFieldErrors = {};
-                if (lowerReason.includes('email')) newFieldErrors.email = serverReason;
-                if (lowerReason.includes('id')) newFieldErrors.idNumber = serverReason;
-                if (lowerReason.includes('password')) newFieldErrors.password = serverReason;
-
-                setFieldErrors(prev => ({ ...prev, ...newFieldErrors }));
+                setError(data.reason || 'Signup failed');
             }
-        } catch (err) {
-            console.error('Signup error:', err);
-            setError('Could not connect to the server. Please check your internet connection.');
+        } catch {
+            setError('Connection failed');
         } finally {
             setLoading(false);
         }
     };
 
+    const filledCount = [
+        formData.fullName,
+        formData.email,
+        formData.idNumber,
+        formData.department,
+        formData.password,
+        formData.confirmPassword
+    ].filter(v => v.length > 0).length;
+    const progress = Math.round((filledCount / 6) * 100);
+
+    const inputCls = (hasError) =>
+        `w-full rounded-xl pl-10 pr-4 py-3 text-[13px] outline-none transition-all duration-150 ` +
+        (hasError
+            ? 'bg-red-500/5 border border-red-500/40 text-[#F5F5F5] placeholder:text-[#3A3A3A] focus:ring-1 focus:ring-red-500/60'
+            : 'bg-black/20 border border-white/8 text-[#F5F5F5] placeholder:text-[#3A3A3A] focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)]');
+
     return (
-        <div className="login-container">
-            <div className="login-card" style={{ maxWidth: '500px' }}>
-                <div className="login-header">
-                    <div className="login-logo">
-                        <GraduationCap size={32} />
-                    </div>
-                    <h1>Join SAARTHI</h1>
-                    <p>Create your account to start your placement journey.</p>
+        <div 
+            className="min-h-screen flex overflow-hidden relative"
+            style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)', fontFamily: 'var(--font-sans)' }}
+        >
+            {/* Full-page background (right panel grid) */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                <AuthBgRight className="absolute inset-0 w-full h-full" />
+            </div>
+
+            {/* ══════════════════ LEFT BRAND PANEL ═══════════════════════════ */}
+            <div
+                className="hidden lg:flex relative w-[48%] flex-shrink-0 flex-col min-h-screen px-16 py-12 overflow-hidden border-r"
+                style={{ backgroundColor: '#0D0D0D', borderColor: '#1A1A1A' }}
+            >
+                {/* Panel background grid */}
+                <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                    <AuthBgLeft className="absolute inset-0 w-full h-full" />
                 </div>
 
-                <form onSubmit={handleSubmit} className={error ? 'animate-shake' : ''}>
-                    {error && (
-                        <div style={{
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            borderLeft: '4px solid #ef4444',
-                            padding: '0.85rem',
-                            borderRadius: '8px',
-                            marginBottom: '1.5rem',
-                            fontSize: '0.9rem',
-                            color: '#ef4444',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.25rem'
-                        }}>
-                            <strong style={{ fontWeight: '700' }}>Signup Failed</strong>
-                            <span>{error}</span>
-                        </div>
-                    )}
-
-                    <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div className="form-group">
-                            <label>Full Name</label>
-                            <div className="input-wrapper">
-                                <User className={`input-icon ${fieldErrors.fullName ? 'error-text' : ''}`} size={18} />
-                                <input
-                                    name="fullName"
-                                    type="text"
-                                    placeholder="John Doe"
-                                    className={fieldErrors.fullName ? 'error-input' : ''}
-                                    value={formData.fullName}
-                                    onChange={handleChange}
-                                    required
-                                    style={{ paddingLeft: '2.8rem' }}
-                                />
-                            </div>
-                            {fieldErrors.fullName && <p className="error-text">{fieldErrors.fullName}</p>}
-                        </div>
-
-                        <div className="form-group">
-                            <label>ID Number</label>
-                            <div className="input-wrapper">
-                                <IdCard className={`input-icon ${fieldErrors.idNumber ? 'error-text' : ''}`} size={18} />
-                                <input
-                                    name="idNumber"
-                                    type="text"
-                                    placeholder="C2K2..."
-                                    className={fieldErrors.idNumber ? 'error-input' : ''}
-                                    value={formData.idNumber}
-                                    onChange={handleChange}
-                                    required
-                                    style={{ paddingLeft: '2.8rem' }}
-                                />
-                            </div>
-                            {fieldErrors.idNumber && <p className="error-text">{fieldErrors.idNumber}</p>}
-                        </div>
+                <div className="relative z-10 flex flex-col h-full">
+                    {/* Logo */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                        <LogoSVG className="w-auto h-12" />
                     </div>
 
-                    <div className="form-group">
-                        <label>Email Address</label>
-                        <div className="input-wrapper">
-                            <Mail className={`input-icon ${fieldErrors.email ? 'error-text' : ''}`} size={18} />
-                            <input
-                                name="email"
-                                type="email"
-                                placeholder="name@college.edu"
-                                className={fieldErrors.email ? 'error-input' : ''}
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        {fieldErrors.email && <p className="error-text">{fieldErrors.email}</p>}
-                    </div>
-
-                    <div className="form-group">
-                        <label>Department</label>
-                        <div className="input-wrapper">
-                            <BookOpen className="input-icon" size={18} />
-                            <select
-                                name="department"
-                                value={formData.department}
-                                onChange={handleChange}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.85rem 1rem 0.85rem 3rem',
-                                    background: 'var(--bg-body)',
-                                    border: '1px solid var(--border-light)',
-                                    borderRadius: '12px',
-                                    color: 'var(--text-main)',
-                                    appearance: 'none',
-                                    fontSize: '1rem'
-                                }}
-                            >
-                                <option value="CE">CE</option>
-                                <option value="IT">IT</option>
-                                <option value="AI&DS">AI&DS</option>
-                                <option value="E&CE(Electronics & Computer Engineering)">E&CE(Electronics & Computer Engineering)</option>
-                                <option value="E&TC">E&TC</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div className="form-group">
-                            <label>Password</label>
-                            <div className="input-wrapper">
-                                <Lock className={`input-icon ${fieldErrors.password ? 'error-text' : ''}`} size={18} />
-                                <input
-                                    name="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="••••••••"
-                                    className={fieldErrors.password ? 'error-input' : ''}
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                    style={{ paddingLeft: '2.8rem' }}
-                                />
-                            </div>
-                            {fieldErrors.password && <p className="error-text">{fieldErrors.password}</p>}
-                        </div>
-
-                        <div className="form-group">
-                            <label>Confirm</label>
-                            <div className="input-wrapper">
-                                <Lock className={`input-icon ${fieldErrors.confirmPassword ? 'error-text' : ''}`} size={18} />
-                                <input
-                                    name="confirmPassword"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="••••••••"
-                                    className={fieldErrors.confirmPassword ? 'error-input' : ''}
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    required
-                                    style={{ paddingLeft: '2.8rem' }}
-                                />
-                            </div>
-                            {fieldErrors.confirmPassword && <p className="error-text">{fieldErrors.confirmPassword}</p>}
-                        </div>
-                    </div>
-
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '500' }}
+                    {/* Headline + Illustration */}
+                    <div className="flex-1 flex flex-col justify-center py-12">
+                        <p
+                            className="text-[11px] font-semibold uppercase tracking-widest mb-6"
+                            style={{ color: 'var(--primary)' }}
                         >
-                            {showPassword ? "Hide Passwords" : "Show Passwords"}
-                        </button>
+                            Placement Intelligence Platform
+                        </p>
+                        <h2
+                            className="text-[44px] font-bold leading-[1.05] tracking-tighter mb-6"
+                            style={{ color: 'var(--text-main)' }}
+                        >
+                            Start your<br />
+                            placement<br />
+                            <span style={{ color: 'var(--primary)' }}>journey here.</span>
+                        </h2>
+                        <p className="text-[15px] leading-relaxed mb-12 max-w-[340px]" style={{ color: '#525252' }}>
+                            Create your account and get instant access to eligibility matching, AI guidance, and real-time placement analytics.
+                        </p>
+
+                        {/* Illustration card - Enlarged and Centered */}
+                        <div
+                            className="rounded-2xl w-full max-w-[500px] mx-auto p-4 relative mt-4 border"
+                            style={{ backgroundColor: 'var(--bg-card)', borderColor: '#2A2A2A' }}
+                        >
+                            <AuthIllustration />
+                        </div>
                     </div>
 
-                    <button type="submit" className="login-btn" disabled={loading}>
-                        {loading ? (
-                            <div className="loader-small"></div>
-                        ) : (
-                            <>
-                                Create Account <ArrowRight size={18} />
-                            </>
-                        )}
-                    </button>
-                </form>
-
-                <div className="login-footer">
-                    <p>Already have an account? <Link to="/login/student">Sign In</Link></p>
+                    {/* Stats strip */}
+                    <div className="flex-shrink-0 flex items-center pt-6 border-t" style={{ borderColor: '#1A1A1A' }}>
+                        {[
+                            { num: '1,200+', label: 'Students enrolled' },
+                            { num: '58',     label: 'Companies visited' },
+                            { num: '78%',    label: 'Placement rate'    },
+                        ].map((s, i) => (
+                            <div
+                                key={i}
+                                className={`flex-1 ${i < 2 ? 'border-r pr-4 mr-4' : ''}`}
+                                style={{ borderColor: '#1A1A1A' }}
+                            >
+                                <div
+                                    className="text-[22px] font-bold leading-none mb-1 tracking-tight"
+                                    style={{ color: 'var(--primary)' }}
+                                >
+                                    {s.num}
+                                </div>
+                                <div className="text-[11px]" style={{ color: '#525252' }}>
+                                    {s.label}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div >
-        </div >
+            </div>
+
+            {/* ══════════════════ RIGHT FORM PANEL ═══════════════════════════ */}
+            <div className="flex-1 relative z-10 flex items-start lg:items-center justify-center px-6 py-12 overflow-y-auto">
+
+                {/* Animated form card */}
+                <motion.div
+                    className="w-full max-w-[460px]"
+                    variants={pageVariant}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    <AnimatePresence mode="wait">
+
+                        {/* ── SUCCESS STATE ─────────────────────────────── */}
+                        {success ? (
+                            <motion.div
+                                key="success"
+                                variants={successVariant}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
+                                className="flex flex-col items-center justify-center py-16 text-center"
+                            >
+                                <AuthSuccess />
+                                <h2 className="text-[22px] font-bold mt-6 mb-2 tracking-tighter" style={{ color: 'var(--text-main)' }}>
+                                    Account created!
+                                </h2>
+                                <p className="text-[14px]" style={{ color: '#525252' }}>
+                                    Taking you to the login page…
+                                </p>
+                                <div className="mt-6 w-32 h-[2px] rounded-full overflow-hidden" style={{ background: '#1A1A1A' }}>
+                                    <motion.div
+                                        className="h-full rounded-full"
+                                        style={{ backgroundColor: 'var(--success)' }}
+                                        initial={{ width: '0%' }}
+                                        animate={{ width: '100%' }}
+                                        transition={{ duration: 1.2, ease: 'linear' }}
+                                    />
+                                </div>
+                            </motion.div>
+
+                        ) : (
+
+                        /* ── FORM STATE ───────────────────────────────── */
+                        <motion.div
+                            key="form"
+                            variants={formVariant}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            className="w-full"
+                        >
+                            {/* Mobile logo */}
+                            <div className="flex lg:hidden items-center gap-2 mb-8">
+                                <LogoSVG className="w-auto h-8" />
+                            </div>
+
+                            {/* Heading */}
+                            <h1
+                                className="text-[30px] font-bold tracking-tighter leading-tight mb-1"
+                                style={{ color: 'var(--text-main)' }}
+                            >
+                                Create your account
+                            </h1>
+                            <p className="text-[14px] mb-6 leading-relaxed" style={{ color: '#525252' }}>
+                                Start your placement journey with SAARTHI Nexus.
+                            </p>
+
+                            {/* Progress bar */}
+                            <div className="mb-7 p-3.5 bg-black/20 border border-white/8 rounded-xl">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: '#525252' }}>
+                                        Profile completion
+                                    </span>
+                                    <span className="text-[12px] font-bold" style={{ color: 'var(--primary)' }}>
+                                        {progress}%
+                                    </span>
+                                </div>
+                                <div className="w-full h-[3px] bg-black/40 rounded-full overflow-hidden">
+                                    <motion.div
+                                        className="h-full rounded-full"
+                                        style={{ backgroundColor: progress === 100 ? 'var(--success)' : 'var(--primary)' }}
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${progress}%` }}
+                                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                                    />
+                                </div>
+                                <div className="flex items-center gap-1 mt-2.5">
+                                    {[0,1,2,3,4,5].map(i => (
+                                        <div key={i} 
+                                            className={`flex-1 h-[1.5px] rounded-full transition-colors duration-300 ${i < filledCount ? 'bg-[var(--primary)]' : 'bg-white/5'}`}/>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Form */}
+                            <form onSubmit={handleSubmit}>
+                                {/* Error banner */}
+                                <AnimatePresence>
+                                    {error && (
+                                        <motion.div
+                                            key="err"
+                                            initial={{ opacity: 0, y: -6 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -4 }}
+                                            className="flex items-start gap-3 rounded-xl px-4 py-3 mb-5 border"
+                                            style={{ background: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.22)' }}
+                                        >
+                                            <div className="w-[3px] self-stretch rounded-full flex-shrink-0" style={{ background: '#EF4444', minHeight: 16 }} />
+                                            <div>
+                                                <p className="text-[12px] font-semibold mb-0.5" style={{ color: '#EF4444' }}>Signup failed</p>
+                                                <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(239,68,68,0.75)' }}>{error}</p>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                {/* Name + ID row */}
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#A3A3A3' }}>
+                                            Full Name
+                                        </label>
+                                        <div className="relative">
+                                            <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" style={{ color: fieldErrors.fullName ? '#EF4444' : '#525252' }} />
+                                            <input
+                                                type="text"
+                                                name="fullName"
+                                                placeholder="John Doe"
+                                                value={formData.fullName}
+                                                onChange={handleChange}
+                                                className={inputCls(!!fieldErrors.fullName)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#A3A3A3' }}>
+                                            College ID
+                                        </label>
+                                        <div className="relative">
+                                            <IdCard size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" style={{ color: fieldErrors.idNumber ? '#EF4444' : '#525252' }} />
+                                            <input
+                                                type="text"
+                                                name="idNumber"
+                                                placeholder="C2K2..."
+                                                value={formData.idNumber}
+                                                onChange={handleChange}
+                                                className={inputCls(!!fieldErrors.idNumber)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Email */}
+                                <div className="mb-4">
+                                    <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#A3A3A3' }}>
+                                        Email Address
+                                    </label>
+                                    <div className="relative">
+                                        <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" style={{ color: fieldErrors.email ? '#EF4444' : '#525252' }} />
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            placeholder="name@college.edu"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            required
+                                            className={inputCls(!!fieldErrors.email)}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Department */}
+                                <div className="mb-4">
+                                    <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#A3A3A3' }}>
+                                        Department
+                                    </label>
+                                    <div className="relative">
+                                        <BookOpen size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10 text-[#525252]" />
+                                        <select
+                                            name="department"
+                                            value={formData.department}
+                                            onChange={handleChange}
+                                            className="appearance-none w-full bg-black/20 border border-white/8 rounded-xl pl-10 pr-10 py-3 text-[13px] text-[#F5F5F5] outline-none cursor-pointer focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition-all duration-150"
+                                        >
+                                            <option value="CE">CE — Computer Engineering</option>
+                                            <option value="IT">IT — Information Technology</option>
+                                            <option value="AI&DS">AI&DS — Artificial Intelligence</option>
+                                            <option value="E&CE">E&CE — Electronics & Computer</option>
+                                            <option value="E&TC">E&TC — Electronics & Telecom</option>
+                                        </select>
+                                        <ChevronRight size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#525252] pointer-events-none rotate-90" />
+                                    </div>
+                                </div>
+
+                                {/* Password Row */}
+                                <div className="grid grid-cols-2 gap-4 mb-3">
+                                    <div>
+                                        <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#A3A3A3' }}>
+                                            Password
+                                        </label>
+                                        <div className="relative">
+                                            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" style={{ color: fieldErrors.password ? '#EF4444' : '#525252' }} />
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                name="password"
+                                                placeholder="••••••"
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                                className={inputCls(!!fieldErrors.password)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#A3A3A3' }}>
+                                            Confirm
+                                        </label>
+                                        <div className="relative">
+                                            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" style={{ color: fieldErrors.confirmPassword ? '#EF4444' : '#525252' }} />
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                name="confirmPassword"
+                                                placeholder="••••••"
+                                                value={formData.confirmPassword}
+                                                onChange={handleChange}
+                                                className={inputCls(!!fieldErrors.confirmPassword)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Show password toggle */}
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="flex items-center gap-2 mb-7 bg-transparent border-none cursor-pointer p-0 group"
+                                >
+                                    <div className="w-4 h-4 rounded border border-white/10 flex items-center justify-center transition-colors group-hover:border-white/20">
+                                        {showPassword && <div className="w-2 h-2 rounded-sm bg-[var(--primary)]" />}
+                                    </div>
+                                    <span className="text-[12px]" style={{ color: '#525252' }}>Show passwords</span>
+                                </button>
+
+                                {/* Submit */}
+                                <motion.button
+                                    type="submit"
+                                    disabled={loading}
+                                    whileHover={!loading ? { scale: 1.015 } : {}}
+                                    whileTap={!loading ? { scale: 0.975 } : {}}
+                                    className="w-full font-semibold text-[14px] py-3 rounded-xl border-none flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                    style={{ backgroundColor: 'var(--primary)', color: '#000' }}
+                                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                                >
+                                    {loading
+                                        ? <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                        : <><span>Create Account</span><ArrowRight size={15} /></>
+                                    }
+                                </motion.button>
+                            </form>
+
+                            {/* Divider */}
+                            <div className="flex items-center gap-3 my-6">
+                                <div className="flex-1 h-px" style={{ backgroundColor: '#1A1A1A' }} />
+                                <span className="text-[11px]" style={{ color: '#3A3A3A' }}>or</span>
+                                <div className="flex-1 h-px" style={{ backgroundColor: '#1A1A1A' }} />
+                            </div>
+
+                            {/* Footer */}
+                            <p className="text-[13px] text-center" style={{ color: '#525252' }}>
+                                Already have an account?{' '}
+                                <Link to="/login/student" className="font-medium transition-opacity hover:opacity-80" style={{ color: 'var(--primary)' }}>
+                                    Sign In
+                                </Link>
+                            </p>
+
+                        </motion.div>
+                        )}
+
+                    </AnimatePresence>
+                </motion.div>
+            </div>
+        </div>
     );
 };
 

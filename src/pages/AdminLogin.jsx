@@ -59,7 +59,7 @@ const AdminLogin = () => {
                     localStorage.removeItem('rememberedEmail_admin');
                 }
 
-                navigate('/');
+                navigate('/admin/dashboard');
             } else {
                 const serverError = data.error || 'Invalid admin credentials';
                 setError(serverError);

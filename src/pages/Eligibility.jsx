@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, X, BookOpen, ExternalLink } from 'lucide-react';
+import { Check, X, BookOpen, ExternalLink, ChevronRight, Sparkles, AlertTriangle, GraduationCap, Target, TrendingUp } from 'lucide-react';
 import '../styles/Eligibility.css';
 import { API_URL } from '../config';
 
@@ -16,7 +16,6 @@ const Eligibility = () => {
     const [loading, setLoading] = useState(false);
 
     // Mock Data
-    // Real Data from Placement Reports
     const companies = [
         { name: 'TCS (Mass Only)', minCgpa: 6.0, min10th: 60, min12th: 60, minAmcat: 60, requiredToppings: ['Aptitude', 'Java Basics'] },
         { name: 'Accenture', minCgpa: 6.5, min10th: 65, min12th: 65, minAmcat: 60, requiredToppings: ['Problem Solving', 'Communication'] },
@@ -51,13 +50,13 @@ const Eligibility = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    cgpa: parseFloat(cgpa),
-                    tenth_score: parseFloat(tenthScore),
-                    twelfth_score: parseFloat(twelfthScore),
-                    amcat_score: parseFloat(amcatScore),
-                    internships: parseInt(internships),
-                    backlogs: parseInt(backlogs),
-                    projects: parseInt(projects)
+                    cgpa: parseFloat(cgpa) || 0,
+                    tenth_score: parseFloat(tenthScore) || 0,
+                    twelfth_score: parseFloat(twelfthScore) || 0,
+                    amcat_score: parseFloat(amcatScore) || 0,
+                    internships: parseInt(internships) || 0,
+                    backlogs: parseInt(backlogs) || 0,
+                    projects: parseInt(projects) || 0
                 })
             });
             const data = await response.json();
@@ -72,173 +71,284 @@ const Eligibility = () => {
     };
 
     const eligibleCompanies = getEligibilityStatus().filter(c => c.eligible);
+    const probValue = aiProbability !== null ? aiProbability : Math.min((parseFloat(cgpa) || 0) * 10 + 10, 100);
+    const probColor = probValue >= 70 ? '#22C55E' : (probValue >= 40 ? '#F97316' : '#EF4444');
+    
+    // For CGPA meter
+    const cgpaVal = parseFloat(cgpa) || 0;
+    const cgpaColor = cgpaVal >= 8.0 ? '#22C55E' : (cgpaVal >= 7.0 ? '#F97316' : '#EF4444');
 
     return (
-        <div className="eligibility-page">
-            <div className="page-header">
-                <div>
-                    <h2 className="page-title">Eligibility & Recommendations</h2>
-                    <p className="page-subtitle">Check your eligibility and get AI-driven recommendations</p>
-                </div>
-            </div>
-
-            <div className="eligibility-container">
-                <div className="input-panel card">
-                    <h3>Your Profile</h3>
-
-                    <div className="form-group">
-                        <label>CGPA</label>
-                        <input
-                            type="number"
-                            step="0.1"
-                            value={cgpa}
-                            onChange={e => setCgpa(e.target.value)}
-                            className="text-input"
-                        />
+        <div className="el-page">
+            <div className="el-container">
+                
+                {/* SECTION 1 — PAGE HEADER */}
+                <div className="el-header">
+                    <div>
+                        <span className="el-overline">Placement Engine</span>
+                        <h2 className="el-title">Eligibility & Recommendations</h2>
+                        <p className="el-subtitle">Check your profile against company requirements and get AI-driven placement predictions.</p>
                     </div>
-
-                    <div className="flex gap-4">
-                        <div className="form-group flex-1">
-                            <label>10th (%)</label>
-                            <input
-                                type="number"
-                                value={tenthScore}
-                                onChange={e => setTenthScore(e.target.value)}
-                                className="text-input"
-                            />
+                    <div className="el-header-right">
+                        <div className="pill-green">
+                            <span className="dot-green"></span>
+                            {eligibleCompanies.length} Companies Eligible
                         </div>
-                        <div className="form-group flex-1">
-                            <label>12th (%)</label>
-                            <input
-                                type="number"
-                                value={twelfthScore}
-                                onChange={e => setTwelfthScore(e.target.value)}
-                                className="text-input"
-                            />
+                        <div className="pill-neutral">
+                            {companies.length} Total Tracked
                         </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label>AMCAT Score (%)</label>
-                        <input
-                            type="number"
-                            value={amcatScore}
-                            onChange={e => setAmcatScore(e.target.value)}
-                            className="text-input"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Department</label>
-                        <select
-                            value={department}
-                            onChange={e => setDepartment(e.target.value)}
-                            className="select-input"
-                        >
-                            <option value="CE">CE</option>
-                            <option value="IT">IT</option>
-                            <option value="AI&DS">AI&DS</option>
-                            <option value="E&CE(Electronics & Computer Engineering)">E&CE(Electronics & Computer Engineering)</option>
-                            <option value="E&TC">E&TC</option>
-                        </select>
-                    </div>
-
-                    <div className="flex gap-4">
-                        <div className="form-group flex-1">
-                            <label>Internships</label>
-                            <input
-                                type="number"
-                                value={internships}
-                                onChange={e => setInternships(e.target.value)}
-                                className="text-input"
-                            />
-                        </div>
-                        <div className="form-group flex-1">
-                            <label>Projects</label>
-                            <input
-                                type="number"
-                                value={projects}
-                                onChange={e => setProjects(e.target.value)}
-                                className="text-input"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Backlogs</label>
-                        <input
-                            type="number"
-                            value={backlogs}
-                            onChange={e => setBacklogs(e.target.value)}
-                            className="text-input"
-                        />
-                    </div>
-
-                    <div className="probability-section">
-                        <label>Placement Probability {aiProbability !== null && '(AI Predicted)'}</label>
-                        <div className="progress-bar-container">
-                            <div
-                                className={`progress-bar ${aiProbability !== null ? 'ai-active' : ''}`}
-                                style={{ width: `${aiProbability !== null ? aiProbability : Math.min(cgpa * 10 + 10, 100)}%` }}
-                            ></div>
-                        </div>
-                        <p className="prob-text">
-                            {aiProbability !== null ? aiProbability : Math.min(cgpa * 10 + 10, 100)}% Chance of Placement
-                        </p>
-                        <button
-                            className="btn-primary mt-3 w-full"
-                            onClick={predictPlacement}
-                            disabled={loading}
-                        >
-                            {loading ? 'Analyzing...' : 'Analyze with AI'}
-                        </button>
                     </div>
                 </div>
 
-                <div className="output-panel">
-                    <h3>Eligible Companies ({eligibleCompanies.length})</h3>
-                    <div className="companies-grid">
-                        {getEligibilityStatus().map(company => (
-                            <div key={company.name} className={`company-card ${company.eligible ? 'eligible' : 'not-eligible'}`}>
-                                <div className="company-header">
-                                    <h4>{company.name}</h4>
-                                    {company.eligible ? <Check size={18} /> : <X size={18} />}
+                {/* SECTION 2 — MAIN TWO-COLUMN LAYOUT */}
+                <div className="el-grid">
+                    
+                    {/* LEFT COLUMN — PROFILE INPUT PANEL */}
+                    <div className="el-card profile-panel">
+                        <div className="card-header">
+                            <Target size={16} color="#F97316" />
+                            <h3>Your Profile</h3>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">CGPA</label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={cgpa}
+                                onChange={e => setCgpa(e.target.value)}
+                                className="form-input"
+                                placeholder="E.g. 8.5"
+                            />
+                            <div className="inline-meter">
+                                <div 
+                                    className="inline-meter-fill" 
+                                    style={{ width: `${Math.min((cgpaVal / 10) * 100, 100)}%`, background: cgpaColor }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div className="form-row">
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">10th (%)</label>
+                                <input
+                                    type="number"
+                                    value={tenthScore}
+                                    onChange={e => setTenthScore(e.target.value)}
+                                    className="form-input"
+                                />
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">12th (%)</label>
+                                <input
+                                    type="number"
+                                    value={twelfthScore}
+                                    onChange={e => setTwelfthScore(e.target.value)}
+                                    className="form-input"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">AMCAT Score (%)</label>
+                            <input
+                                type="number"
+                                value={amcatScore}
+                                onChange={e => setAmcatScore(e.target.value)}
+                                className="form-input"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Department</label>
+                            <div className="select-wrapper">
+                                <select
+                                    value={department}
+                                    onChange={e => setDepartment(e.target.value)}
+                                    className="form-input"
+                                >
+                                    <option value="CE">CE</option>
+                                    <option value="IT">IT</option>
+                                    <option value="AI&DS">AI&DS</option>
+                                    <option value="E&CE(Electronics & Computer Engineering)">E&CE(Electronics & Computer Engineering)</option>
+                                    <option value="E&TC">E&TC</option>
+                                </select>
+                                <ChevronRight className="select-arrow" size={14} />
+                            </div>
+                        </div>
+
+                        <div className="form-row">
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Internships</label>
+                                <input
+                                    type="number"
+                                    value={internships}
+                                    onChange={e => setInternships(e.target.value)}
+                                    className="form-input"
+                                />
+                            </div>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="form-label">Projects</label>
+                                <input
+                                    type="number"
+                                    value={projects}
+                                    onChange={e => setProjects(e.target.value)}
+                                    className="form-input"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Active Backlogs</label>
+                            <input
+                                type="number"
+                                value={backlogs}
+                                onChange={e => setBacklogs(e.target.value)}
+                                className="form-input"
+                            />
+                            {parseInt(backlogs) > 0 && (
+                                <div className="warning-text">
+                                    <AlertTriangle size={12} />
+                                    <span>May affect eligibility for some companies</span>
                                 </div>
-                                <div className="criteria-list">
-                                    <span className="badge">Min CGPA: {company.minCgpa}</span>
-                                    <span className="badge">10th: {company.min10th}%</span>
-                                    <span className="badge">12th: {company.min12th}%</span>
-                                    {company.minAmcat > 0 && <span className="badge">AMCAT: {company.minAmcat}%</span>}
+                            )}
+                        </div>
+
+                        {/* PLACEMENT PROBABILITY SECTION */}
+                        <div className="prob-section">
+                            <div className="prob-header">
+                                <div className="prob-label-wrap">
+                                    <Sparkles size={13} color="#F97316" />
+                                    <span className="prob-label">AI Placement Probability</span>
                                 </div>
-                                {!company.eligible && (
-                                    <div className="gap-msg">
-                                        Critera failed: {company.reasons.join(', ')}
-                                    </div>
+                                {aiProbability !== null && (
+                                    <div className="ai-active-pill">AI Active</div>
                                 )}
                             </div>
-                        ))}
+                            
+                            <div className="prob-value" style={{ color: aiProbability !== null ? probColor : '#F5F5F5' }}>
+                                {probValue}%
+                            </div>
+                            
+                            <div className="prob-bar-track">
+                                <div 
+                                    className="prob-bar-fill" 
+                                    style={{ width: `${probValue}%`, background: probColor }}
+                                ></div>
+                            </div>
+                            <p className="prob-sub">{probValue}% estimated chance of placement</p>
+
+                            <button className="btn-primary" onClick={predictPlacement} disabled={loading}>
+                                <Sparkles size={14} color="#000" />
+                                {loading ? "Analyzing..." : "Predict with AI"}
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="recommendations card mt-4">
-                        <h3>Recommended Study Materials</h3>
-                        <div className="study-list">
-                            <div className="study-item">
-                                <BookOpen size={20} className="icon-blue" />
-                                <div>
-                                    <h4>Advanced Data Structures</h4>
-                                    <p>Recommended for Google, Microsoft</p>
-                                </div>
-                                <button className="btn-icon"><ExternalLink size={16} /></button>
+                    {/* RIGHT COLUMN — OUTPUT PANEL */}
+                    <div className="output-panel">
+                        
+                        {/* RESULTS HEADER */}
+                        <div className="results-header">
+                            <div>
+                                <div className="res-overline">Live Results</div>
+                                <h3 className="res-title">Company Eligibility Check</h3>
                             </div>
-                            <div className="study-item">
-                                <BookOpen size={20} className="icon-blue" />
-                                <div>
-                                    <h4>System Design Patterns</h4>
-                                    <p> Essential for Product Companies</p>
+                            <div className="el-header-right">
+                                <div className="pill-green">
+                                    <span className="dot-green"></span>
+                                    {eligibleCompanies.length} Eligible
                                 </div>
-                                <button className="btn-icon"><ExternalLink size={16} /></button>
+                                <div className="pill-red">
+                                    <span className="dot-red"></span>
+                                    {companies.length - eligibleCompanies.length} Not Eligible
+                                </div>
                             </div>
                         </div>
+
+                        {/* COMPANIES GRID */}
+                        <div className="el-card comp-wrapper">
+                            <div className="comp-grid">
+                                {getEligibilityStatus().map((company, index) => {
+                                    const isLastRow = index >= companies.length - (companies.length % 2 === 0 ? 2 : 1);
+                                    return (
+                                        <div 
+                                            key={company.name} 
+                                            className={`comp-card ${company.eligible ? 'eligible' : 'ineligible'}`}
+                                            style={isLastRow ? { borderBottom: 'none' } : {}}
+                                        >
+                                            <div className="comp-name-row">
+                                                <h4 className="comp-name">{company.name}</h4>
+                                                <div className={`status-badge ${company.eligible ? 'pass' : 'fail'}`}>
+                                                    {company.eligible ? 
+                                                        <Check size={12} color="#22C55E" strokeWidth={2.5} /> : 
+                                                        <X size={12} color="#EF4444" strokeWidth={2.5} />
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div className="crit-row">
+                                                <span className="crit-pill">CGPA {company.minCgpa}+</span>
+                                                <span className="crit-pill">10th {company.min10th}%</span>
+                                                <span className="crit-pill">12th {company.min12th}%</span>
+                                                {company.minAmcat > 0 && <span className="crit-pill">AMCAT {company.minAmcat}%</span>}
+                                            </div>
+
+                                            <div className="skill-row">
+                                                {company.requiredToppings.map(skill => (
+                                                    <span key={skill} className="skill-tag">{skill}</span>
+                                                ))}
+                                            </div>
+
+                                            {!company.eligible && (
+                                                <div className="fail-row">
+                                                    <AlertTriangle size={12} color="#EF4444" style={{ flexShrink: 0, marginTop: '2px' }} />
+                                                    <p className="fail-text">Failed: {company.reasons.join(' · ')}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* STUDY RECOMMENDATIONS */}
+                        <div className="el-card study-panel">
+                            <div className="study-header">
+                                <GraduationCap size={16} color="#F97316" />
+                                <div>
+                                    <p className="study-ov">Personalized</p>
+                                    <h3 className="study-title">Recommended Study Materials</h3>
+                                </div>
+                            </div>
+                            <div className="study-list">
+                                <div className="study-item">
+                                    <div className="study-icon-wrap">
+                                        <BookOpen size={16} color="#F97316" />
+                                    </div>
+                                    <div className="study-text">
+                                        <h4 className="study-item-title">Advanced Data Structures</h4>
+                                        <p className="study-item-sub">Recommended for Google, Microsoft</p>
+                                    </div>
+                                    <button className="btn-external">
+                                        <ExternalLink size={13} color="#A3A3A3" />
+                                    </button>
+                                </div>
+                                <div className="study-item">
+                                    <div className="study-icon-wrap">
+                                        <BookOpen size={16} color="#F97316" />
+                                    </div>
+                                    <div className="study-text">
+                                        <h4 className="study-item-title">System Design Patterns</h4>
+                                        <p className="study-item-sub">Essential for Product Companies</p>
+                                    </div>
+                                    <button className="btn-external">
+                                        <ExternalLink size={13} color="#A3A3A3" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

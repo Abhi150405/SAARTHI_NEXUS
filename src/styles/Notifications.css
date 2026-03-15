@@ -76,7 +76,7 @@
 
 .notif-card-history:hover {
     transform: translateX(8px);
-    border-color: rgba(79, 70, 229, 0.2);
+    border-color: rgba(249, 115, 22, 0.2);
     box-shadow: var(--shadow-md);
 }
 

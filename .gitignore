@@ -14,6 +14,7 @@ dist-ssr
 .env
 .env.*
 
+venv
 
 # Editor directories and files
 .vscode/*
@@ -30,8 +31,3 @@ backend/.env
 temp.json
 backend_log.txt
 backend/backend_log.txt
-backend/venv/
-venv/
-**/__pycache__/
-*.pyc
-*.pkl

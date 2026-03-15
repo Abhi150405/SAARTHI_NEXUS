@@ -59,7 +59,7 @@ const StudentLogin = () => {
                     localStorage.removeItem('rememberedEmail_student');
                 }
 
-                navigate('/');
+                navigate('/app/dashboard');
             } else {
                 const serverError = data.error || 'Invalid student credentials';
                 setError(serverError);

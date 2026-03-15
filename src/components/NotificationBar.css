@@ -26,7 +26,7 @@
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(79, 70, 229, 0.15);
+    border: 1px solid rgba(249, 115, 22, 0.15);
     border-radius: var(--radius-xl);
     display: flex;
     align-items: center;
@@ -37,7 +37,7 @@
 
 [data-theme='dark'] .notification-bar {
     background: rgba(15, 23, 42, 0.92);
-    border-color: rgba(79, 70, 229, 0.25);
+    border-color: rgba(249, 115, 22, 0.25);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
 }
 

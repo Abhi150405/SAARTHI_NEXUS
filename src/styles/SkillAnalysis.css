@@ -160,7 +160,7 @@
     stroke-width: 2.5;
     stroke-linecap: round;
     transition: stroke-dasharray 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: drop-shadow(0 0 4px rgba(79, 70, 229, 0.3));
+    filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.3));
 }
 
 .percentage {
@@ -242,7 +242,7 @@
 
 .toggle-btn:hover:not(.active) {
     color: var(--text-secondary);
-    background: rgba(79, 70, 229, 0.04);
+    background: rgba(249, 115, 22, 0.04);
 }
 
 /* ===== CHART ===== */
