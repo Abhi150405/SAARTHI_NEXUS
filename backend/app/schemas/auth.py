@@ -21,6 +21,9 @@ class ChangePassword(BaseModel):
 
 class ProfileUpdate(BaseModel):
     email: str
+    full_name: Optional[str] = None
+    department: Optional[str] = None
+    profile_picture: Optional[str] = None
     tenth_percentage: Optional[float] = Field(None, ge=0, le=100)
     twelfth_percentage: Optional[float] = Field(None, ge=0, le=100)
     college_cgpa: Optional[float] = Field(None, ge=0, le=10)

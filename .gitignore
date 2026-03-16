@@ -14,7 +14,16 @@ dist-ssr
 .env
 .env.*
 
-venv
+venv/
+.venv/
+env/
+.env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Editor directories and files
 .vscode/*

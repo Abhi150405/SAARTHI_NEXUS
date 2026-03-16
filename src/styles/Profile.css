@@ -82,6 +82,64 @@
     color: var(--text-main);
 }
 
+/* Avatar Section */
+.avatar-upload-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.avatar-preview-lg {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-full);
+    background: var(--bg-hover);
+    border: 2px solid var(--border-medium);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+}
+
+.avatar-placeholder-lg {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.avatar-edit-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.avatar-preview-lg:hover .avatar-edit-overlay {
+    opacity: 1;
+}
+
+.avatar-info h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.avatar-info p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
 /* Info Section */
 .info-grid {
     display: grid;
@@ -116,6 +174,47 @@
     border: 1px solid var(--border-light);
 }
 
+.info-value.readonly {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.info-input {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-main);
+    padding: 0.75rem;
+    background: var(--bg-body);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-medium);
+    transition: all var(--transition-base);
+}
+
+.info-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--bg-card);
+}
+
+.info-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: 100%;
+}
+
+.info-save-btn {
+    margin-top: auto;
+    padding: 0.75rem !important;
+    font-size: 0.9rem !important;
+}
+
+.message-banner.small {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+}
+
 .info-footer {
     display: flex;
     align-items: center;
@@ -125,6 +224,30 @@
     margin-top: auto;
     padding-top: 1rem;
     font-style: italic;
+}
+
+/* Skills & Highlights */
+.profile-skills-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.profile-skill-tag {
+    background: rgba(249, 115, 22, 0.08);
+    color: var(--primary);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(249, 115, 22, 0.15);
+}
+
+.resume-summary-box {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    border-left: 3px solid var(--primary);
 }
 
 /* Password Form */
@@ -265,11 +388,13 @@
 .academic-grid input[type="number"]::-webkit-outer-spin-button,
 .academic-grid input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
+    appearance: none;
     margin: 0;
 }
 
 .academic-grid input[type="number"] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 @media (max-width: 968px) {

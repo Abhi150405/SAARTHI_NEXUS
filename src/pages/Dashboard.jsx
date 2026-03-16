@@ -82,7 +82,7 @@ const Dashboard = () => {
   const totalPlaced = parseInt(displayData.totalPlaced) || 0;
   const avgPkg = displayData.avgPackage || '—';
   const highestPkg = displayData.highestPackage || '—';
-  const numCompanies = currentData.topCompanies?.labels?.length || 0;
+  const numCompanies = displayData.totalCompanies || 0;
 
   // Build the area chart from ALL years (multi-year trend)
   const trendData = sortedYears.map(year => {
@@ -161,7 +161,7 @@ const Dashboard = () => {
           </div>
           <div className="kpi-card">
             <Briefcase size={18} color="#F97316" />
-            <div className="kpi-number">{numCompanies}+</div>
+            <div className="kpi-number">{numCompanies}</div>
             <div className="kpi-label">Companies Visited</div>
             <div className="kpi-sub">Top recruiters in {selectedYear}</div>
           </div>

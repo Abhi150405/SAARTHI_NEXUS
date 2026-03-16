@@ -9,7 +9,18 @@ async def get_profile(email: str = Query(...)):
     db = get_database()
     student = await db['students'].find_one(
         {'email': email},
-        {'_id': 0, 'tenth_percentage': 1, 'twelfth_percentage': 1, 'college_cgpa': 1, 'amcat_score': 1}
+        {
+            '_id': 0, 
+            'full_name': 1, 
+            'department': 1, 
+            'tenth_percentage': 1, 
+            'twelfth_percentage': 1, 
+            'college_cgpa': 1, 
+            'amcat_score': 1,
+            'skills': 1,
+            'resume_summary': 1,
+            'profile_picture': 1
+        }
     )
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")

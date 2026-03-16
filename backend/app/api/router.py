@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from app.api.endpoints import auth, profile, chatbot, ml, companies, stats, notifications, experiences, admin
+from app.api.endpoints import auth, profile, chatbot, ml, companies, stats, notifications, experiences, admin, resume
 
 api_router = APIRouter()
 api_router.include_router(auth.router, tags=["auth"])
 api_router.include_router(profile.router, tags=["profile"])
+api_router.include_router(resume.router, tags=["resume"])
 api_router.include_router(chatbot.router, tags=["chatbot"])
 api_router.include_router(ml.router, tags=["ml"])
 api_router.include_router(companies.router, tags=["companies"])

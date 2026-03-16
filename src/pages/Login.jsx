@@ -322,9 +322,9 @@ const Login = ({ defaultRole = 'student' }) => {
 
                 <div className="relative z-10 flex flex-col h-full">
                     {/* Logo */}
-                    <div className="flex items-center gap-3 flex-shrink-0">
+                    <Link to="/" className="flex items-center gap-3 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
                         <LogoSVG className="w-auto h-12" />
-                    </div>
+                    </Link>
 
                     {/* Headline + Illustration */}
                     <div className="flex-1 flex flex-col justify-center py-12">
@@ -434,7 +434,7 @@ const Login = ({ defaultRole = 'student' }) => {
                             className="w-full"
                         >
                             {/* Mobile logo */}
-                            <div className="flex lg:hidden items-center gap-2 mb-8">
+                            <Link to="/" className="flex lg:hidden items-center gap-2 mb-8 cursor-pointer hover:opacity-80 transition-opacity">
                                 <div
                                     className="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-black"
                                     style={{ backgroundColor: 'var(--primary)' }}
@@ -444,7 +444,7 @@ const Login = ({ defaultRole = 'student' }) => {
                                 <span className="text-[13px] font-semibold tracking-tight" style={{ color: '#A3A3A3' }}>
                                     SAARTHI Nexus
                                 </span>
-                            </div>
+                            </Link>
 
                             {/* Heading */}
                             <h1

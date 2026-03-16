@@ -14,6 +14,8 @@ async def chat(request: Request):
         raise HTTPException(status_code=400, detail="No query provided")
 
     db = get_database()
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not initialized")
     collection = db['placement_records']
     
     # Retrieval logic (simplified for now, matching Flask)
@@ -22,16 +24,29 @@ async def chat(request: Request):
     companies = await collection.distinct("company_name")
     
     found_companies = [c for c in companies if re.search(rf"\b{re.escape(c.lower())}\b", query_lower)]
-    found_years = re.findall(r"20\d{2}", query)
+    found_years = re.findall(r"(?:20)?\d{2}-\d{2}|20\d{2}", query)
     
     context_parts = []
-    if found_companies:
-        docs = await collection.find({"company_name": {"$in": found_companies}}).sort("academic_year", -1).to_list(10)
+    query_filter = {}
+    
+    if found_companies and found_years:
+        query_filter = {"company_name": {"$in": found_companies}, "academic_year": {"$in": found_years}}
+    elif found_companies:
+        query_filter = {"company_name": {"$in": found_companies}}
+    elif found_years:
+        query_filter = {"academic_year": {"$in": found_years}}
+    
+    if query_filter:
+        docs = await collection.find(query_filter).sort([("academic_year", -1), ("salary_lpa", -1)]).to_list(20)
         for d in docs:
             hires = d['selections']['CE'] + d['selections']['IT'] + d['selections']['E&TC']
-            context_parts.append(f"Company: {d['company_name']} ({d['academic_year']}) | Salary: {d['salary_lpa']} LPA | Total Hired: {hires}")
+            context_parts.append(
+                f"Year: {d['academic_year']} | Company: {d['company_name']} | Salary: {d['salary_lpa']} LPA | "
+                f"Hired: {hires} (CE: {d['selections']['CE']}, IT: {d['selections']['IT']}, E&TC: {d['selections']['E&TC']}) | "
+                f"Criteria: {d.get('criteria', {}).get('min_cgpa', 'N/A')} CGPA"
+            )
     
-    context_string = "\n".join(context_parts) if context_parts else "PICT has excellent placements with top recruiters."
+    context_string = "\n".join(context_parts) if context_parts else "No specific database records found for this query."
     
     return StreamingResponse(
         chatbot_service.get_chat_response_stream(query, context_string),

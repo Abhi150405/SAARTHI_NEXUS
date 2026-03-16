@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, Mail, Hash, BookOpen, AlertCircle, CheckCircle2, LogOut, GraduationCap, Save } from 'lucide-react';
+import { User, Lock, Mail, Hash, BookOpen, AlertCircle, CheckCircle2, LogOut, GraduationCap, Save, Award, FileText, UploadCloud } from 'lucide-react';
 import { API_URL } from '../config';
 import '../styles/Profile.css';
 
@@ -12,6 +12,16 @@ const Profile = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+
+    const [fullName, setFullName] = useState(user.fullName || '');
+    const [department, setDepartment] = useState(user.department || '');
+    const [profilePicture, setProfilePicture] = useState(user.profilePicture || null);
+    const [infoLoading, setInfoLoading] = useState(false);
+    const [infoMessage, setInfoMessage] = useState({ type: '', text: '' });
+
+    // AI/Resume fields state (from Resume Extraction)
+    const [skills, setSkills] = useState([]);
+    const [resumeSummary, setResumeSummary] = useState('');
 
     // Academic fields state
     const [tenthPercentage, setTenthPercentage] = useState('');
@@ -33,10 +43,15 @@ const Profile = () => {
                 const res = await fetch(`${API_URL}/api/profile?email=${encodeURIComponent(user.email)}`);
                 const data = await res.json();
                 if (res.ok) {
+                    setFullName(data.full_name ?? user.fullName);
+                    setDepartment(data.department ?? user.department);
+                    setProfilePicture(data.profile_picture ?? null);
                     setTenthPercentage(data.tenth_percentage ?? '');
                     setTwelfthPercentage(data.twelfth_percentage ?? '');
                     setCollegeCgpa(data.college_cgpa ?? '');
                     setAmcatScore(data.amcat_score ?? '');
+                    setSkills(data.skills ?? []);
+                    setResumeSummary(data.resume_summary ?? '');
                 }
             } catch (err) {
                 console.error('Failed to fetch profile:', err);
@@ -91,6 +106,55 @@ const Profile = () => {
         }
     };
 
+    const handleInfoSave = async (e) => {
+        e.preventDefault();
+        setInfoLoading(true);
+        setInfoMessage({ type: '', text: '' });
+
+        try {
+            const response = await fetch(`${API_URL}/api/profile`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: user.email,
+                    full_name: fullName,
+                    department: department,
+                    profile_picture: profilePicture
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update localStorage
+                const updatedUser = { ...user, fullName, department, profilePicture };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setInfoMessage({ type: 'success', text: 'Personal info updated!' });
+            } else {
+                setInfoMessage({ type: 'error', text: data.error || 'Failed to update info' });
+            }
+        } catch (err) {
+            setInfoMessage({ type: 'error', text: 'Connection error.' });
+        } finally {
+            setInfoLoading(false);
+        }
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                setInfoMessage({ type: 'error', text: 'Image too large (Max 2MB)' });
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfilePicture(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleAcademicSave = async (e) => {
         e.preventDefault();
         setAcademicMessage({ type: '', text: '' });
@@ -123,10 +187,10 @@ const Profile = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: user.email,
-                    tenth_percentage: tenthPercentage,
-                    twelfth_percentage: twelfthPercentage,
-                    college_cgpa: collegeCgpa,
-                    amcat_score: amcatScore
+                    tenth_percentage: tenthPercentage === '' ? null : parseFloat(tenthPercentage),
+                    twelfth_percentage: twelfthPercentage === '' ? null : parseFloat(twelfthPercentage),
+                    college_cgpa: collegeCgpa === '' ? null : parseFloat(collegeCgpa),
+                    amcat_score: amcatScore === '' ? null : parseInt(amcatScore)
                 })
             });
 
@@ -166,28 +230,68 @@ const Profile = () => {
                         <User size={20} />
                         <h2>Personal Information</h2>
                     </div>
-                    <div className="info-grid">
-                        <div className="info-item">
-                            <label><User size={14} /> Full Name</label>
-                            <div className="info-value">{user.fullName}</div>
+                    
+                    <div className="avatar-upload-section">
+                        <div className="avatar-preview-lg">
+                            {profilePicture ? (
+                                <img src={profilePicture} alt="Profile" className="object-cover w-full h-full" />
+                            ) : (
+                                <div className="avatar-placeholder-lg">
+                                    {fullName?.[0] || user.fullName?.[0] || 'U'}
+                                </div>
+                            )}
+                            <label className="avatar-edit-overlay">
+                                <UploadCloud size={20} />
+                                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                            </label>
                         </div>
-                        <div className="info-item">
-                            <label><Mail size={14} /> Email Address</label>
-                            <div className="info-value">{user.email}</div>
-                        </div>
-                        <div className="info-item">
-                            <label><Hash size={14} /> ID Number</label>
-                            <div className="info-value">{user.idNumber}</div>
-                        </div>
-                        <div className="info-item">
-                            <label><BookOpen size={14} /> Department</label>
-                            <div className="info-value">{user.department}</div>
+                        <div className="avatar-info">
+                            <h3>Profile Picture</h3>
+                            <p>Recommended: Square JPG or PNG, max 2MB</p>
                         </div>
                     </div>
-                    <div className="info-footer">
-                        <AlertCircle size={14} />
-                        <span>Contact Admin to update personal information</span>
-                    </div>
+
+                    <form onSubmit={handleInfoSave} className="info-form">
+                        <div className="info-grid">
+                            <div className="info-item">
+                                <label><User size={14} /> Full Name</label>
+                                <input 
+                                    type="text" 
+                                    value={fullName} 
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    placeholder="Enter full name"
+                                    className="info-input"
+                                />
+                            </div>
+                            <div className="info-item">
+                                <label><Mail size={14} /> Email Address</label>
+                                <div className="info-value readonly">{user.email}</div>
+                            </div>
+                            <div className="info-item">
+                                <label><Hash size={14} /> ID Number</label>
+                                <div className="info-value readonly">{user.idNumber}</div>
+                            </div>
+                            <div className="info-item">
+                                <label><BookOpen size={14} /> Department</label>
+                                <input 
+                                    type="text" 
+                                    value={department} 
+                                    onChange={(e) => setDepartment(e.target.value)}
+                                    placeholder="Enter department"
+                                    className="info-input"
+                                />
+                            </div>
+                        </div>
+                        {infoMessage.text && (
+                            <div className={`message-banner ${infoMessage.type} small`}>
+                                {infoMessage.type === 'success' ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+                                <span>{infoMessage.text}</span>
+                            </div>
+                        )}
+                        <button type="submit" className="submit-btn info-save-btn" disabled={infoLoading}>
+                            {infoLoading ? 'Saving...' : 'Save Info'}
+                        </button>
+                    </form>
                 </div>
 
                 {/* Password Section */}
@@ -239,6 +343,47 @@ const Profile = () => {
                             {loading ? 'Updating...' : 'Update Password'}
                         </button>
                     </form>
+                </div>
+
+                {/* Skills & AI Highlights Card */}
+                <div className="profile-card skills-highlight-card glass">
+                    <div className="card-header">
+                        <Award size={20} className="text-[#F97316]" />
+                        <h2>Skills & AI Highlights</h2>
+                    </div>
+                    <div className="skills-content">
+                        {fetchingAcademic ? (
+                            <div className="academic-loading">Loading skills and summary...</div>
+                        ) : (
+                            <>
+                                {resumeSummary && (
+                                    <div className="resume-summary-box mb-6">
+                                        <label className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-2 block">Extracted Summary</label>
+                                        <p className="text-sm text-gray-400 italic leading-relaxed">"{resumeSummary}"</p>
+                                    </div>
+                                )}
+
+                                <label className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-3 block">Technical Arsenal</label>
+                                <div className="profile-skills-tags">
+                                    {skills.length > 0 ? (
+                                        skills.map((skill, i) => (
+                                            <span key={i} className="profile-skill-tag">{skill}</span>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-500 text-sm py-4 italic">No skills extracted yet. Upload your resume in the Resume Match section.</p>
+                                    )}
+                                </div>
+
+                                <button
+                                    className="mt-6 w-full py-2.5 rounded-xl border border-[#2A2A2A] hover:bg-[#1A1A1A] text-gray-400 text-xs font-semibold flex items-center justify-center gap-2 transition-all"
+                                    onClick={() => navigate('/app/resume')}
+                                >
+                                    <FileText size={14} />
+                                    Update from Resume
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 {/* Academic Details Section */}

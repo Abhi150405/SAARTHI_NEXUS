@@ -25,6 +25,7 @@ const mainNav = [
 ];
 
 const secondaryNav = [
+  { path: '/app/profile', label: 'My Profile', icon: UserCheck },
   { path: '/app/resume', label: 'Resume Match', icon: FileText },
   { path: '/app/help', label: 'AI Help', icon: HelpCircle },
   { path: '/app/notifications', label: 'Alerts', icon: Bell },
@@ -46,7 +47,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* HEADER */}
       <div className="sidebar-header">
-        <div className="logo-section">
+        <div className="logo-section cursor-pointer" onClick={() => { navigate('/'); onClose(); }}>
           <img src="/logo.svg" alt="SAARTHI Nexus Logo" className="brand-logo" />
         </div>
         <button className="mobile-close" onClick={onClose}>

@@ -34,8 +34,12 @@ const Topbar = () => {
                         className={`profile-trigger ${dropdownOpen ? 'active' : ''}`}
                         onClick={() => setDropdownOpen(!dropdownOpen)}
                     >
-                        <div className="user-avatar">
-                            {user.fullName?.[0] || 'U'}
+                        <div className="user-avatar overflow-hidden">
+                            {user.profilePicture ? (
+                                <img src={user.profilePicture} alt="" className="object-cover w-full h-full" />
+                            ) : (
+                                user.fullName?.[0] || 'U'
+                            )}
                         </div>
                         <div className="user-details-desktop">
                             <span className="user-name">{user.fullName}</span>
@@ -51,7 +55,7 @@ const Topbar = () => {
                                 <p className="dropdown-email">{user.email}</p>
                             </div>
                             <div className="dropdown-divider"></div>
-                            <Link to="/profile" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                            <Link to="/app/profile" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                                 <User size={16} />
                                 <span>My Profile</span>
                             </Link>

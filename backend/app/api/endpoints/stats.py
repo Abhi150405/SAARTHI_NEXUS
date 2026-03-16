@@ -39,6 +39,9 @@ async def get_placement_stats():
         ce_salaries, it_salaries, etc_salaries = [], [], []
         
         company_hires = {}
+        unique_companies = set()
+        branch_unique_companies = {"CE": set(), "IT": set(), "E&TC": set()}
+        
         for r in records:
             try:
                 s_raw = r.get('salary_lpa', 0)
@@ -53,21 +56,29 @@ async def get_placement_stats():
             it_hired = int(selections.get('IT', 0) or 0)
             etc_hired = int(selections.get('E&TC', 0) or 0)
             
-            if ce_hired > 0: ce_salaries.extend([s] * ce_hired)
-            if it_hired > 0: it_salaries.extend([s] * it_hired)
-            if etc_hired > 0: etc_salaries.extend([s] * etc_hired)
+            if ce_hired > 0: 
+                ce_salaries.extend([s] * ce_hired)
+                branch_unique_companies["CE"].add(r.get('company_name'))
+            if it_hired > 0: 
+                it_salaries.extend([s] * it_hired)
+                branch_unique_companies["IT"].add(r.get('company_name'))
+            if etc_hired > 0: 
+                etc_salaries.extend([s] * etc_hired)
+                branch_unique_companies["E&TC"].add(r.get('company_name'))
             
             c_name = r.get('company_name', 'Unknown')
+            unique_companies.add(c_name)
             company_hires[c_name] = company_hires.get(c_name, 0) + ce_hired + it_hired + etc_hired
         
         sorted_companies = sorted(company_hires.items(), key=lambda x: x[1], reverse=True)[:5]
         
-        def format_branch_stats(stats_dict, count):
+        def format_branch_stats(stats_dict, count, branch_companies):
             return {
                 "totalPlaced": str(count),
                 "avgPackage": stats_dict['avg'],
                 "medianPackage": stats_dict['median'],
-                "highestPackage": stats_dict['highest']
+                "highestPackage": stats_dict['highest'],
+                "totalCompanies": len(branch_companies)
             }
 
         yearly_data[year] = {
@@ -75,15 +86,16 @@ async def get_placement_stats():
             "medianPackage": get_stats(salaries)['median'],
             "highestPackage": get_stats(salaries)['highest'],
             "totalPlaced": str(totalPlaced),
+            "totalCompanies": len(unique_companies),
             "deptDistribution": [compCount, itCount, etcCount],
             "topCompanies": {
                  "labels": [c[0] for c in sorted_companies], 
                  "data": [c[1] for c in sorted_companies]
             },
             "branchStats": {
-                "CE": format_branch_stats(get_stats(ce_salaries), compCount),
-                "IT": format_branch_stats(get_stats(it_salaries), itCount),
-                "E&TC": format_branch_stats(get_stats(etc_salaries), etcCount)
+                "CE": format_branch_stats(get_stats(ce_salaries), compCount, branch_unique_companies["CE"]),
+                "IT": format_branch_stats(get_stats(it_salaries), itCount, branch_unique_companies["IT"]),
+                "E&TC": format_branch_stats(get_stats(etc_salaries), etcCount, branch_unique_companies["E&TC"])
             }
         }
         

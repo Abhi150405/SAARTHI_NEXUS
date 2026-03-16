@@ -73,10 +73,14 @@ const HeroSection = ({ isAuthenticated, user }) => {
                     </motion.p>
 
                     {/* Terminal pill */}
-                    <motion.div variants={itemVariants} className="inline-flex items-center gap-3 px-5 py-3 rounded-lg bg-[#111111]/80 backdrop-blur-sm border border-[#2A2A2A] font-mono text-[13px] mb-8">
+                    <motion.div 
+                        variants={itemVariants} 
+                        onClick={() => isAuthenticated ? handleNavigation('/app/dashboard') : navigate('/login/student')}
+                        className="inline-flex items-center gap-3 px-5 py-3 rounded-lg bg-[#111111]/80 backdrop-blur-sm border border-[#2A2A2A] font-mono text-[13px] mb-8 cursor-pointer hover:border-[#F97316]/30 hover:bg-[#111111] transition-all duration-300 group"
+                    >
                         <span className="terminal-cursor w-2 h-4 bg-[#F97316] animate-pulse rounded-sm inline-block"></span>
-                        <span className="text-[#F97316]">→</span>
-                        <span className="text-[#A3A3A3]">Login with your college credentials</span>
+                        <span className="text-[#F97316] group-hover:translate-x-1 transition-transform duration-300">→</span>
+                        <span className="text-[#A3A3A3] group-hover:text-[#F5F5F5] transition-colors duration-300">Login with your college credentials</span>
                     </motion.div>
 
                     {/* CTA Buttons */}

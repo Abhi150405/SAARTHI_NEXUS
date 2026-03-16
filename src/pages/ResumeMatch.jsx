@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { UploadCloud, FileText, CheckCheck, AlertCircle, Briefcase } from 'lucide-react';
+import { UploadCloud, FileText, CheckCheck, AlertCircle, Briefcase, Zap, Star, Layout, BookOpen, Clock } from 'lucide-react';
+import { API_URL } from '../config';
 import '../styles/ResumeMatch.css';
 
 const ResumeMatch = () => {
     const [file, setFile] = useState(null);
     const [analyzing, setAnalyzing] = useState(false);
     const [result, setResult] = useState(null);
+    const [error, setError] = useState(null);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     const handleDrop = (e) => {
         e.preventDefault();
@@ -13,43 +16,61 @@ const ResumeMatch = () => {
         if (droppedFile) setFile(droppedFile);
     };
 
-    const analyzeResume = () => {
-        if (!file) return;
+    const handleFileUpload = async () => {
+        if (!file || !user.email) return;
+
         setAnalyzing(true);
-        // Mock analysis delay
-        setTimeout(() => {
-            setAnalyzing(false);
-            setResult({
-                score: 78,
-                matchPercentage: 82,
-                missingKeywords: ['Kubernetes', 'Microservices', 'GraphQL'],
-                tips: [
-                    'Add more quantifiable achievements in your experience.',
-                    'Include "Kubernetes" in your skills section.',
-                    'Format your education section more clearly.'
-                ],
-                recommendedCompanies: [
-                    { name: 'TCS', role: 'System Engineer', match: 92 },
-                    { name: 'Accenture', role: 'App Developer', match: 88 },
-                    { name: 'Capgemini', role: 'Analyst', match: 85 }
-                ]
+        setError(null);
+        setResult(null);
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('email', user.email);
+
+        try {
+            const response = await fetch(`${API_URL}/api/upload-resume`, {
+                method: 'POST',
+                body: formData,
             });
-        }, 2000);
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setResult(data.analysis);
+                // Also update local storage with new skills if needed, 
+                // but better to let profile page fetch it
+            } else {
+                setError(data.detail || 'Analysis failed. Please try again.');
+            }
+        } catch (err) {
+            setError('Connection error. Please check if backend is running.');
+            console.error('Resume upload error:', err);
+        } finally {
+            setAnalyzing(false);
+        }
     };
 
     return (
-        <div className="resume-match-page">
+        <div className="resume-match-page animate-fade-in">
             <div className="page-header">
-                <div>
-                    <h2 className="page-title">Resume & JD Matcher</h2>
-                    <p className="page-subtitle">Optimize your resume for Applicant Tracking Systems (ATS)</p>
+                <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-[#F97316]/10 border border-[#F97316]/20">
+                        <Zap size={24} className="text-[#F97316]" />
+                    </div>
+                    <div>
+                        <h2 className="page-title">AI Skill Extractor</h2>
+                        <p className="page-subtitle">Upload your resume to automatically extract skills and update your profile</p>
+                    </div>
                 </div>
             </div>
 
-            <div className="match-container">
+            <div className="match-container mt-8">
                 <div className="upload-section">
-                    <div className="card full-height">
-                        <h3>Upload Resume</h3>
+                    <div className="card full-height glass-premium">
+                        <div className="flex items-center gap-2 mb-6">
+                            <UploadCloud size={20} className="text-[#F97316]" />
+                            <h3 className="text-lg font-bold">Resume Upload</h3>
+                        </div>
 
                         <div
                             className={`dropzone ${file ? 'has-file' : ''}`}
@@ -58,99 +79,133 @@ const ResumeMatch = () => {
                         >
                             {file ? (
                                 <div className="file-preview">
-                                    <FileText size={48} className="icon-primary" />
-                                    <p className="file-name">{file.name}</p>
-                                    <button className="btn-text" onClick={() => { setFile(null); setResult(null); }}>Remove</button>
+                                    <div className="relative">
+                                        <FileText size={64} className="text-[#F97316]" />
+                                        <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-[#111]">
+                                            <CheckCheck size={12} className="text-white" />
+                                        </div>
+                                    </div>
+                                    <p className="file-name font-mono">{file.name}</p>
+                                    <button className="btn-text hover:text-red-500" onClick={() => { setFile(null); setResult(null); setError(null); }}>
+                                        Remove File
+                                    </button>
                                 </div>
                             ) : (
-                                <div className="upload-placeholder">
-                                    <UploadCloud size={48} className="icon-muted" />
-                                    <p>Drag & drop your resume here</p>
-                                    <span className="small-text">or click to browse (PDF, DOCX)</span>
-                                    <input
-                                        type="file"
-                                        className="file-input"
-                                        onChange={(e) => setFile(e.target.files[0])}
-                                    />
+                                <div className="upload-placeholder flex flex-col items-center">
+                                    <div className="w-16 h-16 rounded-2xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center mb-4">
+                                        <UploadCloud size={32} className="text-[#F97316]" />
+                                    </div>
+                                    <p className="text-gray-200 font-semibold mb-1">Drag & drop your resume here</p>
+                                    <p className="text-gray-500 text-sm mb-4">Supports PDF, DOCX or TXT (Max 5MB)</p>
+                                    
+                                    <div className="px-6 py-2.5 rounded-xl bg-[#F97316] text-black text-sm font-bold shadow-lg shadow-[#F97316]/20 transition-all">
+                                        Browse from Device
+                                    </div>
                                 </div>
+                            )}
+                            {!file && (
+                                <input
+                                    type="file"
+                                    className="file-input"
+                                    accept=".pdf,.docx,.txt"
+                                    onChange={(e) => setFile(e.target.files[0])}
+                                />
                             )}
                         </div>
 
-                        <div className="form-group mt-4">
-                            <label>Target Company / Job Description</label>
-                            <select className="select-input">
-                                <option>Google - Software Engineer</option>
-                                <option>Amazon - SDE I</option>
-                                <option>Microsoft - Data Scientist</option>
-                            </select>
-                        </div>
+                        {error && (
+                            <div className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-500 text-sm">
+                                <AlertCircle size={16} />
+                                <span>{error}</span>
+                            </div>
+                        )}
 
                         <button
-                            className="btn btn-primary full-width-btn"
-                            onClick={analyzeResume}
+                            className="btn btn-primary full-width-btn mt-6"
+                            onClick={handleFileUpload}
                             disabled={!file || analyzing}
                         >
-                            {analyzing ? 'Analyzing...' : 'Analyze Resume'}
+                            {analyzing ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin mr-2" />
+                                    Extracting Skills...
+                                </>
+                            ) : (
+                                <>
+                                    <Zap size={18} />
+                                    Start AI Extraction
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
 
                 <div className="result-section">
                     {result ? (
-                        <div className="analysis-results">
-                            <div className="score-overview">
-                                <div className="card score-box">
-                                    <h4>ATS Score</h4>
-                                    <div className={`score-circle ${result.score > 75 ? 'good' : 'average'}`}>
-                                        <span>{result.score}</span>
-                                    </div>
+                        <div className="analysis-results space-y-6">
+                            <div className="card glass-premium animate-fade-in">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Star size={20} className="text-[#F97316]" />
+                                    <h3 className="text-lg font-bold">Extracted Skills</h3>
                                 </div>
-                                <div className="card score-box">
-                                    <h4>Match %</h4>
-                                    <div className="score-circle">
-                                        <span>{result.matchPercentage}%</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="card mt-4">
-                                <h3><Briefcase size={20} className="icon-blue" /> Target Companies for You</h3>
-                                <div className="companies-list">
-                                    {result.recommendedCompanies.map((c, i) => (
-                                        <div key={i} className="company-match-item">
-                                            <div className="company-info">
-                                                <h4>{c.name}</h4>
-                                                <p>{c.role}</p>
-                                            </div>
-                                            <div className="match-tag">{c.match}% Match</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="card mt-4">
-                                <h3><AlertCircle size={20} className="icon-warn" /> Missing Keywords</h3>
                                 <div className="keywords-list">
-                                    {result.missingKeywords.map(kw => (
-                                        <span key={kw} className="keyword-tag">{kw}</span>
+                                    {result.skills.map((kw, i) => (
+                                        <span key={i} className="keyword-tag">{kw}</span>
                                     ))}
                                 </div>
                             </div>
 
-                            <div className="card mt-4">
-                                <h3><CheckCheck size={20} className="icon-success" /> Improvement Tips</h3>
-                                <ul className="tips-list">
-                                    {result.tips.map((tip, i) => (
-                                        <li key={i}>{tip}</li>
+                            <div className="card glass-premium animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Layout size={20} className="text-[#3B82F6]" />
+                                    <h3 className="text-lg font-bold">Profile Summary</h3>
+                                </div>
+                                <p className="text-gray-400 text-sm leading-relaxed italic">
+                                    "{result.summary}"
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="card glass-premium animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Clock size={16} className="text-[#F97316]" />
+                                        <h4 className="font-bold text-sm">Experience</h4>
+                                    </div>
+                                    <p className="text-2xl font-bold text-[#F97316]">{result.experience_years} <span className="text-xs uppercase text-gray-500">Years</span></p>
+                                </div>
+                                <div className="card glass-premium animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <BookOpen size={16} className="text-[#22C55E]" />
+                                        <h4 className="font-bold text-sm">Education</h4>
+                                    </div>
+                                    <p className="text-sm font-medium text-white truncate">{result.education}</p>
+                                </div>
+                            </div>
+
+                            <div className="card glass-premium animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Briefcase size={20} className="text-yellow-500" />
+                                    <h3 className="text-lg font-bold">Key Achievements</h3>
+                                </div>
+                                <ul className="space-y-3">
+                                    {result.key_achievements.map((item, i) => (
+                                        <li key={i} className="flex items-start gap-3 text-sm text-gray-400">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[#F97316] mt-1.5 shrink-0" />
+                                            {item}
+                                        </li>
                                     ))}
                                 </ul>
                             </div>
                         </div>
                     ) : (
-                        <div className="empty-state card center-content">
-                            <FileText size={64} className="icon-muted" />
-                            <h3>Ready to Optimize?</h3>
-                            <p>Upload your resume and select a job description to see how well you match.</p>
+                        <div className="empty-state card glass-premium center-content min-h-[400px]">
+                            <div className="p-6 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] mb-6">
+                                <FileText size={48} className="text-[#2A2A2A]" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">AI Analysis Ready</h3>
+                            <p className="max-w-[280px] mx-auto text-gray-500 text-sm">
+                                Upload your resume to see the power of AI extraction. Your technical skills, experience and achievements will be automatically populated.
+                            </p>
                         </div>
                     )}
                 </div>

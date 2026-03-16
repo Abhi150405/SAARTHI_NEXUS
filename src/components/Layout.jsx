@@ -23,12 +23,18 @@ const Layout = () => {
                         >
                             <Menu size={24} />
                         </button>
-                        <div className="logo-text-mobile">
+                        <Link to="/" className="logo-text-mobile">
                             SAARTHI NEXUS
-                        </div>
+                        </Link>
                     </div>
-                    <Link to="/profile" className="mobile-profile-link">
-                        <div className="mobile-avatar">{user.fullName?.[0] || 'U'}</div>
+                    <Link to="/app/profile" className="mobile-profile-link">
+                        <div className="mobile-avatar overflow-hidden">
+                            {user.profilePicture ? (
+                                <img src={user.profilePicture} alt="" className="object-cover w-full h-full" />
+                            ) : (
+                                user.fullName?.[0] || 'U'
+                            )}
+                        </div>
                     </Link>
                 </div>
             </header>

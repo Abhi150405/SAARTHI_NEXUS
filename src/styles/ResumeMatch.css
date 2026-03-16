@@ -123,6 +123,15 @@
     box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
 }
 
+.dropzone:hover .px-6.py-2\.5 {
+    transform: scale(1.05);
+    background: #ea580c;
+}
+
+.dropzone:active .px-6.py-2\.5 {
+    transform: scale(0.95);
+}
+
 .empty-state {
     height: 100%;
     display: flex;

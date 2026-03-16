@@ -1,4 +1,5 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import logging
 import os
 import re
@@ -6,7 +7,8 @@ from app.core.config import settings
 
 class ChatbotService:
     def __init__(self):
-        self.model_gen = None
+        self.client = None
+        self.model_name = "gemini-flash-latest"
         self.initialize_gemini()
 
     def initialize_gemini(self):
@@ -15,47 +17,64 @@ class ChatbotService:
             try:
                 import certifi
                 os.environ['SSL_CERT_FILE'] = certifi.where()
-                genai.configure(api_key=api_key)
-                
-                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-                preferred_models = ['models/gemini-1.5-flash', 'models/gemini-1.5-pro', 'models/gemini-pro']
-                
-                chosen_model = next((pm for pm in preferred_models if pm in available_models), None)
-                if not chosen_model and available_models:
-                    chosen_model = available_models[0]
-                    
-                if chosen_model:
-                    self.model_gen = genai.GenerativeModel(
-                        model_name=chosen_model.replace('models/', ''),
-                        generation_config={
-                            "temperature": 0.4,
-                            "top_p": 0.95,
-                            "top_k": 40,
-                            "max_output_tokens": 2048,
-                        }
-                    )
+                self.client = genai.Client(api_key=api_key)
             except Exception as e:
                 logging.error(f"Gemini Initialization Error: {e}")
 
     async def get_chat_response_stream(self, query: str, context_string: str):
-        if not self.model_gen:
+        if not self.client:
             yield "I'm having trouble connecting to my AI core."
             return
 
         is_hii = query.strip().lower() == "hii"
-        intro_instruction = "Start your response with 'Hello! I am Saarthi, the Official AI Placement Assistant for PICT.' and then ask how you can help." if is_hii else "CRITICAL: DO NOT start your response with an introduction. Answer the question directly."
+        intro_instruction = "Start your response with 'Hello! I am Saarthi, the Official AI Placement Assistant for PICT.' and then ask how you can help." if is_hii else "CRITICAL: Answer the question ONLY using the provided Context Data. Do not use outside knowledge."
 
         prompt = (
             f"You are Saarthi, the Official AI Placement Assistant for PICT. "
-            f"{intro_instruction} "
-            f"Context Data: {context_string}. "
-            f"User: {query}. "
-            f"Instructions: Respond in paragraphs, bold key points with <b> and </b>. Use bullet points (•) only if needed."
+            f"STRICT RULE: You must base your answer ONLY on the Context Data provided below. "
+            f"If the Context Data is 'No specific database records found for this query.' or if the information required to answer the question is not present in the Context Data, "
+            f"clearly state that you don't have that information in your database and suggest the user to contact the T&P cell for more details. "
+            f"DO NOT make up any numbers or facts not present in the Context Data. "
+            f"\n\nContext Data:\n{context_string}\n\n"
+            f"User Query: {query}\n\n"
+            f"{intro_instruction}\n"
+            f"Instructions: Respond in a professional and concise manner. Bold key metrics like salary or hiring counts with <b> and </b>. Use bullet points (•) for lists."
         )
 
-        response = self.model_gen.generate_content(prompt, stream=True)
-        for chunk in response:
-            if hasattr(chunk, 'text') and chunk.text:
-                yield chunk.text
+        try:
+            config = types.GenerateContentConfig(
+                temperature=0.4,
+                top_p=0.95,
+                top_k=40,
+                max_output_tokens=2048,
+            )
+            
+            # Try gemini-flash-latest for better quota availability
+            model_to_use = "gemini-flash-latest"
+            
+            try:
+                response = self.client.models.generate_content_stream(
+                    model=model_to_use,
+                    contents=prompt,
+                    config=config
+                )
+                for chunk in response:
+                    if chunk.text:
+                        yield chunk.text
+            except Exception as first_err:
+                logging.warning(f"Primary model {model_to_use} failed: {first_err}. Trying fallback...")
+                # Fallback to gemini-flash-latest if 1.5-flash fails
+                fallback_model = "gemini-flash-latest"
+                response = self.client.models.generate_content_stream(
+                    model=fallback_model,
+                    contents=prompt,
+                    config=config
+                )
+                for chunk in response:
+                    if chunk.text:
+                        yield chunk.text
+        except Exception as e:
+            logging.error(f"Gemini Streaming Error: {e}")
+            yield "Sorry, I encountered an error while processing your request."
 
 chatbot_service = ChatbotService()
