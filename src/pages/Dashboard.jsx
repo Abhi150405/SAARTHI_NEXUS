@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, ArrowRight, Users, Briefcase, TrendingUp, DollarSign, Building2, Clock, Award, ChevronRight, Filter } from 'lucide-react';
+import { Download, ArrowRight, Users, Briefcase, TrendingUp, IndianRupee, Building2, Clock, Award, ChevronRight, Filter } from 'lucide-react';
 import { 
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer 
 } from 'recharts';
@@ -172,7 +172,7 @@ const Dashboard = () => {
             <div className="kpi-sub">{selectedYear} · {selectedBranch === 'All' ? 'Overall' : selectedBranch}</div>
           </div>
           <div className="kpi-card">
-            <DollarSign size={18} color="#F97316" />
+            <IndianRupee size={18} color="#F97316" />
             <div className="kpi-number">{highestPkg}</div>
             <div className="kpi-label">Highest Package</div>
             <div className="kpi-sub">{selectedYear} · {selectedBranch === 'All' ? 'Overall' : selectedBranch}</div>

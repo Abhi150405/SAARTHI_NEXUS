@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-    Search, Building, Calendar, DollarSign, BookOpen, 
+    Search, Building, Calendar, IndianRupee, BookOpen, 
     ChevronRight, Users, TrendingUp, Award, Layers, 
     BarChart2, CalendarDays, SlidersHorizontal, ArrowUpDown 
 } from 'lucide-react';
@@ -422,7 +422,7 @@ const CompanyRecords = () => {
                                                     {/* Col 2 */}
                                                     <td>
                                                         <span className="tb-pkg">
-                                                            <DollarSign size={12} color="#F97316" />
+                                                            <IndianRupee size={12} color="#F97316" />
                                                             {h.salary}
                                                         </span>
                                                     </td>
