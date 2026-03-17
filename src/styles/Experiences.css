@@ -640,3 +640,52 @@
   font-size: 0.95rem;
   font-weight: 500;
 }
+
+.input-group {
+  margin-bottom: 1.25rem;
+  position: relative; /* Added for suggestions positioning */
+}
+
+/* ===== SEARCHABLE COMPANY SUGGESTIONS ===== */
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 4px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.suggestion-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.suggestion-item:hover {
+  background: var(--bg-body);
+  color: var(--primary);
+  padding-left: 1.25rem;
+}
+
+.suggestion-item:not(:last-child) {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

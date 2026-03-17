@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     MessageSquare,
     Send,
@@ -25,7 +25,7 @@ const Experiences = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [feedbackSearch, setFeedbackSearch] = useState('');
 
-    // Form states (only for interview experiences - students can submit these)
+    // Form states
     const [interviewForm, setInterviewForm] = useState({
         student_name: '',
         company_name: '',
@@ -36,10 +36,22 @@ const Experiences = () => {
         status: 'Selected'
     });
 
+    const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
+    const [filteredCompaniesSuggestions, setFilteredCompaniesSuggestions] = useState([]);
     const [successMessage, setSuccessMessage] = useState('');
+    const suggestionsRef = useRef(null);
 
     useEffect(() => {
         fetchInitialData();
+        
+        // Click outside listener for suggestions
+        const handleClickOutside = (event) => {
+            if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+                setShowCompanySuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const fetchInitialData = async () => {
@@ -52,7 +64,6 @@ const Experiences = () => {
             const expData = await expRes.json();
             setExperiences(expData);
 
-            // Fetch all company feedback (admin-published)
             const fbRes = await fetch(`${API_URL}/api/company-feedback`);
             const fbData = await fbRes.json();
             setFeedbacks(fbData);
@@ -83,12 +94,34 @@ const Experiences = () => {
                     suggestions: '',
                     status: 'Selected'
                 });
+                setShowCompanySuggestions(false);
                 fetchInitialData();
                 setTimeout(() => setSuccessMessage(''), 3000);
             }
         } catch (error) {
             console.error('Error submitting experience:', error);
         }
+    };
+
+    const handleCompanyInputChange = (e) => {
+        const val = e.target.value;
+        setInterviewForm({ ...interviewForm, company_name: val });
+        
+        if (val.trim() === '') {
+            setFilteredCompaniesSuggestions([]);
+            setShowCompanySuggestions(false);
+        } else {
+            const filtered = companies.filter(c => 
+                c.company.toLowerCase().includes(val.toLowerCase())
+            );
+            setFilteredCompaniesSuggestions(filtered);
+            setShowCompanySuggestions(true);
+        }
+    };
+
+    const selectCompanySuggestion = (companyName) => {
+        setInterviewForm({ ...interviewForm, company_name: companyName });
+        setShowCompanySuggestions(false);
     };
 
     const filteredExperiences = experiences.filter(exp =>
@@ -181,18 +214,34 @@ const Experiences = () => {
                                         placeholder="Anonymous"
                                     />
                                 </div>
-                                <div className="input-group">
+                                <div className="input-group" ref={suggestionsRef}>
                                     <label><Building size={14} /> Company</label>
-                                    <select
+                                    <input
+                                        type="text"
                                         required
                                         value={interviewForm.company_name}
-                                        onChange={(e) => setInterviewForm({ ...interviewForm, company_name: e.target.value })}
-                                    >
-                                        <option value="">Choose...</option>
-                                        {companies.map((c, i) => (
-                                            <option key={i} value={c.company}>{c.company}</option>
-                                        ))}
-                                    </select>
+                                        onChange={handleCompanyInputChange}
+                                        onFocus={() => {
+                                            if (interviewForm.company_name.trim() !== '') {
+                                                setShowCompanySuggestions(true);
+                                            }
+                                        }}
+                                        placeholder="Type company name..."
+                                        autoComplete="off"
+                                    />
+                                    {showCompanySuggestions && filteredCompaniesSuggestions.length > 0 && (
+                                        <div className="suggestions-list">
+                                            {filteredCompaniesSuggestions.map((c, i) => (
+                                                <div 
+                                                    key={i} 
+                                                    className="suggestion-item"
+                                                    onClick={() => selectCompanySuggestion(c.company)}
+                                                >
+                                                    {c.company}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div className="form-grid">
