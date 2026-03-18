@@ -12,7 +12,8 @@ import {
   Bell,
   Info,
   LogOut,
-  X
+  X,
+  PlusCircle
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -22,6 +23,7 @@ const mainNav = [
   { path: '/app/eligibility', label: 'Eligibility', icon: UserCheck },
   { path: '/app/records', label: 'Placement Records', icon: Building2 },
   { path: '/app/experiences', label: 'Community', icon: MessageSquare },
+  { path: '/app/add-experience', label: 'Add Experience', icon: PlusCircle },
 ];
 
 const secondaryNav = [

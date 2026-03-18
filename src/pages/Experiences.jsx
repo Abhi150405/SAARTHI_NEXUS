@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     MessageSquare,
-    Send,
-    Building,
     User,
     Calendar,
     Award,
     Search,
-    PlusCircle,
     TrendingUp,
     Quote,
     BarChart3,
     ClipboardList
 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import '../styles/Experiences.css';
 import { API_URL } from '../config';
 
@@ -25,33 +23,8 @@ const Experiences = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [feedbackSearch, setFeedbackSearch] = useState('');
 
-    // Form states
-    const [interviewForm, setInterviewForm] = useState({
-        student_name: '',
-        company_name: '',
-        role: '',
-        year: '2024-25',
-        experience: '',
-        suggestions: '',
-        status: 'Selected'
-    });
-
-    const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
-    const [filteredCompaniesSuggestions, setFilteredCompaniesSuggestions] = useState([]);
-    const [successMessage, setSuccessMessage] = useState('');
-    const suggestionsRef = useRef(null);
-
     useEffect(() => {
         fetchInitialData();
-        
-        // Click outside listener for suggestions
-        const handleClickOutside = (event) => {
-            if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
-                setShowCompanySuggestions(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const fetchInitialData = async () => {
@@ -73,55 +46,6 @@ const Experiences = () => {
             console.error('Error fetching data:', error);
             setLoading(false);
         }
-    };
-
-    const handleInterviewSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await fetch(`${API_URL}/api/interview-experience`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(interviewForm)
-            });
-            if (response.ok) {
-                setSuccessMessage('Experience shared successfully!');
-                setInterviewForm({
-                    student_name: '',
-                    company_name: '',
-                    role: '',
-                    year: '2024-25',
-                    experience: '',
-                    suggestions: '',
-                    status: 'Selected'
-                });
-                setShowCompanySuggestions(false);
-                fetchInitialData();
-                setTimeout(() => setSuccessMessage(''), 3000);
-            }
-        } catch (error) {
-            console.error('Error submitting experience:', error);
-        }
-    };
-
-    const handleCompanyInputChange = (e) => {
-        const val = e.target.value;
-        setInterviewForm({ ...interviewForm, company_name: val });
-        
-        if (val.trim() === '') {
-            setFilteredCompaniesSuggestions([]);
-            setShowCompanySuggestions(false);
-        } else {
-            const filtered = companies.filter(c => 
-                c.company.toLowerCase().includes(val.toLowerCase())
-            );
-            setFilteredCompaniesSuggestions(filtered);
-            setShowCompanySuggestions(true);
-        }
-    };
-
-    const selectCompanySuggestion = (companyName) => {
-        setInterviewForm({ ...interviewForm, company_name: companyName });
-        setShowCompanySuggestions(false);
     };
 
     const filteredExperiences = experiences.filter(exp =>
@@ -196,103 +120,9 @@ const Experiences = () => {
                 </button>
             </div>
 
-            {successMessage && <div className="success-banner animate-bounce-in">{successMessage}</div>}
-
             {activeTab === 'interview' ? (
-                /* ========== INTERVIEW EXPERIENCES TAB ========== */
                 <div className="content-layout">
-                    <aside className="form-section card">
-                        <form onSubmit={handleInterviewSubmit}>
-                            <h3><PlusCircle className="icon-primary" /> Share Your Steps</h3>
-                            <div className="form-grid">
-                                <div className="input-group">
-                                    <label><User size={14} /> Name</label>
-                                    <input
-                                        type="text"
-                                        value={interviewForm.student_name}
-                                        onChange={(e) => setInterviewForm({ ...interviewForm, student_name: e.target.value })}
-                                        placeholder="Anonymous"
-                                    />
-                                </div>
-                                <div className="input-group" ref={suggestionsRef}>
-                                    <label><Building size={14} /> Company</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={interviewForm.company_name}
-                                        onChange={handleCompanyInputChange}
-                                        onFocus={() => {
-                                            if (interviewForm.company_name.trim() !== '') {
-                                                setShowCompanySuggestions(true);
-                                            }
-                                        }}
-                                        placeholder="Type company name..."
-                                        autoComplete="off"
-                                    />
-                                    {showCompanySuggestions && filteredCompaniesSuggestions.length > 0 && (
-                                        <div className="suggestions-list">
-                                            {filteredCompaniesSuggestions.map((c, i) => (
-                                                <div 
-                                                    key={i} 
-                                                    className="suggestion-item"
-                                                    onClick={() => selectCompanySuggestion(c.company)}
-                                                >
-                                                    {c.company}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="form-grid">
-                                <div className="input-group">
-                                    <label><Award size={14} /> Target Role</label>
-                                    <input
-                                        type="text"
-                                        value={interviewForm.role}
-                                        onChange={(e) => setInterviewForm({ ...interviewForm, role: e.target.value })}
-                                        placeholder="e.g. SDE"
-                                    />
-                                </div>
-                                <div className="input-group">
-                                    <label><Calendar size={14} /> Outcome</label>
-                                    <select
-                                        value={interviewForm.status}
-                                        onChange={(e) => setInterviewForm({ ...interviewForm, status: e.target.value })}
-                                    >
-                                        <option value="Selected">Selected ✅</option>
-                                        <option value="Rejected">Rejected ❌</option>
-                                        <option value="In Progress">In Progress ⏳</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="input-group">
-                                <label>The Interview Experience</label>
-                                <textarea
-                                    required
-                                    rows="4"
-                                    value={interviewForm.experience}
-                                    onChange={(e) => setInterviewForm({ ...interviewForm, experience: e.target.value })}
-                                    placeholder="Rounds, coding questions, difficulty..."
-                                />
-                            </div>
-                            <div className="input-group">
-                                <label>Golden Advice for Juniors</label>
-                                <textarea
-                                    required
-                                    rows="3"
-                                    value={interviewForm.suggestions}
-                                    onChange={(e) => setInterviewForm({ ...interviewForm, suggestions: e.target.value })}
-                                    placeholder="What should they focus on?"
-                                />
-                            </div>
-                            <button type="submit" className="submit-btn">
-                                <Send size={18} /> Share Wisdom
-                            </button>
-                        </form>
-                    </aside>
-
-                    <main className="display-section">
+                    <main className="display-section full-width-display">
                         <div className="search-controls">
                             <div className="search-input-wrapper">
                                 <Search className="search-icon" size={18} />
@@ -323,7 +153,12 @@ const Experiences = () => {
                                     </div>
                                     <div className="card-content">
                                         <h5>The Journey</h5>
-                                        <p>{exp.experience}</p>
+                                        <div
+                                            className="ql-rendered"
+                                            dangerouslySetInnerHTML={{
+                                                __html: DOMPurify.sanitize(exp.experience)
+                                            }}
+                                        />
 
                                         <div className="suggestion-box">
                                             <strong><TrendingUp size={14} /> Pro-Tip:</strong>

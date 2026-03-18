@@ -11,6 +11,7 @@ import ResumeMatch from './pages/ResumeMatch';
 import Help from './pages/Help';
 import AboutUs from './pages/AboutUs';
 import Experiences from './pages/Experiences';
+import AddExperience from './pages/AddExperience';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import Signup from './pages/Signup';
@@ -98,6 +99,7 @@ function App() {
           <Route path="eligibility" element={<Eligibility />} />
           <Route path="records" element={<CompanyRecords />} />
           <Route path="experiences" element={<Experiences />} />
+          <Route path="add-experience" element={<AddExperience />} />
           <Route path="resume" element={<ResumeMatch />} />
           <Route path="help" element={<Help />} />
           <Route path="about" element={<AboutUs />} />
