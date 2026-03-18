@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, LogOut, Settings, Shield, ChevronDown } from 'lucide-react';
+import { User, LogOut, Shield, ChevronDown } from 'lucide-react';
 import '../styles/Topbar.css';
 
 const Topbar = () => {
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const user = JSON.parse(localStorage.getItem('user') || '{"fullName": "User"}');
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -26,8 +27,12 @@ const Topbar = () => {
         navigate('/');
     };
 
+    // Don't show the topbar at all for unauthenticated users (public dashboard)
+    if (!isAuthenticated) return null;
+
     return (
         <div className="topbar">
+            <div></div>
             <div className="topbar-right">
                 <div className="profile-wrapper" ref={dropdownRef}>
                     <button
@@ -79,3 +84,5 @@ const Topbar = () => {
 };
 
 export default Topbar;
+
+

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User, Building, Award, Calendar, Send, PlusCircle } from 'lucide-react';
-import RichTextEditor from '../components/RichTextEditor';
+import '@toast-ui/editor/dist/toastui-editor.css';
+import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
+import { Editor } from '@toast-ui/react-editor';
 import { API_URL } from '../config';
-import DOMPurify from 'dompurify';
 import '../styles/Experiences.css';
 
 const AddExperience = () => {
@@ -11,12 +12,16 @@ const AddExperience = () => {
     const [filteredCompaniesSuggestions, setFilteredCompaniesSuggestions] = useState([]);
     const [successMessage, setSuccessMessage] = useState('');
     const suggestionsRef = useRef(null);
+    const editorRef = useRef(null);
 
     const [interviewForm, setInterviewForm] = useState({
         student_name: '',
         company_name: '',
         role: '',
         year: '2024-25',
+        branch: 'CE',
+        graduation_year: '2025',
+        rounds: '3',
         experience: '',
         suggestions: '',
         status: 'Selected'
@@ -47,8 +52,19 @@ const AddExperience = () => {
     const handleInterviewSubmit = async (e) => {
         e.preventDefault();
         try {
-            const sanitizedExperience = DOMPurify.sanitize(interviewForm.experience);
-            const payload = { ...interviewForm, experience: sanitizedExperience };
+            const payload = { 
+                ...interviewForm,
+                created_at: new Date().toISOString(),
+                formatted_date: new Intl.DateTimeFormat('en-IN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZoneName: 'short'
+                }).format(new Date())
+            };
 
             const response = await fetch(`${API_URL}/api/interview-experience`, {
                 method: 'POST',
@@ -62,11 +78,17 @@ const AddExperience = () => {
                     company_name: '',
                     role: '',
                     year: '2024-25',
+                    branch: 'CE',
+                    graduation_year: '2025',
+                    rounds: '3',
                     experience: '',
                     suggestions: '',
                     status: 'Selected'
                 });
                 setShowCompanySuggestions(false);
+                if (editorRef.current) {
+                    editorRef.current.getInstance().setMarkdown('');
+                }
                 setTimeout(() => setSuccessMessage(''), 3000);
             }
         } catch (error) {
@@ -164,6 +186,41 @@ const AddExperience = () => {
                                 />
                             </div>
                             <div className="input-group">
+                                <label><Calendar size={14} /> Branch & Batch</label>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <select
+                                        style={{ flex: 1 }}
+                                        value={interviewForm.branch}
+                                        onChange={(e) => setInterviewForm({ ...interviewForm, branch: e.target.value })}
+                                    >
+                                        <option value="CE">CE</option>
+                                        <option value="IT">IT</option>
+                                        <option value="EnTC">EnTC</option>
+                                        <option value="AIDS">AI&DS</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        style={{ flex: 1 }}
+                                        value={interviewForm.graduation_year}
+                                        onChange={(e) => setInterviewForm({ ...interviewForm, graduation_year: e.target.value })}
+                                        placeholder="Grad. Year (e.g. 2025)"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="form-grid">
+                            <div className="input-group">
+                                <label><PlusCircle size={14} /> Interview Rounds</label>
+                                <input
+                                    type="number"
+                                    required
+                                    value={interviewForm.rounds}
+                                    onChange={(e) => setInterviewForm({ ...interviewForm, rounds: e.target.value })}
+                                    placeholder="Number of rounds (e.g. 3)"
+                                />
+                            </div>
+                            <div className="input-group">
                                 <label><Calendar size={14} /> Outcome</label>
                                 <select
                                     value={interviewForm.status}
@@ -177,12 +234,31 @@ const AddExperience = () => {
                         </div>
 
                         <div className="input-group quill-input-group">
-                            <label>The Interview / OA Experience</label>
-                            <RichTextEditor
-                                value={interviewForm.experience}
-                                onChange={(html) => setInterviewForm({ ...interviewForm, experience: html })}
-                                placeholder="Describe the rounds, coding questions asked, and overall difficulty..."
-                                className="exp-rte"
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <label style={{ margin: 0 }}>The Interview / OA Experience</label>
+                                <a 
+                                    href="#/app/template" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    style={{ fontSize: '13px', color: '#3B82F6', textDecoration: 'none', fontWeight: 500 }}
+                                >
+                                    Short on ideas?
+                                </a>
+                            </div>
+                            <Editor
+                                ref={editorRef}
+                                initialValue={interviewForm.experience}
+                                previewStyle="vertical"
+                                height="400px"
+                                initialEditType="markdown"
+                                useCommandShortcut={true}
+                                hideModeSwitch={true}
+                                theme="dark"
+                                onChange={() => {
+                                    if (editorRef.current) {
+                                        setInterviewForm({ ...interviewForm, experience: editorRef.current.getInstance().getMarkdown() });
+                                    }
+                                }}
                             />
                         </div>
 

@@ -14,9 +14,14 @@ async def add_interview_experience(request: Request):
         "company_name": data['company_name'],
         "role": data.get('role', 'N/A'),
         "year": data.get('year', '2024-25'),
+        "branch": data.get('branch', 'CE'),
+        "graduation_year": data.get('graduation_year', ''),
+        "rounds": data.get('rounds', ''),
         "experience": data['experience'],
-        "suggestions": data['suggestions'],
+        "suggestions": data.get('suggestions', ''),
         "status": data.get('status', 'N/A'),
+        "created_at": data.get('created_at', pd.Timestamp.now().isoformat()),
+        "formatted_date": data.get('formatted_date', ''),
         "date": pd.Timestamp.now().isoformat()
     }
     result = await db['interview_experience'].insert_one(experience_record)
@@ -30,6 +35,18 @@ async def get_interview_experiences(company: str = Query(None)):
     for exp in experiences:
         exp['_id'] = str(exp['_id'])
     return experiences
+
+@router.get("/interview-experience/{exp_id}")
+async def get_interview_experience_by_id(exp_id: str):
+    db = get_database()
+    try:
+        exp = await db['interview_experience'].find_one({"_id": ObjectId(exp_id)})
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid ID format")
+    if not exp:
+        raise HTTPException(status_code=404, detail="Experience not found")
+    exp['_id'] = str(exp['_id'])
+    return exp
 
 @router.post("/company-feedback", status_code=201)
 async def add_company_feedback(request: Request):

@@ -9,7 +9,7 @@ export default defineConfig({
     host: true,
   },
   optimizeDeps: {
-    include: ['dompurify'],
+    include: ['dompurify', 'recharts'],
   },
 })
 

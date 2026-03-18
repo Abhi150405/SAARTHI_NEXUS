@@ -28,7 +28,33 @@
     padding: 0 16px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
     gap: 10px;
+}
+
+.sidebar-toggle-trigger {
+    background: transparent;
+    border: none;
+    color: #525252;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 150ms ease;
+}
+
+.sidebar-toggle-trigger:hover {
+    background: #1A1A1A;
+    color: #A3A3A3;
 }
 
 .logo-section {
@@ -272,5 +298,72 @@
 
     .sidebar-header {
         justify-content: space-between;
+    }
+}
+
+/* === COLLAPSED STATE === */
+.sidebar.collapsed {
+    width: 70px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 0;
+}
+
+.sidebar.collapsed .brand-logo {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-header-top {
+    justify-content: center;
+    gap: 0;
+}
+
+.sidebar.collapsed .sidebar-toggle-trigger {
+    padding: 8px;
+}
+
+.sidebar.collapsed .mobile-close {
+    display: none;
+}
+
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px;
+}
+
+.sidebar.collapsed .nav-item span {
+    display: none;
+}
+
+.sidebar.collapsed .nav-item svg {
+    margin: 0;
+}
+
+.sidebar.collapsed .user-details {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-footer {
+    padding: 12px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar.collapsed .user-info {
+    justify-content: center;
+    gap: 0;
+}
+
+.sidebar.collapsed .logout-icon-btn {
+    display: none;
+}
+
+/* Tooltip on hover if collapsed (optional, but let's keep it simple for now) */
+@media (min-width: 1025px) {
+    .sidebar {
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }

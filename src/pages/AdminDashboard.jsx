@@ -15,11 +15,8 @@ import {
     Send,
     Edit2,
     Trash2,
-    X,
-    ArrowUpDown,
-    Eye,
-    ChevronUp,
-    ChevronDown
+    ChevronDown,
+    Menu
 } from 'lucide-react';
 import {
     Chart as ChartJS,
@@ -419,9 +416,10 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className={`admin-dashboard-root ${sidebarOpen ? 'sidebar-open' : ''}`}>
+        <div className={`admin-dashboard-root ${sidebarOpen ? 'sidebar-open' : 'admin-sidebar-collapsed'}`}>
             {sidebarOpen && <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
-            <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
+            {/* Admin Sidebar */}
+            <aside className={`admin-sidebar ${sidebarOpen ? 'open' : 'collapsed'}`}>
                 <div className="admin-sidebar-header">
                     <div className="admin-logo-box">
                         <ShieldCheck size={24} />
@@ -498,12 +496,18 @@ const AdminDashboard = () => {
 
             <main className="admin-main">
                 <header className="admin-top-bar">
-                    <button className="admin-menu-toggle" onClick={() => setSidebarOpen(true)}>
-                        <Activity size={24} strokeWidth={2.5} />
-                    </button>
-                    <div className="admin-search-box">
-                        <Search size={18} />
-                        <input type="text" placeholder="Search records, students, or companies..." />
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <button
+                            className="admin-menu-toggle"
+                            style={{ display: 'flex' }}
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
+                            <Menu size={24} />
+                        </button>
+                        <div className="admin-search-box">
+                            <Search size={18} color="var(--admin-text-muted)" />
+                            <input type="text" placeholder="Search for applications, companies or students..." />
+                        </div>
                     </div>
 
                     <div className="admin-user-actions">
@@ -613,6 +617,8 @@ const AdminDashboard = () => {
                                                                         parseFloat(String(yearData.branchStats[k].avgPackage).replace(/[^0-9.]/g, '')) || 0
                                                                     ) : [],
                                                                      backgroundColor: '#F97316',
+                                                                     borderColor: '#F97316',
+                                                                     borderWidth: 1
                                                                 },
                                                                 {
                                                                     label: `Highest Package (LPA) - ${latestYearKey}`,
@@ -620,14 +626,32 @@ const AdminDashboard = () => {
                                                                         parseFloat(String(yearData.branchStats[k].highestPackage).replace(/[^0-9.]/g, '')) || 0
                                                                     ) : [],
                                                                      backgroundColor: '#FB923C',
+                                                                     borderColor: '#FB923C',
+                                                                     borderWidth: 1
                                                                 }
                                                             ]
                                                         }}
                                                         options={{
                                                             responsive: true,
                                                             maintainAspectRatio: false,
-                                                            plugins: { legend: { position: 'top' } },
-                                                            scales: { y: { beginAtZero: true, title: { display: true, text: 'LPA' } } }
+                                                            plugins: {
+                                                                legend: {
+                                                                    position: 'top',
+                                                                    labels: { color: '#A3A3A3', font: { size: 11, weight: '600' } }
+                                                                }
+                                                            },
+                                                            scales: {
+                                                                y: {
+                                                                    beginAtZero: true,
+                                                                    title: { display: true, text: 'LPA', color: '#A3A3A3' },
+                                                                    ticks: { color: '#737373' },
+                                                                    grid: { color: 'rgba(255,255,255,0.05)' }
+                                                                },
+                                                                x: {
+                                                                    ticks: { color: '#737373' },
+                                                                    grid: { display: false }
+                                                                }
+                                                            }
                                                         }}
                                                     />
                                                 );

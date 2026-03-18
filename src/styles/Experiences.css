@@ -1,4 +1,4 @@
-﻿.experiences-page {
+.experiences-page {
   padding-bottom: 3rem;
   animation: fadeInUp 0.4s ease-out;
 }
@@ -301,6 +301,144 @@
   background: linear-gradient(to bottom, #ef4444, #dc2626);
 }
 
+/* === PREMIUM CARD STYLES === */
+.experience-card.premium-card {
+  padding: 1.25rem 1.5rem;
+}
+
+/* User info row at top */
+.card-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.card-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.card-user-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.card-user-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.card-sub-metadata {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Body section */
+.card-body {
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.card-title-line {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.card-badges-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.badge-sep {
+  color: var(--border-medium);
+  font-weight: 300;
+}
+
+/* Content section */
+.card-content-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.content-intro {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.intro-icon {
+  font-size: 0.9rem;
+}
+
+.content-snippet {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.read-more-btn {
+  background: transparent;
+  border: none;
+  color: #3B82F6;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: opacity 0.2s;
+}
+
+.read-more-btn:hover {
+  opacity: 0.75;
+}
+
+/* Footer timestamp */
+.card-footer {
+  margin-top: 0.85rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.card-timestamp {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Old card parts (still used in other areas) */
 .card-top {
   display: flex;
   justify-content: space-between;
@@ -943,4 +1081,3 @@
 .ql-rendered p {
   margin: 0.2rem 0;
 }
- 

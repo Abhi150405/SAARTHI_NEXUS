@@ -9,14 +9,24 @@ const HeroSection = ({ isAuthenticated, user }) => {
 
     const handleNavigation = (path) => {
         if (isAuthenticated) {
-            // If user is admin and trying to go to general dashboard, send to admin dashboard
+            // Admins have their own dashboard
             if (user?.role === 'admin' && path === '/app/dashboard') {
                 navigate('/admin/dashboard');
             } else {
                 navigate(path);
             }
         } else {
+            // Only dashboard is public — everything else needs signup
             navigate('/signup');
+        }
+    };
+
+    // View Analytics is always public → goes straight to dashboard
+    const handleViewAnalytics = () => {
+        if (user?.role === 'admin') {
+            navigate('/admin/dashboard');
+        } else {
+            navigate('/app/dashboard');
         }
     };
 
@@ -72,10 +82,10 @@ const HeroSection = ({ isAuthenticated, user }) => {
                         SAARTHI Nexus centralizes every part of college placements — from eligibility filtering to AI-guided interview prep.
                     </motion.p>
 
-                    {/* Terminal pill */}
+                    {/* Terminal pill — always goes to analytics (public) */}
                     <motion.div 
                         variants={itemVariants} 
-                        onClick={() => isAuthenticated ? handleNavigation('/app/dashboard') : navigate('/login/student')}
+                        onClick={handleViewAnalytics}
                         className="inline-flex items-center gap-3 px-5 py-3 rounded-lg bg-[#111111]/80 backdrop-blur-sm border border-[#2A2A2A] font-mono text-[13px] mb-8 cursor-pointer hover:border-[#F97316]/30 hover:bg-[#111111] transition-all duration-300 group"
                     >
                         <span className="terminal-cursor w-2 h-4 bg-[#F97316] animate-pulse rounded-sm inline-block"></span>
@@ -85,9 +95,11 @@ const HeroSection = ({ isAuthenticated, user }) => {
 
                     {/* CTA Buttons */}
                     <motion.div variants={itemVariants} className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                        <button onClick={() => handleNavigation('/app/dashboard')} className="btn btn-primary">
+                        {/* View Analytics — always public, no auth needed */}
+                        <button onClick={handleViewAnalytics} className="btn btn-primary">
                             View Analytics <BarChart2 size={15} />
                         </button>
+                        {/* Protected buttons → redirects to /signup if not logged in */}
                         <button onClick={() => handleNavigation('/app/eligibility')} className="btn btn-outline">
                             Check Eligibility <CheckCircle size={15} />
                         </button>

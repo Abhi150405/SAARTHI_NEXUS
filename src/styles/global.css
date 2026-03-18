@@ -190,6 +190,10 @@
     position: relative;
 }
 
+.main-content.collapsed {
+    margin-left: 70px;
+}
+
 /* Subtle ambient glow behind content */
 .main-content::before {
     content: '';

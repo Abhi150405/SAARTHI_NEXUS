@@ -26,24 +26,28 @@ class ChatbotService:
             yield "I'm having trouble connecting to my AI core."
             return
 
-        is_hii = query.strip().lower() == "hii"
-        intro_instruction = "Start your response with 'Hello! I am Saarthi, the Official AI Placement Assistant for PICT.' and then ask how you can help." if is_hii else "CRITICAL: Answer the question ONLY using the provided Context Data. Do not use outside knowledge."
-
+        is_hii = query.strip().lower() in ["hii", "hi", "hello", "hey"]
+        
+        # Determine instruction based on whether we have database context
+        has_context = context_string != "No specific database records found for this query."
+        
         prompt = (
             f"You are Saarthi, the Official AI Placement Assistant for PICT. "
-            f"STRICT RULE: You must base your answer ONLY on the Context Data provided below. "
-            f"If the Context Data is 'No specific database records found for this query.' or if the information required to answer the question is not present in the Context Data, "
-            f"clearly state that you don't have that information in your database and suggest the user to contact the T&P cell for more details. "
-            f"DO NOT make up any numbers or facts not present in the Context Data. "
-            f"\n\nContext Data:\n{context_string}\n\n"
-            f"User Query: {query}\n\n"
-            f"{intro_instruction}\n"
-            f"Instructions: Respond in a professional and concise manner. Bold key metrics like salary or hiring counts with <b> and </b>. Use bullet points (•) for lists."
+            f"Your goal is to provide 100% ACCURATE information about PICT placements using the provided Database Context when available. "
+            f"\n\n--- DATABASE CONTEXT ---\n{context_string}\n--- END CONTEXT ---\n\n"
+            f"USER QUERY: {query}\n\n"
+            f"RULES:\n"
+            f"1. IF the USER QUERY asks for PICT-specific stats (salary, company names, hiring numbers) and the information is in the DATABASE CONTEXT, you MUST provide it exactly as listed. 100% accuracy is required.\n"
+            f"2. IF the information is NOT in the DATABASE CONTEXT, or for general queries (interview tips, resume advice, career paths), use your general AI knowledge to be as helpful as possible.\n"
+            f"3. NEVER make up or guess PICT-specific numbers, years, or company details if they aren't in the provided context.\n"
+            f"4. Always maintain a professional and encouraging tone.\n"
+            f"5. Start your response with a friendly greeting if the user said 'hi' or similar.\n"
+            f"\nFormatting: Use <b>bold</b> for all numbers, company names, and salary figures. Use bullet points (•) for lists."
         )
 
         try:
             config = types.GenerateContentConfig(
-                temperature=0.4,
+                temperature=0.5,  # Lower temperature for better factual consistency
                 top_p=0.95,
                 top_k=40,
                 max_output_tokens=2048,

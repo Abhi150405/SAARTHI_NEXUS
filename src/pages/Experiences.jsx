@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     MessageSquare,
     User,
@@ -10,11 +11,13 @@ import {
     BarChart3,
     ClipboardList
 } from 'lucide-react';
-import DOMPurify from 'dompurify';
 import '../styles/Experiences.css';
 import { API_URL } from '../config';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const Experiences = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('interview');
     const [companies, setCompanies] = useState([]);
     const [experiences, setExperiences] = useState([]);
@@ -136,37 +139,67 @@ const Experiences = () => {
                         </div>
 
                         <div className="list-container">
-                            {filteredExperiences.length > 0 ? filteredExperiences.map((exp, i) => (
-                                <div key={i} className={`experience-card ${exp.status === 'Rejected' ? 'rejected' : ''} animate-fade-in`}>
-                                    <div className="card-top">
-                                        <div className="company-meta">
-                                            <h4>{exp.company_name}</h4>
-                                            <div className="chips-row">
-                                                <div className="chip"><User size={14} /> {exp.student_name || 'Anonymous'}</div>
-                                                <div className="chip"><Award size={14} /> {exp.role}</div>
-                                                <div className="chip"><Calendar size={14} /> {exp.year}</div>
+                            {filteredExperiences.length > 0 ? filteredExperiences.map((exp, i) => {
+                                const initial = exp.student_name ? exp.student_name.charAt(0).toLowerCase() : 'u';
+                                const displayDate = exp.formatted_date || (exp.created_at ? new Intl.DateTimeFormat('en-IN', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    timeZoneName: 'short'
+                                }).format(new Date(exp.created_at)) : '');
+
+                                return (
+                                    <div key={i} className={`experience-card premium-card ${exp.status === 'Rejected' ? 'rejected' : ''} animate-fade-in`}>
+                                        <div className="card-user-info">
+                                            <div className="card-avatar" style={{ background: '#5B6BC8' }}>{initial}</div>
+                                            <div className="card-user-metadata">
+                                                <div className="card-user-name">{exp.student_name || 'Anonymous'}</div>
+                                                <div className="card-sub-metadata">
+                                                    <span>🎓 {exp.branch || 'CE'} {exp.graduation_year || '2025'}</span> • 
+                                                    <span> 🏢 {exp.company_name}</span> • 
+                                                    <span> 💼 {exp.role}</span> • 
+                                                    <span> 👁️ {Math.floor(Math.random() * 20) + 1} Reads</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <span className={`status-badge ${exp.status.toLowerCase().replace(' ', '')}`}>
-                                            {exp.status}
-                                        </span>
-                                    </div>
-                                    <div className="card-content">
-                                        <h5>The Journey</h5>
-                                        <div
-                                            className="ql-rendered"
-                                            dangerouslySetInnerHTML={{
-                                                __html: DOMPurify.sanitize(exp.experience)
-                                            }}
-                                        />
 
-                                        <div className="suggestion-box">
-                                            <strong><TrendingUp size={14} /> Pro-Tip:</strong>
-                                            <p>{exp.suggestions}</p>
+                                        <div className="card-body">
+                                            <div className="card-title-line">
+                                                🏢 {exp.company_name} Interview Experience | 🤵 {exp.role}
+                                            </div>
+                                            <div className="card-badges-line">
+                                                <span className="badge-item">🎓 <strong>Batch:</strong> {exp.year || '2024'}</span>
+                                                <span className="badge-sep">|</span>
+                                                <span className="badge-item">🏫 <strong>Branch:</strong> {exp.branch || 'CE'}</span>
+                                                <span className="badge-sep">|</span>
+                                                <span className="badge-item">🔁 <strong>Rounds:</strong> {exp.rounds || '2'}</span>
+                                            </div>
+
+                                            <div className="card-content-section">
+                                                <div className="content-intro">
+                                                    <span className="intro-icon">📝</span> Application Process
+                                                </div>
+                                                <div className="content-snippet">
+                                                    {exp.experience?.length > 150 ? exp.experience.substring(0, 150) + "..." : exp.experience}
+                                                </div>
+                                                <button 
+                                                    className="read-more-btn"
+                                                    onClick={() => navigate(`/app/experience/${exp._id}`)}
+                                                >
+                                                    Read More...
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="card-footer">
+                                            <div className="card-timestamp">{displayDate}</div>
                                         </div>
                                     </div>
-                                </div>
-                            )) : <div className="empty-msg">No experiences match your search.</div>}
+                                );
+                            }) : <div className="empty-msg">No experiences match your search.</div>}
                         </div>
                     </main>
                 </div>

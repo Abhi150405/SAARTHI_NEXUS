@@ -4,14 +4,18 @@ import { Menu } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Chatbot from './Chatbot';
 import NotificationBar from './NotificationBar';
-import Topbar from './Topbar';
 
 const Layout = () => {
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+    const toggleSidebar = () => {
+        setSidebarCollapsed(!sidebarCollapsed);
+    };
+
     return (
-        <div className="layout-root">
+        <div className={`layout-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
             <NotificationBar />
             {/* Mobile Header */}
             <header className="mobile-header">
@@ -39,7 +43,12 @@ const Layout = () => {
                 </div>
             </header>
 
-            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+            <Sidebar 
+                isOpen={sidebarOpen} 
+                onClose={() => setSidebarOpen(false)} 
+                isCollapsed={sidebarCollapsed}
+                onToggleSidebar={toggleSidebar}
+            />
 
             {/* Overlay for mobile */}
             {sidebarOpen && (
@@ -49,8 +58,7 @@ const Layout = () => {
                 />
             )}
 
-            <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
-                <Topbar />
+            <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}>
                 <div className="container">
                     <Outlet />
                 </div>

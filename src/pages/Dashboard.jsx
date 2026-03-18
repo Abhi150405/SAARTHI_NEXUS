@@ -189,7 +189,7 @@ const Dashboard = () => {
                 <div className="chart-title">Placement Trend — Total Students Placed</div>
               </div>
             </div>
-            <div className="chart-area">
+            <div className="chart-area" style={{ minWidth: 0 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trendData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                   <defs>
