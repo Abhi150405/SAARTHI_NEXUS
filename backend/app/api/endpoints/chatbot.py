@@ -10,6 +10,8 @@ router = APIRouter()
 async def chat(request: Request):
     data = await request.json()
     query = data.get('query', '')
+    is_first_message = data.get('is_first_message', False)
+    
     if not query:
         raise HTTPException(status_code=400, detail="No query provided")
 
@@ -49,7 +51,7 @@ async def chat(request: Request):
     context_string = "\n".join(context_parts) if context_parts else "No specific database records found for this query."
     
     return StreamingResponse(
-        chatbot_service.get_chat_response_stream(query, context_string),
+        chatbot_service.get_chat_response_stream(query, context_string, is_first_message),
         media_type="text/plain"
     )
     # Note: Flask had some headers like X-Accel-Buffering, which can be added if needed via custom response

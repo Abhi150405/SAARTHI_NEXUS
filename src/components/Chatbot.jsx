@@ -21,10 +21,22 @@ const Chatbot = () => {
         scrollToBottom();
     }, [messages]);
 
+    const formatMarkdown = (text) => {
+        if (!text) return "";
+        let html = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        html = html.replace(/__(.*?)__/g, '<b>$1</b>');
+        html = html.replace(/\*(.*?)\*/g, '<i>$1</i>');
+        // Handle markdown bullet points (- item or * item at start of lines)
+        html = html.replace(/^\s*[-*]\s+/gm, '• ');
+        return html;
+    };
+
     const handleSend = async () => {
         if (!input.trim()) return;
 
         const userMsg = input;
+        const isFirst = messages.filter(m => m.type === 'user').length === 0;
+
         setMessages(prev => [...prev, { type: 'user', text: userMsg }]);
         setInput('');
         setLoading(true);
@@ -33,40 +45,57 @@ const Chatbot = () => {
             const response = await fetch(`${API_URL}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: userMsg })
+                body: JSON.stringify({ query: userMsg, is_first_message: isFirst })
             });
 
             if (!response.body) throw new Error('No response body');
 
-            // Add placeholder for bot message
-            setMessages(prev => [...prev, { type: 'bot', text: '' }]);
+            // Add placeholder for bot message (source unknown until first chunk)
+            setMessages(prev => [...prev, { type: 'bot', text: '', source: null }]);
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let accumulatedResponse = '';
+            let detectedSource = null;
+            let sourceMarkerHandled = false;
 
-            setLoading(false); // Stop showing "Thinking" once streaming starts
+            setLoading(false);
 
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
 
-                const chunk = decoder.decode(value, { stream: true });
+                let chunk = decoder.decode(value, { stream: true });
+
+                // ── Parse the hidden [SOURCE:xxx] marker from the first chunk ──
+                if (!sourceMarkerHandled) {
+                    const sourceMatch = chunk.match(/^\[SOURCE:(ollama|gemini)\]/);
+                    if (sourceMatch) {
+                        detectedSource = sourceMatch[1];          // 'ollama' or 'gemini'
+                        chunk = chunk.replace(/^\[SOURCE:(ollama|gemini)\]/, ''); // strip it
+                    }
+                    sourceMarkerHandled = true;
+                }
+
                 accumulatedResponse += chunk;
 
-                // Update the last message (the bot placeholder) with new text
                 setMessages(prev => {
                     const updated = [...prev];
-                    updated[updated.length - 1].text = accumulatedResponse;
+                    updated[updated.length - 1] = {
+                        ...updated[updated.length - 1],
+                        text: accumulatedResponse,
+                        source: detectedSource,
+                    };
                     return updated;
                 });
             }
         } catch (error) {
             console.error('Chat error:', error);
-            setMessages(prev => [...prev, { type: 'bot', text: "Sorry, I'm having trouble connecting to the brain." }]);
+            setMessages(prev => [...prev, { type: 'bot', text: "Sorry, I'm having trouble connecting to the brain.", source: null }]);
             setLoading(false);
         }
     };
+
 
     return (
         <div className="chatbot-container">
@@ -86,7 +115,23 @@ const Chatbot = () => {
                         {messages.map((msg, i) => (
                             <div key={i} className={`message ${msg.type}`}>
                                 {msg.type === 'bot' ? (
-                                    <div dangerouslySetInnerHTML={{ __html: msg.text }} />
+                                    <>
+                                        <div dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.text) }} />
+                                        {msg.source && (
+                                            <div style={{
+                                                marginTop: '6px',
+                                                fontSize: '11px',
+                                                opacity: 0.65,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                            }}>
+                                                {msg.source === 'ollama'
+                                                    ? '🦙 Local (Ollama)'
+                                                    : '☁️ Gemini'}
+                                            </div>
+                                        )}
+                                    </>
                                 ) : (
                                     msg.text
                                 )}

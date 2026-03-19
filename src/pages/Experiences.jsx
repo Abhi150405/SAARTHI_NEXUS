@@ -161,7 +161,7 @@ const Experiences = () => {
                                                     <span>🎓 {exp.branch || 'CE'} {exp.graduation_year || '2025'}</span> • 
                                                     <span> 🏢 {exp.company_name}</span> • 
                                                     <span> 💼 {exp.role}</span> • 
-                                                    <span> 👁️ {Math.floor(Math.random() * 20) + 1} Reads</span>
+                                                    <span> 👁️ {exp.reads || 0} Reads</span>
                                                 </div>
                                             </div>
                                         </div>

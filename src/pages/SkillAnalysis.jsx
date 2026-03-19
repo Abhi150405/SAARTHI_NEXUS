@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
-import { Target, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Target, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { API_URL } from '../config';
 import '../styles/SkillAnalysis.css';
 
 const SkillAnalysis = () => {
@@ -37,7 +38,30 @@ const SkillAnalysis = () => {
         'PhonePe': ['DSA', 'System Design', 'Java', 'Kafka', 'Spring Boot']
     };
 
-    const [studentSkills, setStudentSkills] = useState(['React', 'Git', 'HTML', 'CSS']);
+    const [studentSkills, setStudentSkills] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchSkills = async () => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.email) {
+                setLoading(false);
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/api/profile?email=${encodeURIComponent(user.email)}`);
+                const data = await res.json();
+                if (res.ok) {
+                    setStudentSkills(data.skills ?? []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch skills:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSkills();
+    }, []);
 
     const getRequiredSkills = () => {
         if (analysisMode === 'role') return roleSkills[selectedTarget] || [];
@@ -109,22 +133,31 @@ const SkillAnalysis = () => {
                     </div>
 
                     <div className="form-group">
-                        <label>Your Current Skills (Mock Input)</label>
+                        <label>Your Current Skills (from Profile)</label>
                         <div className="skills-tags">
-                            {studentSkills.map(skill => (
-                                <span key={skill} className="skill-tag">
-                                    {skill}
-                                    <button onClick={() => setStudentSkills(studentSkills.filter(s => s !== skill))}>×</button>
-                                </span>
-                            ))}
-                            <div className="add-skill">
-                                <input placeholder="Add skill..." onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        setStudentSkills([...studentSkills, e.target.value]);
-                                        e.target.value = '';
-                                    }
-                                }} />
-                            </div>
+                            {loading ? (
+                                <div className="loading-skills">
+                                    <Loader2 className="animate-spin" size={16} />
+                                    <span>Syncing with profile...</span>
+                                </div>
+                            ) : (
+                                <>
+                                    {studentSkills.map((skill, i) => (
+                                        <span key={i} className="skill-tag">
+                                            {skill}
+                                            <button onClick={() => setStudentSkills(studentSkills.filter(s => s !== skill))}>×</button>
+                                        </span>
+                                    ))}
+                                    <div className="add-skill">
+                                        <input placeholder="Add skill..." onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && e.target.value.trim()) {
+                                                setStudentSkills([...studentSkills, e.target.value.trim()]);
+                                                e.target.value = '';
+                                            }
+                                        }} />
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

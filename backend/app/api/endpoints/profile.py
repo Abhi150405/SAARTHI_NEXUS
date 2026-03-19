@@ -19,6 +19,10 @@ async def get_profile(email: str = Query(...)):
             'amcat_score': 1,
             'skills': 1,
             'resume_summary': 1,
+            'resume_education': 1,
+            'experience_years': 1,
+            'key_achievements': 1,
+            'ats_score': 1,
             'profile_picture': 1
         }
     )

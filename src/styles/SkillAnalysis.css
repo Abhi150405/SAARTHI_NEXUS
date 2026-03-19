@@ -268,6 +268,34 @@
     border-radius: var(--radius-full);
 }
 
+/* ===== LOADING STATE ===== */
+.loading-skills {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    width: 100%;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .analysis-grid {

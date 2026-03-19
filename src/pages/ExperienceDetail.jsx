@@ -27,7 +27,16 @@ const ExperienceDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/interview-experience/${id}`);
+                // Prevent React StrictMode double-bouncing AND stop view-spam on refresh
+                const hasViewed = sessionStorage.getItem(`viewed_exp_${id}`);
+                let fetchUrl = `${API_URL}/api/interview-experience/${id}`;
+                
+                if (!hasViewed) {
+                    fetchUrl += `?increment=true`;
+                    sessionStorage.setItem(`viewed_exp_${id}`, 'true');
+                }
+
+                const res = await fetch(fetchUrl);
                 if (!res.ok) throw new Error('Not found');
                 const data = await res.json();
                 setExp(data);
@@ -90,6 +99,8 @@ const ExperienceDetail = () => {
                             <span>🏢 {exp.company_name}</span>
                             <span className="meta-dot">•</span>
                             <span>💼 {exp.role}</span>
+                            <span className="meta-dot">•</span>
+                            <span>👁️ {exp.reads || 0} Reads</span>
                         </div>
                     </div>
                     <div className="exp-hero-status" style={{ background: statusBg, color: statusColor }}>

@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Request, Query
 from app.db.mongodb import get_database
 from bson.objectid import ObjectId
 import pandas as pd
+from pymongo import ReturnDocument
 
 router = APIRouter()
 
@@ -22,7 +23,8 @@ async def add_interview_experience(request: Request):
         "status": data.get('status', 'N/A'),
         "created_at": data.get('created_at', pd.Timestamp.now().isoformat()),
         "formatted_date": data.get('formatted_date', ''),
-        "date": pd.Timestamp.now().isoformat()
+        "date": pd.Timestamp.now().isoformat(),
+        "reads": 0
     }
     result = await db['interview_experience'].insert_one(experience_record)
     return {"message": "Experience added successfully", "id": str(result.inserted_id)}
@@ -37,10 +39,17 @@ async def get_interview_experiences(company: str = Query(None)):
     return experiences
 
 @router.get("/interview-experience/{exp_id}")
-async def get_interview_experience_by_id(exp_id: str):
+async def get_interview_experience_by_id(exp_id: str, increment: bool = False):
     db = get_database()
     try:
-        exp = await db['interview_experience'].find_one({"_id": ObjectId(exp_id)})
+        if increment:
+            exp = await db['interview_experience'].find_one_and_update(
+                {"_id": ObjectId(exp_id)},
+                {"$inc": {"reads": 1}},
+                return_document=ReturnDocument.AFTER
+            )
+        else:
+            exp = await db['interview_experience'].find_one({"_id": ObjectId(exp_id)})
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid ID format")
     if not exp:

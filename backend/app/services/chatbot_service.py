@@ -1,84 +1,123 @@
-from google import genai
-from google.genai import types
+"""
+chatbot_service.py  (refactored — multi-agent pipeline)
+--------------------------------------------------------
+
+Pipeline per request:
+  1. Analyzer Agent  → extract intent + entities (decides if DB context needed)
+  2. [Context fetch happens in the endpoint — passed in as context_string]
+  3. Reasoner Agent  → generate answer via llm_router (local → Gemini fallback)
+  4. Formatter Agent → clean up output text
+
+The endpoint streams the response to the frontend.
+No direct Gemini or Ollama calls happen here — everything goes via llm_router.
+
+Backward-compatible:
+  - Public interface unchanged: get_chat_response_stream(query, context_string)
+  - Returns an async generator of text chunks (same as before)
+"""
+
 import logging
-import os
-import re
-from app.core.config import settings
+from typing import AsyncGenerator
+
+from app.agents.analyzer  import analyze
+from app.agents.reasoner  import reason
+from app.agents.formatter import format_chat_output
+from app.llm.llm_router   import generate_response_stream
+
 
 class ChatbotService:
-    def __init__(self):
-        self.client = None
-        self.model_name = "gemini-flash-latest"
-        self.initialize_gemini()
+    """
+    Multi-agent chatbot service.
 
-    def initialize_gemini(self):
-        api_key = settings.GEMINI_API_KEY
-        if api_key:
-            try:
-                import certifi
-                os.environ['SSL_CERT_FILE'] = certifi.where()
-                self.client = genai.Client(api_key=api_key)
-            except Exception as e:
-                logging.error(f"Gemini Initialization Error: {e}")
+    Flow:
+      analyze → (context already fetched by endpoint) → reason → format → stream
+    """
 
-    async def get_chat_response_stream(self, query: str, context_string: str):
-        if not self.client:
-            yield "I'm having trouble connecting to my AI core."
+    async def get_chat_response_stream(
+        self, query: str, context_string: str, is_first: bool = False
+    ) -> AsyncGenerator[str, None]:
+        """
+        Entry point called by the /api/chatbot/chat endpoint.
+        Passes via the LLMRouter so it can dynamically choose local vs Gemini.
+
+        Args:
+            query          : Raw user message.
+            context_string : Pre-fetched DB records (formatted string).
+            is_first       : True if this is the very first user message in the current session.
+
+        Yields:
+            Text chunks (str) to be streamed to the client.
+        """
+        if not query.strip():
+            yield "Please provide a valid question."
             return
 
-        is_hii = query.strip().lower() in ["hii", "hi", "hello", "hey"]
-        
-        # Determine instruction based on whether we have database context
-        has_context = context_string != "No specific database records found for this query."
-        
-        prompt = (
-            f"You are Saarthi, the Official AI Placement Assistant for PICT. "
-            f"Your goal is to provide 100% ACCURATE information about PICT placements using the provided Database Context when available. "
-            f"\n\n--- DATABASE CONTEXT ---\n{context_string}\n--- END CONTEXT ---\n\n"
-            f"USER QUERY: {query}\n\n"
-            f"RULES:\n"
-            f"1. IF the USER QUERY asks for PICT-specific stats (salary, company names, hiring numbers) and the information is in the DATABASE CONTEXT, you MUST provide it exactly as listed. 100% accuracy is required.\n"
-            f"2. IF the information is NOT in the DATABASE CONTEXT, or for general queries (interview tips, resume advice, career paths), use your general AI knowledge to be as helpful as possible.\n"
-            f"3. NEVER make up or guess PICT-specific numbers, years, or company details if they aren't in the provided context.\n"
-            f"4. Always maintain a professional and encouraging tone.\n"
-            f"5. Start your response with a friendly greeting if the user said 'hi' or similar.\n"
-            f"\nFormatting: Use <b>bold</b> for all numbers, company names, and salary figures. Use bullet points (•) for lists."
-        )
-
         try:
-            config = types.GenerateContentConfig(
-                temperature=0.5,  # Lower temperature for better factual consistency
-                top_p=0.95,
-                top_k=40,
-                max_output_tokens=2048,
+            # ── Step 1: Analyze intent (side effect only right now, can be used later) ──
+            analysis = await analyze(query)
+            logging.info(
+                f"ChatbotService: intent={analysis.get('intent')} "
+                f"needs_context={analysis.get('needs_context')}"
             )
-            
-            # Try gemini-flash-latest for better quota availability
-            model_to_use = "gemini-flash-latest"
-            
-            try:
-                response = self.client.models.generate_content_stream(
-                    model=model_to_use,
-                    contents=prompt,
-                    config=config
-                )
-                for chunk in response:
-                    if chunk.text:
-                        yield chunk.text
-            except Exception as first_err:
-                logging.warning(f"Primary model {model_to_use} failed: {first_err}. Trying fallback...")
-                # Fallback to gemini-flash-latest if 1.5-flash fails
-                fallback_model = "gemini-flash-latest"
-                response = self.client.models.generate_content_stream(
-                    model=fallback_model,
-                    contents=prompt,
-                    config=config
-                )
-                for chunk in response:
-                    if chunk.text:
-                        yield chunk.text
+
+            # ── Step 2: Build the Reasoner prompt with context ─────────────────
+            # We pass the context_string exactly as received from the endpoint
+            # (already filtered and formatted by the DB retrieval logic there).
+
+            # ── Step 3: Stream from Reasoner via LLM router ───────────────────
+            # generate_response_stream handles local→Gemini fallback transparently.
+            full_response_parts = []
+            async for chunk in generate_response_stream(
+                _build_reasoner_prompt(query, context_string, is_first)
+            ):
+                # Hardcoded safety replacement — absolutely no dollars allowed
+                chunk = chunk.replace("$", "₹")
+                chunk = chunk.replace("dollars", "Rupees")
+                chunk = chunk.replace("USD", "INR")
+                
+                full_response_parts.append(chunk)
+                yield chunk
+
+            # ── Step 4: Format (side effect only) ────────────────────────────
+            full_text = "".join(full_response_parts)
+            logging.debug(f"ChatbotService: response length = {len(full_text)} chars")
+
         except Exception as e:
-            logging.error(f"Gemini Streaming Error: {e}")
+            logging.error(f"ChatbotService pipeline error: {e}", exc_info=True)
             yield "Sorry, I encountered an error while processing your request."
 
+
+def _build_reasoner_prompt(query: str, context: str, is_first: bool = False) -> str:
+    """
+    Constructs the full prompt that will be passed to llm_router for streaming.
+    """
+    greeting_rule = (
+        "6. This is the user's FIRST message. Start your response with a warm, welcoming greeting to introduce yourself.\n"
+        if is_first else
+        "6. DO NOT start your response with greetings or conversational filler like 'Hi there, how can I assist you today?'. Jump straight into answering the exact query.\n"
+    )
+
+    return (
+        "You are Saarthi, the Official AI Placement Assistant for PICT "
+        "(Pune Institute of Computer Technology).\n"
+        "Your goal is to provide 100% ACCURATE information about PICT placements "
+        "using the provided Database Context when available.\n\n"
+        f"--- DATABASE CONTEXT ---\n{context}\n--- END CONTEXT ---\n\n"
+        f"USER QUERY: {query}\n\n"
+        "RULES:\n"
+        "1. If the DATABASE CONTEXT contains relevant PICT stats (salary, company names, hiring numbers), "
+        "quote them EXACTLY.\n"
+        "2. All salary values are in Indian Rupees (₹) per annum. Always display salary as '₹X LPA'. "
+        "NEVER use the $ sign. NEVER use the word 'dollars' or 'USD'. You must use ₹.\n"
+        "3. For general queries (interview tips, resume advice, career paths), use your AI knowledge freely.\n"
+        "4. NEVER make up PICT-specific numbers not in the context.\n"
+        "5. NEVER mention or list any company names that are NOT explicitly provided in the DATABASE CONTEXT when answering queries about placements or hiring at PICT.\n"
+        f"{greeting_rule}"
+        "7. Maintain a professional, direct, and encouraging tone.\n\n"
+        "Formatting: Wrap numbers, company names, and salary values in <b>...</b> HTML bold tags. "
+        "Use bullet points (•) for lists. Do NOT use markdown **bold** — use HTML <b> tags only."
+    )
+
+
+# Module-level singleton — drop-in replacement for the old chatbot_service
 chatbot_service = ChatbotService()

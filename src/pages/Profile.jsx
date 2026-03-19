@@ -22,6 +22,9 @@ const Profile = () => {
     // AI/Resume fields state (from Resume Extraction)
     const [skills, setSkills] = useState([]);
     const [resumeSummary, setResumeSummary] = useState('');
+    const [atsScore, setAtsScore] = useState(0);
+    const [experienceYears, setExperienceYears] = useState(0);
+    const [keyAchievements, setKeyAchievements] = useState([]);
 
     // Academic fields state
     const [tenthPercentage, setTenthPercentage] = useState('');
@@ -52,6 +55,9 @@ const Profile = () => {
                     setAmcatScore(data.amcat_score ?? '');
                     setSkills(data.skills ?? []);
                     setResumeSummary(data.resume_summary ?? '');
+                    setAtsScore(data.ats_score ?? 0);
+                    setExperienceYears(data.experience_years ?? 0);
+                    setKeyAchievements(data.key_achievements ?? []);
                 }
             } catch (err) {
                 console.error('Failed to fetch profile:', err);
@@ -358,21 +364,42 @@ const Profile = () => {
                             <>
                                 {resumeSummary && (
                                     <div className="resume-summary-box mb-6">
-                                        <label className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-2 block">Extracted Summary</label>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Extracted Summary</label>
+                                            {atsScore > 0 && (
+                                                <span className={`text-xs font-bold px-2 py-0.5 rounded ${atsScore >= 75 ? 'text-green-500 bg-green-500/10' : atsScore >= 50 ? 'text-orange-500 bg-orange-500/10' : 'text-red-500 bg-red-500/10'}`}>
+                                                    ATS Score: {atsScore}%
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-sm text-gray-400 italic leading-relaxed">"{resumeSummary}"</p>
+                                        <p className="text-xs text-gray-500 mt-2"><strong>{experienceYears} Year{experienceYears !== 1 ? 's' : ''}</strong> of Working Experience noted.</p>
                                     </div>
                                 )}
 
-                                <label className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-3 block">Technical Arsenal</label>
-                                <div className="profile-skills-tags">
-                                    {skills.length > 0 ? (
-                                        skills.map((skill, i) => (
-                                            <span key={i} className="profile-skill-tag">{skill}</span>
-                                        ))
-                                    ) : (
-                                        <p className="text-gray-500 text-sm py-4 italic">No skills extracted yet. Upload your resume in the Resume Match section.</p>
-                                    )}
+                                <div className="mb-6">
+                                    <label className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-3 block">Technical Arsenal ({skills.length})</label>
+                                    <div className="profile-skills-tags">
+                                        {skills.length > 0 ? (
+                                            skills.map((skill, i) => (
+                                                <span key={i} className="profile-skill-tag">{skill}</span>
+                                            ))
+                                        ) : (
+                                            <p className="text-gray-500 text-sm italic">No skills extracted yet.</p>
+                                        )}
+                                    </div>
                                 </div>
+
+                                {keyAchievements.length > 0 && (
+                                    <div className="mb-6">
+                                        <label className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-2 block">Key Achievements & Projects</label>
+                                        <ul className="list-disc pl-4 text-sm text-gray-400 space-y-1">
+                                            {keyAchievements.map((ach, i) => (
+                                                <li key={i}>{ach}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
 
                                 <button
                                     className="mt-6 w-full py-2.5 rounded-xl border border-[#2A2A2A] hover:bg-[#1A1A1A] text-gray-400 text-xs font-semibold flex items-center justify-center gap-2 transition-all"
@@ -382,6 +409,7 @@ const Profile = () => {
                                     Update from Resume
                                 </button>
                             </>
+
                         )}
                     </div>
                 </div>
