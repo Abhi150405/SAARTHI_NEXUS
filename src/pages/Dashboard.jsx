@@ -94,11 +94,13 @@ const Dashboard = () => {
   });
 
   // Build bar chart from department distribution for selected year
-  const deptDist = currentData.deptDistribution || [0, 0, 0];
+  const deptDist = currentData.deptDistribution || [0, 0, 0, 0, 0];
   const barData = [
     { branch: 'CE', placed: deptDist[0] || 0 },
     { branch: 'IT', placed: deptDist[1] || 0 },
     { branch: 'E&TC', placed: deptDist[2] || 0 },
+    { branch: 'E&CE', placed: deptDist[3] || 0 },
+    { branch: 'AI&DS', placed: deptDist[4] || 0 },
   ];
 
   // Top companies for the recruiter list
@@ -139,6 +141,8 @@ const Dashboard = () => {
                 <option value="CE">Computer (CE)</option>
                 <option value="IT">IT</option>
                 <option value="E&TC">E&TC</option>
+                <option value="E&CE">E&CE</option>
+                <option value="AI&DS">AI&DS</option>
               </select>
             </div>
             <button className="btn-primary-dash" onClick={() => navigate('/app/eligibility')}>

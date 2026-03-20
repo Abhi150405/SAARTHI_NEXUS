@@ -20,6 +20,8 @@ async def get_placement_stats():
     db = get_database()
     results = await db['placement_records'].find().to_list(None)
     
+    BRANCH_LIST = ['CE', 'IT', 'E&TC', 'E&CE', 'AI&DS']
+    
     yearly_raw = {}
     for r in results:
         year = r.get('academic_year')
@@ -30,17 +32,13 @@ async def get_placement_stats():
         
     yearly_data = {}
     for year, records in yearly_raw.items():
-        compCount = sum(r.get('selections', {}).get('CE', 0) for r in records)
-        itCount = sum(r.get('selections', {}).get('IT', 0) for r in records)
-        etcCount = sum(r.get('selections', {}).get('E&TC', 0) for r in records)
-        totalPlaced = compCount + itCount + etcCount
-        
+        branch_counts = {b: 0 for b in BRANCH_LIST}
         salaries = []
-        ce_salaries, it_salaries, etc_salaries = [], [], []
+        branch_salaries = {b: [] for b in BRANCH_LIST}
         
         company_hires = {}
         unique_companies = set()
-        branch_unique_companies = {"CE": set(), "IT": set(), "E&TC": set()}
+        branch_unique_companies = {b: set() for b in BRANCH_LIST}
         
         for r in records:
             try:
@@ -51,25 +49,32 @@ async def get_placement_stats():
                 
             if s > 0: salaries.append(s)
             
-            selections = r.get('selections', {})
-            ce_hired = int(selections.get('CE', 0) or 0)
-            it_hired = int(selections.get('IT', 0) or 0)
-            etc_hired = int(selections.get('E&TC', 0) or 0)
+            selections = r.get('selections')
+            if not isinstance(selections, dict):
+                selections = {}
             
-            if ce_hired > 0: 
-                ce_salaries.extend([s] * ce_hired)
-                branch_unique_companies["CE"].add(r.get('company_name'))
-            if it_hired > 0: 
-                it_salaries.extend([s] * it_hired)
-                branch_unique_companies["IT"].add(r.get('company_name'))
-            if etc_hired > 0: 
-                etc_salaries.extend([s] * etc_hired)
-                branch_unique_companies["E&TC"].add(r.get('company_name'))
+            # Consolate E&CE variations into 'E&CE'
+            ece_keys = ['E&CE', 'Electronics and Computer Engineering', 'Electronics & Computer Engineering', 
+                        'E&CE(Electronics & Computer Engineering)', 'E&CE(Electronics and Computer Engineering)']
+            ece_total = 0
+            for key in ece_keys:
+                ece_total += int(selections.pop(key, 0) or 0)
+            selections['E&CE'] = ece_total
+            
+            total_hired_this_company = 0
+            for b in BRANCH_LIST:
+                hired = int(selections.get(b, 0) or 0)
+                if hired > 0:
+                    branch_counts[b] += hired
+                    total_hired_this_company += hired
+                    branch_salaries[b].extend([s] * hired)
+                    branch_unique_companies[b].add(r.get('company_name'))
             
             c_name = r.get('company_name', 'Unknown')
             unique_companies.add(c_name)
-            company_hires[c_name] = company_hires.get(c_name, 0) + ce_hired + it_hired + etc_hired
+            company_hires[c_name] = company_hires.get(c_name, 0) + total_hired_this_company
         
+        totalPlaced = sum(branch_counts.values())
         sorted_companies = sorted(company_hires.items(), key=lambda x: x[1], reverse=True)[:5]
         
         def format_branch_stats(stats_dict, count, branch_companies):
@@ -87,16 +92,16 @@ async def get_placement_stats():
             "highestPackage": get_stats(salaries)['highest'],
             "totalPlaced": str(totalPlaced),
             "totalCompanies": len(unique_companies),
-            "deptDistribution": [compCount, itCount, etcCount],
+            "deptDistribution": [branch_counts[b] for b in BRANCH_LIST],
             "topCompanies": {
                  "labels": [c[0] for c in sorted_companies], 
                  "data": [c[1] for c in sorted_companies]
             },
             "branchStats": {
-                "CE": format_branch_stats(get_stats(ce_salaries), compCount, branch_unique_companies["CE"]),
-                "IT": format_branch_stats(get_stats(it_salaries), itCount, branch_unique_companies["IT"]),
-                "E&TC": format_branch_stats(get_stats(etc_salaries), etcCount, branch_unique_companies["E&TC"])
+                b: format_branch_stats(get_stats(branch_salaries[b]), branch_counts[b], branch_unique_companies[b])
+                for b in BRANCH_LIST
             }
         }
         
     return {k: yearly_data[k] for k in sorted(yearly_data.keys(), reverse=True)}
+

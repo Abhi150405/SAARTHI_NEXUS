@@ -54,6 +54,7 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [yearlyData, setYearlyData] = useState(null);
     const [adminSelectedBranch, setAdminSelectedBranch] = useState('All');
+    const [adminSelectedYear, setAdminSelectedYear] = useState('');
     const [stats, setStats] = useState({
         totalStudents: 0,
         totalCompanies: 0,
@@ -130,7 +131,15 @@ const AdminDashboard = () => {
         let list = [...recentUsers];
         // Filter by branch
         if (studentBranchFilter !== 'All') {
-            list = list.filter(s => (s.dept || '').toUpperCase() === studentBranchFilter.toUpperCase());
+            list = list.filter(s => {
+                const dept = (s.dept || '').toUpperCase();
+                if (studentBranchFilter === 'E&CE') {
+                    return dept.includes('E&CE') || 
+                           dept.includes('ELECTRONICS & COMPUTER ENGINEERING') || 
+                           dept.includes('ELECTRONICS AND COMPUTER ENGINEERING');
+                }
+                return dept === studentBranchFilter.toUpperCase();
+            });
         }
         // Filter by search
         if (studentSearch.trim()) {
@@ -171,14 +180,23 @@ const AdminDashboard = () => {
                 const response = await fetch(`${API_URL}/api/placement-stats`);
                 if (response.ok) {
                     const data = await response.json();
-                    setYearlyData(data); // Assume we also add state yearlyData
+                    setYearlyData(data);
                     const sortedYears = Object.keys(data).sort((a, b) => b.localeCompare(a));
-                    const currentYear = sortedYears[0];
-                    if (currentYear) {
-                        const displayData = adminSelectedBranch === 'All' ? data[currentYear] : (data[currentYear].branchStats?.[adminSelectedBranch] || data[currentYear]);
+                    
+                    // Set default year if not set
+                    const selectedYear = adminSelectedYear || sortedYears[0];
+                    if (!adminSelectedYear && sortedYears[0]) {
+                        setAdminSelectedYear(sortedYears[0]);
+                    }
+
+                    if (selectedYear && data[selectedYear]) {
+                        const displayData = adminSelectedBranch === 'All' 
+                            ? data[selectedYear] 
+                            : (data[selectedYear].branchStats?.[adminSelectedBranch] || data[selectedYear]);
+                            
                         setStats({
                             totalStudents: displayData.totalPlaced,
-                            totalCompanies: data[currentYear].topCompanies?.labels?.length || 0,
+                            totalCompanies: data[selectedYear].totalCompanies || 0,
                             averagePackage: String(displayData.avgPackage).includes('₹') ? displayData.avgPackage : `₹ ${displayData.avgPackage}`,
                             activeOpportunities: 12
                         });
@@ -224,7 +242,7 @@ const AdminDashboard = () => {
         fetchCompanies();
         fetchFeedbacks();
         fetchBroadcasts();
-    }, [adminSelectedBranch]);
+    }, [adminSelectedBranch, adminSelectedYear]);
 
     const observationLabels = {
         aptitude: 'Aptitude',
@@ -560,18 +578,36 @@ const AdminDashboard = () => {
                             <h1>Command Center</h1>
                             <p>Welcome back, Administrator. System status is normal.</p>
                         </div>
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border shadow-sm filter-container" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                            <select
-                                value={adminSelectedBranch}
-                                onChange={(e) => setAdminSelectedBranch(e.target.value)}
-                                className="bg-transparent border-none outline-none text-sm font-medium"
-                                style={{ color: 'inherit', background: 'transparent' }}
-                            >
-                                <option value="All">All Branches</option>
-                                <option value="CE">Computer Engineering</option>
-                                <option value="IT">Information Technology</option>
-                                <option value="E&TC">E&TC</option>
-                            </select>
+                        <div className="flex items-center gap-3 px-3 py-2 rounded-lg border shadow-sm filter-container" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', display: 'flex' }}>
+                            <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '12px' }}>
+                                <Database size={16} color="var(--admin-accent)" />
+                                <select
+                                    value={adminSelectedYear}
+                                    onChange={(e) => setAdminSelectedYear(e.target.value)}
+                                    className="bg-transparent border-none outline-none text-sm font-medium"
+                                    style={{ color: 'inherit', background: 'transparent', cursor: 'pointer' }}
+                                >
+                                    {yearlyData && Object.keys(yearlyData).sort((a,b) => b.localeCompare(a)).map(year => (
+                                        <option key={year} value={year} style={{ background: '#1a1a1a' }}>{year}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Users size={16} color="var(--admin-accent)" />
+                                <select
+                                    value={adminSelectedBranch}
+                                    onChange={(e) => setAdminSelectedBranch(e.target.value)}
+                                    className="bg-transparent border-none outline-none text-sm font-medium"
+                                    style={{ color: 'inherit', background: 'transparent', cursor: 'pointer' }}
+                                >
+                                    <option value="All" style={{ background: '#1a1a1a' }}>All Branches</option>
+                                    <option value="CE" style={{ background: '#1a1a1a' }}>Computer Engineering</option>
+                                    <option value="IT" style={{ background: '#1a1a1a' }}>Information Technology</option>
+                                    <option value="E&TC" style={{ background: '#1a1a1a' }}>E&TC</option>
+                                    <option value="E&CE" style={{ background: '#1a1a1a' }}>E&CE</option>
+                                    <option value="AI&DS" style={{ background: '#1a1a1a' }}>AI & DS</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -625,15 +661,16 @@ const AdminDashboard = () => {
                                         {(() => {
                                             if (yearlyData && Object.keys(yearlyData).length > 0) {
                                                 const sortedKeys = Object.keys(yearlyData).sort((a,b) => b.localeCompare(a));
-                                                const latestYearKey = sortedKeys[0];
-                                                const yearData = yearlyData[latestYearKey];
+                                                const yearData = yearlyData[adminSelectedYear] || {};
                                                 const branchLabelsMap = {
                                                     'CE': 'Computer',
                                                     'IT': 'IT',
-                                                    'E&TC': 'E&TC'
+                                                    'E&TC': 'E&TC',
+                                                    'E&CE': 'E&CE',
+                                                    'AI&DS': 'AI&DS'
                                                 };
-                                                const compLabels = adminSelectedBranch === 'All' ? ['Computer', 'IT', 'E&TC'] : [branchLabelsMap[adminSelectedBranch]];
-                                                const compKeys = adminSelectedBranch === 'All' ? ['CE', 'IT', 'E&TC'] : [adminSelectedBranch];
+                                                const compLabels = adminSelectedBranch === 'All' ? ['Computer', 'IT', 'E&TC', 'E&CE', 'AI&DS'] : [branchLabelsMap[adminSelectedBranch]];
+                                                const compKeys = adminSelectedBranch === 'All' ? ['CE', 'IT', 'E&TC', 'E&CE', 'AI&DS'] : [adminSelectedBranch];
 
                                                 return (
                                                     <Bar
@@ -641,18 +678,18 @@ const AdminDashboard = () => {
                                                             labels: compLabels,
                                                             datasets: [
                                                                 {
-                                                                    label: `Avg Package (LPA) - ${latestYearKey}`,
+                                                                    label: `Avg Package (LPA) - ${adminSelectedYear}`,
                                                                     data: yearData.branchStats ? compKeys.map(k =>
-                                                                        parseFloat(String(yearData.branchStats[k].avgPackage).replace(/[^0-9.]/g, '')) || 0
+                                                                        parseFloat(String(yearData.branchStats[k]?.avgPackage || '0').replace(/[^0-9.]/g, '')) || 0
                                                                     ) : [],
                                                                      backgroundColor: '#F97316',
                                                                      borderColor: '#F97316',
                                                                      borderWidth: 1
                                                                 },
                                                                 {
-                                                                    label: `Highest Package (LPA) - ${latestYearKey}`,
+                                                                    label: `Highest Package (LPA) - ${adminSelectedYear}`,
                                                                     data: yearData.branchStats ? compKeys.map(k =>
-                                                                        parseFloat(String(yearData.branchStats[k].highestPackage).replace(/[^0-9.]/g, '')) || 0
+                                                                        parseFloat(String(yearData.branchStats[k]?.highestPackage || '0').replace(/[^0-9.]/g, '')) || 0
                                                                     ) : [],
                                                                      backgroundColor: '#FB923C',
                                                                      borderColor: '#FB923C',
@@ -717,7 +754,7 @@ const AdminDashboard = () => {
                                                     <tr key={u.id}>
                                                         <td><span className="student-pill">{u.name}</span></td>
                                                         <td>{u.email}</td>
-                                                        <td>{u.dept}</td>
+                                                        <td>{(u.dept || '').toUpperCase().includes('ELECTRONICS') && (u.dept || '').toUpperCase().includes('COMPUTER') ? 'E&CE' : u.dept}</td>
                                                         <td>{u.joined}</td>
                                                         <td><button className="btn-icon">Manage</button></td>
                                                     </tr>
@@ -864,7 +901,7 @@ const AdminDashboard = () => {
                                                     </td>
                                                     <td>
                                                         <span className="dept-pill-sm" title={s.dept || '—'}>
-                                                            {s.dept || '—'}
+                                                            {(s.dept || '').toUpperCase().includes('ELECTRONICS') && (s.dept || '').toUpperCase().includes('COMPUTER') ? 'E&CE' : (s.dept || '—')}
                                                         </span>
                                                     </td>
                                                     <td>
@@ -933,7 +970,7 @@ const AdminDashboard = () => {
                                                 <div className="modal-header-info">
                                                     <h3>{selectedStudent.name}</h3>
                                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                                                        <span className="dept-pill">{selectedStudent.dept}</span>
+                                                        <span className="dept-pill">{(selectedStudent.dept || '').toUpperCase().includes('ELECTRONICS') && (selectedStudent.dept || '').toUpperCase().includes('COMPUTER') ? 'E&CE' : selectedStudent.dept}</span>
                                                         {selectedStudent.idNumber && <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>ID: {selectedStudent.idNumber}</span>}
                                                     </div>
                                                     <div className="modal-contact-row">
