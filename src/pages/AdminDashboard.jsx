@@ -16,7 +16,11 @@ import {
     Edit2,
     Trash2,
     ChevronDown,
-    Menu
+    ChevronUp,
+    ArrowUpDown,
+    Menu,
+    X,
+    Eye
 } from 'lucide-react';
 import {
     Chart as ChartJS,
@@ -98,16 +102,41 @@ const AdminDashboard = () => {
     const [studentSortDir, setStudentSortDir] = useState('desc');
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [studentSearch, setStudentSearch] = useState('');
+    const [studentBranchFilter, setStudentBranchFilter] = useState('All');
+    const [modalLoading, setModalLoading] = useState(false);
+
+    const BRANCHES = ['All', 'CE', 'IT', 'E&TC', 'E&CE', 'AI&DS'];
+
+
+    // Fetch full student detail when Eye icon clicked
+    const handleViewStudent = async (s) => {
+        setSelectedStudent(s);
+        setModalLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/api/admin/student-detail?email=${encodeURIComponent(s.email)}`);
+            if (res.ok) {
+                const full = await res.json();
+                setSelectedStudent(full);
+            }
+        } catch (err) {
+            console.error('Failed to fetch student detail:', err);
+        } finally {
+            setModalLoading(false);
+        }
+    };
 
     // Sorted & filtered students
     const sortedStudents = useMemo(() => {
         let list = [...recentUsers];
+        // Filter by branch
+        if (studentBranchFilter !== 'All') {
+            list = list.filter(s => (s.dept || '').toUpperCase() === studentBranchFilter.toUpperCase());
+        }
         // Filter by search
         if (studentSearch.trim()) {
             const q = studentSearch.toLowerCase();
             list = list.filter(s =>
                 (s.name || '').toLowerCase().includes(q) ||
-                (s.email || '').toLowerCase().includes(q) ||
                 (s.dept || '').toLowerCase().includes(q)
             );
         }
@@ -120,7 +149,7 @@ const AdminDashboard = () => {
             });
         }
         return list;
-    }, [recentUsers, studentSortKey, studentSortDir, studentSearch]);
+    }, [recentUsers, studentSortKey, studentSortDir, studentSearch, studentBranchFilter]);
 
     const handleStudentSort = (key) => {
         if (studentSortKey === key) {
@@ -731,114 +760,138 @@ const AdminDashboard = () => {
                     {/* Student Records Tab */}
                     {activeTab === 'students' && (
                         <div className="admin-panel glass">
-                            <div className="panel-header">
+                            <div className="panel-header" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
                                 <h2>Student Records</h2>
                                 <div className="student-search-box">
                                     <Search size={16} />
                                     <input
                                         type="text"
-                                        placeholder="Search by name, email, or department..."
+                                        placeholder="Search by name or department..."
                                         value={studentSearch}
                                         onChange={(e) => setStudentSearch(e.target.value)}
                                     />
                                 </div>
                             </div>
+
+                            {/* Branch Filter Pills */}
+                            <div className="branch-filter-row">
+                                {BRANCHES.map(b => (
+                                    <button
+                                        key={b}
+                                        className={`branch-pill ${studentBranchFilter === b ? 'active' : ''}`}
+                                        onClick={() => setStudentBranchFilter(b)}
+                                    >
+                                        {b}
+                                    </button>
+                                ))}
+                            </div>
+
                             <div className="panel-content">
                                 {/* Summary row */}
                                 <div className="student-summary-row">
                                     <div className="summary-card">
-                                        <span className="label">Total Records</span>
-                                        <span className="value">{recentUsers.length}</span>
+                                        <span className="label">Showing</span>
+                                        <span className="value">{sortedStudents.length} / {recentUsers.length}</span>
                                     </div>
                                     <div className="summary-card">
                                         <span className="label">High CGPA (&ge; 9.0)</span>
                                         <span className="value">
-                                            {recentUsers.filter(u => parseFloat(u.college_cgpa) >= 9.0).length}
+                                            {sortedStudents.filter(u => parseFloat(u.college_cgpa) >= 9.0).length}
                                         </span>
                                     </div>
                                     <div className="summary-card">
                                         <span className="label">Avg AMCAT</span>
                                         <span className="value">
-                                            {Math.round(recentUsers.reduce((acc, curr) => acc + (parseInt(curr.amcat_score) || 0), 0) / (recentUsers.length || 1))}
+                                            {sortedStudents.length > 0
+                                                ? Math.round(sortedStudents.reduce((acc, curr) => acc + (parseInt(curr.amcat_score) || 0), 0) / sortedStudents.length)
+                                                : '—'}
                                         </span>
                                     </div>
+                                    <div className="summary-card">
+                                        <span className="label">Branch</span>
+                                        <span className="value">{studentBranchFilter}</span>
+                                    </div>
                                 </div>
+
+                                {/* Sort controls */}
+                                <div className="sort-controls-row">
+                                    <span className="sort-label">Sort by:</span>
+                                    {[{key:'tenth_percentage',label:'10th %'},{key:'twelfth_percentage',label:'12th %'},{key:'college_cgpa',label:'CGPA'},{key:'amcat_score',label:'AMCAT'}].map(({key,label}) => (
+                                        <button
+                                            key={key}
+                                            className={`sort-pill ${studentSortKey === key ? 'active' : ''}`}
+                                            onClick={() => handleStudentSort(key)}
+                                        >
+                                            {label}
+                                            {studentSortKey === key && (
+                                                studentSortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
+                                            )}
+                                            {studentSortKey !== key && <ArrowUpDown size={12} style={{opacity:0.3}} />}
+                                        </button>
+                                    ))}
+                                    {studentSortKey && (
+                                        <button className="sort-clear-pill" onClick={() => { setStudentSortKey(''); setStudentSortDir('desc'); }}>✕ Clear</button>
+                                    )}
+                                </div>
+
                                 <div className="table-responsive">
                                     <table className="nexus-table student-records-table">
                                         <thead>
                                             <tr>
-                                                <th style={{ width: '40px' }}>#</th>
-                                                <th style={{ minWidth: '160px' }}>Name</th>
-                                                <th style={{ minWidth: '180px' }}>Email</th>
-                                                <th style={{ minWidth: '120px' }}>Department</th>
-                                                <th className="sortable-th" style={{ minWidth: '90px' }} onClick={() => handleStudentSort('tenth_percentage')}>
-                                                    <div className="flex items-center justify-between">
-                                                        <span>10th %</span>
-                                                        <SortIcon colKey="tenth_percentage" />
-                                                    </div>
-                                                </th>
-                                                <th className="sortable-th" style={{ minWidth: '90px' }} onClick={() => handleStudentSort('twelfth_percentage')}>
-                                                    <div className="flex items-center justify-between">
-                                                        <span>12th %</span>
-                                                        <SortIcon colKey="twelfth_percentage" />
-                                                    </div>
-                                                </th>
-                                                <th className="sortable-th" style={{ minWidth: '85px' }} onClick={() => handleStudentSort('college_cgpa')}>
-                                                    <div className="flex items-center justify-between">
-                                                        <span>CGPA</span>
-                                                        <SortIcon colKey="college_cgpa" />
-                                                    </div>
-                                                </th>
-                                                <th className="sortable-th" style={{ minWidth: '95px' }} onClick={() => handleStudentSort('amcat_score')}>
-                                                    <div className="flex items-center justify-between">
-                                                        <span>AMCAT</span>
-                                                        <SortIcon colKey="amcat_score" />
-                                                    </div>
-                                                </th>
-                                                <th style={{ width: '60px' }}>Action</th>
+                                                <th style={{ width: '40px', paddingLeft: '1.5rem' }}>#</th>
+                                                <th style={{ width: '25%' }}>Name</th>
+                                                <th style={{ width: '15%' }}>Branch</th>
+                                                <th style={{ width: '10%', textAlign: 'center' }}>10th %</th>
+                                                <th style={{ width: '10%', textAlign: 'center' }}>12th %</th>
+                                                <th style={{ width: '10%', textAlign: 'center' }}>CGPA</th>
+                                                <th style={{ width: '10%', textAlign: 'center' }}>AMCAT</th>
+                                                <th style={{ width: '10%', textAlign: 'center', paddingRight: '1.5rem' }}>Details</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {sortedStudents.length > 0 ? sortedStudents.map((s, i) => (
                                                 <tr key={s.id || i}>
-                                                    <td style={{ opacity: 0.4 }}>{i + 1}</td>
+                                                    <td style={{ opacity: 0.4, paddingLeft: '1.5rem' }}>{i + 1}</td>
                                                     <td>
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded bg-accent/10 flex items-center justify-center text-accent font-bold text-xs" style={{ background: 'rgba(249, 115, 22, 0.1)', minWidth: '32px' }}>
+                                                            <div className="student-avatar-sm">
                                                                 {s.name?.[0]}
                                                             </div>
-                                                            <span
-                                                                className="student-name-link"
-                                                                onClick={() => setSelectedStudent(s)}
-                                                            >
+                                                            <span className="student-name-link" onClick={() => handleViewStudent(s)} title={s.name}>
                                                                 {s.name}
                                                             </span>
                                                         </div>
                                                     </td>
-                                                    <td style={{ fontSize: '0.8rem', color: 'var(--admin-text-muted)' }}>{s.email}</td>
-                                                    <td><span className="dept-pill" style={{ background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>{s.dept}</span></td>
                                                     <td>
-                                                        <div className={`score-tag ${parseFloat(s.tenth_percentage) >= 90 ? 'high' : parseFloat(s.tenth_percentage) >= 75 ? 'mid' : 'low'}`}>
-                                                            {s.tenth_percentage || '—'}%
+                                                        <span className="dept-pill-sm" title={s.dept || '—'}>
+                                                            {s.dept || '—'}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div className={`score-tag center ${parseFloat(s.tenth_percentage) >= 90 ? 'high' : parseFloat(s.tenth_percentage) >= 75 ? 'mid' : 'low'}`}>
+                                                            {s.tenth_percentage ? `${s.tenth_percentage}%` : '—'}
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className={`score-tag ${parseFloat(s.twelfth_percentage) >= 90 ? 'high' : parseFloat(s.twelfth_percentage) >= 75 ? 'mid' : 'low'}`}>
-                                                            {s.twelfth_percentage || '—'}%
+                                                        <div className={`score-tag center ${parseFloat(s.twelfth_percentage) >= 90 ? 'high' : parseFloat(s.twelfth_percentage) >= 75 ? 'mid' : 'low'}`}>
+                                                            {s.twelfth_percentage ? `${s.twelfth_percentage}%` : '—'}
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className={`score-tag ${parseFloat(s.college_cgpa) >= 9.0 ? 'high' : parseFloat(s.college_cgpa) >= 8.0 ? 'mid' : 'low'}`}>
+                                                        <div className={`score-tag center ${parseFloat(s.college_cgpa) >= 9.0 ? 'high' : parseFloat(s.college_cgpa) >= 8.0 ? 'mid' : 'low'}`}>
                                                             {s.college_cgpa || '—'}
                                                         </div>
                                                     </td>
-                                                    <td>{s.amcat_score || '—'}</td>
-                                                    <td>
+                                                    <td style={{ textAlign: 'center', fontWeight: '600' }}>
+                                                        <div className="score-tag center plain">
+                                                            {s.amcat_score || '—'}
+                                                        </div>
+                                                    </td>
+                                                    <td style={{ textAlign: 'center', paddingRight: '1.5rem' }}>
                                                         <button
                                                             className="btn-icon view-btn"
-                                                            title="View Details"
-                                                            onClick={() => setSelectedStudent(s)}
-                                                            style={{ border: 'none', background: 'transparent' }}
+                                                            title="View Full Profile"
+                                                            onClick={() => handleViewStudent(s)}
                                                         >
                                                             <Eye size={16} />
                                                         </button>
@@ -846,45 +899,52 @@ const AdminDashboard = () => {
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan="9" style={{ textAlign: 'center', opacity: 0.5, padding: '2rem' }}>
-                                                        {studentSearch ? 'No students match your search.' : 'No students found.'}
+                                                    <td colSpan="8" style={{ textAlign: 'center', opacity: 0.5, padding: '2rem' }}>
+                                                        {studentSearch || studentBranchFilter !== 'All' ? 'No students match your filters.' : 'No students found.'}
                                                     </td>
                                                 </tr>
                                             )}
                                         </tbody>
                                     </table>
                                 </div>
-                                <div className="student-count-footer">
-                                    Showing {sortedStudents.length} of {recentUsers.length} students
-                                    {studentSortKey && (
-                                        <button className="clear-sort-btn" onClick={() => { setStudentSortKey(''); setStudentSortDir('desc'); }}>
-                                            Clear Sort
-                                        </button>
-                                    )}
-                                </div>
                             </div>
 
                             {/* Student Detail Modal */}
                             {selectedStudent && (
                                 <div className="student-modal-overlay" onClick={() => setSelectedStudent(null)}>
-                                    <div className="student-modal" onClick={(e) => e.stopPropagation()}>
+                                    <div className="student-modal student-modal-lg" onClick={(e) => e.stopPropagation()}>
                                         <div className="student-modal-header">
                                             <h2>Student Profile</h2>
                                             <button className="modal-close-btn" onClick={() => setSelectedStudent(null)}>
                                                 <X size={20} />
                                             </button>
                                         </div>
+
+                                        {modalLoading ? (
+                                            <div className="modal-loading">
+                                                <div className="modal-spinner" />
+                                                <span>Loading full profile...</span>
+                                            </div>
+                                        ) : (
                                         <div className="student-modal-body">
+                                            {/* Header */}
                                             <div className="modal-profile-header">
-                                                <div className="modal-avatar-large">
-                                                    {selectedStudent.name?.[0] || 'S'}
-                                                </div>
+                                                <div className="modal-avatar-large">{selectedStudent.name?.[0] || 'S'}</div>
                                                 <div className="modal-header-info">
                                                     <h3>{selectedStudent.name}</h3>
-                                                    <span className="dept-pill">{selectedStudent.dept}</span>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                        <span className="dept-pill">{selectedStudent.dept}</span>
+                                                        {selectedStudent.idNumber && <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>ID: {selectedStudent.idNumber}</span>}
+                                                    </div>
+                                                    <div className="modal-contact-row">
+                                                        <Send size={13} style={{ opacity: 0.6 }} />
+                                                        <span>{selectedStudent.email}</span>
+                                                    </div>
                                                 </div>
                                             </div>
 
+                                            {/* Academic Metrics */}
+                                            <div className="modal-section-label">Academic Details</div>
                                             <div className="modal-grid-3">
                                                 <div className="metric-card">
                                                     <span className="m-label">CGPA</span>
@@ -892,11 +952,11 @@ const AdminDashboard = () => {
                                                 </div>
                                                 <div className="metric-card">
                                                     <span className="m-label">12th %</span>
-                                                    <span className="m-value">{selectedStudent.twelfth_percentage || '—'}</span>
+                                                    <span className="m-value">{selectedStudent.twelfth_percentage ? `${selectedStudent.twelfth_percentage}%` : '—'}</span>
                                                 </div>
                                                 <div className="metric-card">
                                                     <span className="m-label">10th %</span>
-                                                    <span className="m-value">{selectedStudent.tenth_percentage || '—'}</span>
+                                                    <span className="m-value">{selectedStudent.tenth_percentage ? `${selectedStudent.tenth_percentage}%` : '—'}</span>
                                                 </div>
                                                 <div className="metric-card">
                                                     <span className="m-label">AMCAT</span>
@@ -904,21 +964,59 @@ const AdminDashboard = () => {
                                                 </div>
                                                 <div className="metric-card" style={{ gridColumn: 'span 2' }}>
                                                     <span className="m-label">Joined On</span>
-                                                    <span className="m-value">{new Date(selectedStudent.joined).toLocaleDateString() || '—'}</span>
+                                                    <span className="m-value" style={{ fontSize: '0.95rem' }}>
+                                                        {selectedStudent.joined ? new Date(selectedStudent.joined).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }) : '—'}
+                                                    </span>
                                                 </div>
                                             </div>
 
-                                            <div className="contact-info-list" style={{ marginTop: '2rem' }}>
-                                                <div className="contact-item">
-                                                    <Send size={16} />
-                                                    <span>{selectedStudent.email}</span>
-                                                </div>
-                                                <div className="contact-item">
-                                                    <Database size={16} />
-                                                    <span>ID: {selectedStudent.idNumber || 'Not provided'}</span>
-                                                </div>
-                                            </div>
+                                            {/* Skills */}
+                                            {selectedStudent.skills && selectedStudent.skills.length > 0 && (
+                                                <>
+                                                    <div className="modal-section-label">Skills ({selectedStudent.skills.length})</div>
+                                                    <div className="modal-skills-wrap">
+                                                        {selectedStudent.skills.map((sk, i) => (
+                                                            <span key={i} className="modal-skill-tag">{sk}</span>
+                                                        ))}
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {/* Professional Links */}
+                                            {(selectedStudent.leetcode_url || selectedStudent.codechef_url || selectedStudent.codeforces_url || selectedStudent.linkedin_url || selectedStudent.resume_url) && (
+                                                <>
+                                                    <div className="modal-section-label">Professional Links</div>
+                                                    <div className="modal-links-grid">
+                                                        {selectedStudent.leetcode_url && (
+                                                            <a href={selectedStudent.leetcode_url} target="_blank" rel="noopener noreferrer" className="modal-link-btn leetcode">
+                                                                <span className="mlink-icon">LC</span> LeetCode
+                                                            </a>
+                                                        )}
+                                                        {selectedStudent.codechef_url && (
+                                                            <a href={selectedStudent.codechef_url} target="_blank" rel="noopener noreferrer" className="modal-link-btn codechef">
+                                                                <span className="mlink-icon">CC</span> CodeChef
+                                                            </a>
+                                                        )}
+                                                        {selectedStudent.codeforces_url && (
+                                                            <a href={selectedStudent.codeforces_url} target="_blank" rel="noopener noreferrer" className="modal-link-btn codeforces">
+                                                                <span className="mlink-icon">CF</span> Codeforces
+                                                            </a>
+                                                        )}
+                                                        {selectedStudent.linkedin_url && (
+                                                            <a href={selectedStudent.linkedin_url} target="_blank" rel="noopener noreferrer" className="modal-link-btn linkedin">
+                                                                <span className="mlink-icon">in</span> LinkedIn
+                                                            </a>
+                                                        )}
+                                                        {selectedStudent.resume_url && (
+                                                            <a href={selectedStudent.resume_url} target="_blank" rel="noopener noreferrer" className="modal-link-btn resume">
+                                                                <span className="mlink-icon">📄</span> Resume
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

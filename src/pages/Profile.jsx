@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, Mail, Hash, BookOpen, AlertCircle, CheckCircle2, LogOut, GraduationCap, Save, Award, FileText, UploadCloud } from 'lucide-react';
+import { User, Lock, Mail, Hash, BookOpen, AlertCircle, CheckCircle2, LogOut, GraduationCap, Save, Award, FileText, UploadCloud, Link2, ExternalLink } from 'lucide-react';
 import { API_URL } from '../config';
 import '../styles/Profile.css';
 
@@ -35,6 +35,15 @@ const Profile = () => {
     const [academicMessage, setAcademicMessage] = useState({ type: '', text: '' });
     const [fetchingAcademic, setFetchingAcademic] = useState(true);
 
+    // Professional links state
+    const [leetcodeUrl, setLeetcodeUrl] = useState('');
+    const [codechefUrl, setCodechefUrl] = useState('');
+    const [codeforcesUrl, setCodeforcesUrl] = useState('');
+    const [linkedinUrl, setLinkedinUrl] = useState('');
+    const [resumeUrl, setResumeUrl] = useState('');
+    const [linksLoading, setLinksLoading] = useState(false);
+    const [linksMessage, setLinksMessage] = useState({ type: '', text: '' });
+
     // Fetch academic data on mount
     useEffect(() => {
         const fetchProfile = async () => {
@@ -58,6 +67,11 @@ const Profile = () => {
                     setAtsScore(data.ats_score ?? 0);
                     setExperienceYears(data.experience_years ?? 0);
                     setKeyAchievements(data.key_achievements ?? []);
+                    setLeetcodeUrl(data.leetcode_url ?? '');
+                    setCodechefUrl(data.codechef_url ?? '');
+                    setCodeforcesUrl(data.codeforces_url ?? '');
+                    setLinkedinUrl(data.linkedin_url ?? '');
+                    setResumeUrl(data.resume_url ?? '');
                 }
             } catch (err) {
                 console.error('Failed to fetch profile:', err);
@@ -158,6 +172,57 @@ const Profile = () => {
                 setProfilePicture(reader.result);
             };
             reader.readAsDataURL(file);
+        }
+    };
+
+    const isValidUrl = (url) => {
+        if (!url) return true; // empty is allowed
+        return /^https?:\/\/.+/i.test(url);
+    };
+
+    const handleLinksSave = async (e) => {
+        e.preventDefault();
+        setLinksMessage({ type: '', text: '' });
+
+        const urlFields = [
+            { label: 'LeetCode', value: leetcodeUrl },
+            { label: 'CodeChef', value: codechefUrl },
+            { label: 'Codeforces', value: codeforcesUrl },
+            { label: 'LinkedIn', value: linkedinUrl },
+            { label: 'Resume', value: resumeUrl },
+        ];
+
+        for (const field of urlFields) {
+            if (field.value && !isValidUrl(field.value)) {
+                setLinksMessage({ type: 'error', text: `${field.label}: Must be a valid URL (starting with http:// or https://)` });
+                return;
+            }
+        }
+
+        setLinksLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/api/profile`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: user.email,
+                    leetcode_url: leetcodeUrl || null,
+                    codechef_url: codechefUrl || null,
+                    codeforces_url: codeforcesUrl || null,
+                    linkedin_url: linkedinUrl || null,
+                    resume_url: resumeUrl || null,
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setLinksMessage({ type: 'success', text: 'Professional links saved successfully!' });
+            } else {
+                setLinksMessage({ type: 'error', text: data.detail || data.error || 'Failed to save links' });
+            }
+        } catch (err) {
+            setLinksMessage({ type: 'error', text: 'Connection error. Please try again.' });
+        } finally {
+            setLinksLoading(false);
         }
     };
 
@@ -504,6 +569,136 @@ const Profile = () => {
                     )}
                 </div>
             </div>
+
+            {/* Professional Links Card */}
+            <div className="profile-card links-card glass">
+                <div className="card-header">
+                    <Link2 size={20} />
+                    <h2>Professional Links</h2>
+                </div>
+
+                <form onSubmit={handleLinksSave} className="links-form">
+                    <div className="links-grid">
+
+                        {/* LeetCode */}
+                        <div className="link-input-group">
+                            <div className="link-label-row">
+                                <span className="link-platform-icon leetcode-icon">LC</span>
+                                <label>LeetCode Profile</label>
+                                {leetcodeUrl && isValidUrl(leetcodeUrl) && (
+                                    <a href={leetcodeUrl} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Open LeetCode">
+                                        <ExternalLink size={14} />
+                                    </a>
+                                )}
+                            </div>
+                            <input
+                                type="url"
+                                value={leetcodeUrl}
+                                onChange={(e) => setLeetcodeUrl(e.target.value)}
+                                placeholder="https://leetcode.com/yourname"
+                                className="link-url-input"
+                            />
+                        </div>
+
+                        {/* CodeChef */}
+                        <div className="link-input-group">
+                            <div className="link-label-row">
+                                <span className="link-platform-icon codechef-icon">CC</span>
+                                <label>CodeChef Profile</label>
+                                {codechefUrl && isValidUrl(codechefUrl) && (
+                                    <a href={codechefUrl} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Open CodeChef">
+                                        <ExternalLink size={14} />
+                                    </a>
+                                )}
+                            </div>
+                            <input
+                                type="url"
+                                value={codechefUrl}
+                                onChange={(e) => setCodechefUrl(e.target.value)}
+                                placeholder="https://www.codechef.com/users/yourname"
+                                className="link-url-input"
+                            />
+                        </div>
+
+                        {/* Codeforces */}
+                        <div className="link-input-group">
+                            <div className="link-label-row">
+                                <span className="link-platform-icon codeforces-icon">CF</span>
+                                <label>Codeforces Profile</label>
+                                {codeforcesUrl && isValidUrl(codeforcesUrl) && (
+                                    <a href={codeforcesUrl} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Open Codeforces">
+                                        <ExternalLink size={14} />
+                                    </a>
+                                )}
+                            </div>
+                            <input
+                                type="url"
+                                value={codeforcesUrl}
+                                onChange={(e) => setCodeforcesUrl(e.target.value)}
+                                placeholder="https://codeforces.com/profile/yourname"
+                                className="link-url-input"
+                            />
+                        </div>
+
+                        {/* LinkedIn */}
+                        <div className="link-input-group">
+                            <div className="link-label-row">
+                                <span className="link-platform-icon linkedin-icon">in</span>
+                                <label>LinkedIn Profile</label>
+                                {linkedinUrl && isValidUrl(linkedinUrl) && (
+                                    <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="link-open-btn" title="Open LinkedIn">
+                                        <ExternalLink size={14} />
+                                    </a>
+                                )}
+                            </div>
+                            <input
+                                type="url"
+                                value={linkedinUrl}
+                                onChange={(e) => setLinkedinUrl(e.target.value)}
+                                placeholder="https://linkedin.com/in/yourname"
+                                className="link-url-input"
+                            />
+                        </div>
+
+                        {/* Resume */}
+                        <div className="link-input-group">
+                            <div className="link-label-row">
+                                <span className="link-platform-icon resume-icon"><FileText size={12} /></span>
+                                <label>Resume Link</label>
+                                {resumeUrl && isValidUrl(resumeUrl) && (
+                                    <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="resume-view-btn">
+                                        <ExternalLink size={13} />
+                                        View Resume
+                                    </a>
+                                )}
+                            </div>
+                            <input
+                                type="url"
+                                value={resumeUrl}
+                                onChange={(e) => setResumeUrl(e.target.value)}
+                                placeholder="https://drive.google.com/file/d/..."
+                                className="link-url-input"
+                            />
+                            {!resumeUrl && (
+                                <span className="resume-add-hint">📎 Paste your Google Drive or cloud resume link above</span>
+                            )}
+                        </div>
+
+                    </div>
+
+                    {linksMessage.text && (
+                        <div className={`message-banner ${linksMessage.type}`}>
+                            {linksMessage.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                            <span>{linksMessage.text}</span>
+                        </div>
+                    )}
+
+                    <button type="submit" className="submit-btn links-save-btn" disabled={linksLoading}>
+                        {linksLoading ? 'Saving...' : <><Save size={16} /><span>Save Links</span></>}
+                    </button>
+                </form>
+            </div>
+
         </div>
     );
 };

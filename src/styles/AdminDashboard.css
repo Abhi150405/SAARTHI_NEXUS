@@ -856,6 +856,47 @@
     color: var(--admin-accent);
 }
 
+/* Base Nexus Table (Used across admin tabs) */
+.nexus-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1rem;
+}
+
+.nexus-table th {
+    padding: 1.1rem 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--admin-text-muted);
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.nexus-table td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
+    color: var(--admin-text-main);
+    vertical-align: middle;
+}
+
+/* Zebra striping and hover effects */
+.nexus-table tbody tr {
+    transition: all var(--transition-base);
+    background: transparent;
+}
+
+.nexus-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.nexus-table tbody tr:hover {
+    background: rgba(249, 115, 22, 0.04);
+}
+
 .student-records-table tr td {
     vertical-align: middle;
 }
@@ -864,26 +905,40 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    border-radius: 8px;
     font-weight: 700;
     font-size: 0.85rem;
-    min-width: 60px;
+    min-width: 65px;
+    border: 1px solid transparent;
+}
+
+.score-tag.center {
+    margin: 0 auto;
 }
 
 .score-tag.high {
     background: rgba(34, 197, 94, 0.1);
     color: #22C55E;
+    border-color: rgba(34, 197, 94, 0.2);
 }
 
 .score-tag.mid {
     background: rgba(249, 115, 22, 0.1);
     color: #F97316;
+    border-color: rgba(249, 115, 22, 0.2);
 }
 
 .score-tag.low {
     background: rgba(239, 68, 68, 0.1);
     color: #EF4444;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.score-tag.plain {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--admin-text-main);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .student-name-link {
@@ -1001,4 +1056,274 @@
 .modal-close-btn:hover {
     background: rgba(255,255,255,0.1);
     transform: rotate(90deg);
-}
+}
+
+/* ── Branch Filter Pills ── */
+.branch-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.branch-pill {
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--admin-border);
+    background: transparent;
+    color: var(--admin-text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+}
+
+.branch-pill:hover {
+    border-color: var(--admin-accent);
+    color: var(--admin-accent);
+    background: rgba(249, 115, 22, 0.06);
+}
+
+.branch-pill.active {
+    background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-hover));
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 2px 12px rgba(249, 115, 22, 0.3);
+}
+
+/* ── Sort Pills Row ── */
+.sort-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.sort-label {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 0.25rem;
+}
+
+.sort-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--admin-border);
+    background: transparent;
+    color: var(--admin-text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sort-pill:hover {
+    border-color: var(--admin-accent);
+    color: var(--admin-text-main);
+}
+
+.sort-pill.active {
+    border-color: var(--admin-accent);
+    color: var(--admin-accent);
+    background: rgba(249, 115, 22, 0.08);
+}
+
+.sort-clear-pill {
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.06);
+    color: #EF4444;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sort-clear-pill:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+/* ── Student Avatar Small ── */
+.student-avatar-sm {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 8px;
+    background: rgba(249, 115, 22, 0.1);
+    color: var(--admin-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.75rem;
+}
+
+/* ── Dept Pill Small ── */
+.dept-pill-sm {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--admin-border);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--admin-text-muted);
+}
+
+/* ── Enlarged Modal ── */
+.student-modal-lg {
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* ── Modal Section Label ── */
+.modal-section-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--admin-text-muted);
+    font-weight: 700;
+    margin: 1.5rem 0 0.6rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+/* ── Modal Header Contact Row ── */
+.modal-contact-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--admin-text-muted);
+}
+
+/* ── Modal Loading State ── */
+.modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem;
+    color: var(--admin-text-muted);
+    font-size: 0.9rem;
+}
+
+.modal-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--admin-border);
+    border-top-color: var(--admin-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Skills Tags in Modal ── */
+.modal-skills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 0.5rem;
+}
+
+.modal-skill-tag {
+    background: rgba(249, 115, 22, 0.08);
+    color: var(--admin-accent);
+    border: 1px solid rgba(249, 115, 22, 0.15);
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* ── Professional Links Grid in Modal ── */
+.modal-links-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.modal-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.modal-link-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.15);
+}
+
+.modal-link-btn .mlink-icon {
+    font-size: 0.65rem;
+    font-weight: 800;
+}
+
+.modal-link-btn.leetcode {
+    background: rgba(255, 161, 22, 0.1);
+    color: #FFA116;
+    border-color: rgba(255, 161, 22, 0.25);
+}
+
+.modal-link-btn.codechef {
+    background: rgba(177, 123, 74, 0.12);
+    color: #B17B4A;
+    border-color: rgba(177, 123, 74, 0.25);
+}
+
+.modal-link-btn.codeforces {
+    background: rgba(31, 138, 203, 0.12);
+    color: #1F8ACB;
+    border-color: rgba(31, 138, 203, 0.25);
+}
+
+.modal-link-btn.linkedin {
+    background: rgba(10, 102, 194, 0.1);
+    color: #0A66C2;
+    border-color: rgba(10, 102, 194, 0.25);
+}
+
+.modal-link-btn.resume {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8B5CF6;
+    border-color: rgba(139, 92, 246, 0.25);
+}
+
+/* ── View Button in table ── */
+.view-btn {
+    background: rgba(249,115,22,0.08) !important;
+    border: 1px solid rgba(249,115,22,0.2) !important;
+    color: var(--admin-accent) !important;
+    padding: 0.4rem 0.6rem !important;
+    border-radius: 8px !important;
+    transition: all 0.2s !important;
+}
+
+.view-btn:hover {
+    background: rgba(249,115,22,0.18) !important;
+    transform: scale(1.1);
+}
+

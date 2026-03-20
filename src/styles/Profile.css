@@ -409,4 +409,171 @@
     .academic-grid {
         grid-template-columns: 1fr;
     }
+
+    .links-grid {
+        grid-template-columns: 1fr;
+    }
 }
+
+/* ── Professional Links Card ─────────────────────────────────── */
+
+.links-card {
+    grid-column: 1 / -1;
+}
+
+.links-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.links-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.link-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.link-label-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.link-label-row label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+/* Platform icon badges */
+.link-platform-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+}
+
+.leetcode-icon {
+    background: rgba(255, 161, 22, 0.12);
+    color: #FFA116;
+    border: 1px solid rgba(255, 161, 22, 0.25);
+}
+
+.codechef-icon {
+    background: rgba(90, 60, 40, 0.25);
+    color: #B17B4A;
+    border: 1px solid rgba(177, 123, 74, 0.3);
+}
+
+.codeforces-icon {
+    background: rgba(31, 138, 203, 0.12);
+    color: #1F8ACB;
+    border: 1px solid rgba(31, 138, 203, 0.25);
+}
+
+.linkedin-icon {
+    background: rgba(10, 102, 194, 0.12);
+    color: #0A66C2;
+    border: 1px solid rgba(10, 102, 194, 0.25);
+}
+
+.resume-icon {
+    background: rgba(139, 92, 246, 0.12);
+    color: #8B5CF6;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+/* URL input field */
+.link-url-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg-body);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-lg);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    transition: all var(--transition-base);
+    box-sizing: border-box;
+}
+
+.link-url-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+    background: var(--bg-card);
+}
+
+.link-url-input::placeholder {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+/* External link open button */
+.link-open-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.3rem;
+    border-radius: var(--radius-md);
+    color: var(--primary);
+    background: var(--primary-light, rgba(249,115,22,0.08));
+    border: 1px solid rgba(249, 115, 22, 0.2);
+    transition: all var(--transition-base);
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.link-open-btn:hover {
+    background: rgba(249, 115, 22, 0.18);
+    transform: translateY(-1px);
+}
+
+/* "View Resume" button */
+.resume-view-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #8B5CF6;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    text-decoration: none;
+    transition: all var(--transition-base);
+    flex-shrink: 0;
+}
+
+.resume-view-btn:hover {
+    background: rgba(139, 92, 246, 0.2);
+    transform: translateY(-1px);
+}
+
+/* "Add Resume" hint text */
+.resume-add-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Save links button */
+.links-save-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
