@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     MONGODB_URL: str = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
     DATABASE_NAME: str = "saarthi_nexus"
     GEMINI_API_KEY: str = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or ""
+    NVIDIA_API_KEY: str = os.getenv("NVIDIA_API_KEY") or ""
     PORT: int = int(os.environ.get("PORT", 5000))
 
 settings = Settings()

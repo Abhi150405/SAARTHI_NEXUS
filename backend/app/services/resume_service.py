@@ -1,34 +1,20 @@
 """
 resume_service.py  — reliable single-call approach
 ----------------------------------------------------
-Uses ONE well-crafted Gemini call that extracts everything in one shot.
-This is more reliable than chaining 3 separate calls (quota, latency, parse errors).
-
-Output schema (backward-compatible + new fields):
-{
-  "skills":           [...],        ← specific tech skill names (NOT categories)
-  "missing_skills":   [...],        ← important skills absent from resume
-  "improvements":     [...],        ← 5 actionable suggestions
-  "ats_score":        <int 0-100>,
-  "summary":          "...",
-  "education":        "...",
-  "experience_years": <number>,     ← 0 for students with no work experience
-  "key_achievements": [...]
-}
+Uses ONE well-crafted NVIDIA NIM call that extracts everything in one shot.
+Replaces Gemini to avoid "RESOURCE_EXHAUSTED" errors and quota limits.
 """
 
 import io
 import json
 import logging
 import re
-import os
 import asyncio
 from typing import Any, Dict, Optional
 
 import PyPDF2
 import docx
-from google import genai
-from app.core.config import settings
+from app.llm.api_llm import nvidia_llm
 
 
 # ── Prompt ────────────────────────────────────────────────────────────────────
@@ -63,22 +49,8 @@ Resume Text:
 
 class ResumeService:
     def __init__(self):
-        self.client = None
-        self.model_name = "gemini-flash-latest"
-        self._init_gemini()
-
-    def _init_gemini(self):
-        api_key = settings.GEMINI_API_KEY
-        if not api_key:
-            logging.warning("ResumeService: No Gemini API key set.")
-            return
-        try:
-            import certifi
-            os.environ['SSL_CERT_FILE'] = certifi.where()
-            self.client = genai.Client(api_key=api_key)
-            logging.info("ResumeService: Gemini client initialised.")
-        except Exception as e:
-            logging.error(f"ResumeService: Gemini init error → {e}")
+        # We now use the global nvidia_llm singleton
+        pass
 
     # ── File Parsing ──────────────────────────────────────────────────────────
 
@@ -103,9 +75,9 @@ class ResumeService:
     # ── JSON Parser ───────────────────────────────────────────────────────────
 
     def _parse_response(self, text: str) -> Optional[Dict[str, Any]]:
-        """Extract JSON from Gemini response, handling markdown fences."""
+        """Extract JSON from LLM response, handling markdown fences."""
         if not text:
-            logging.error("ResumeService: empty response from Gemini")
+            logging.error("ResumeService: empty response from LLM")
             return None
 
         logging.info(f"ResumeService: raw response ({len(text)} chars): {repr(text[:300])}")
@@ -126,47 +98,39 @@ class ResumeService:
         logging.error(f"ResumeService: No JSON object found in response:\n{clean[:500]}")
         return None
 
-    # ── Main Analysis (single Gemini call) ────────────────────────────────────
+    # ── Main Analysis (single NVIDIA NIM call) ────────────────────────────────
 
     async def analyze_resume(self, text: str, max_retries: int = 2) -> Optional[Dict[str, Any]]:
         """
-        Analyze resume text using a single detailed Gemini call.
+        Analyze resume text using a single detailed NVIDIA NIM call.
         Retries on rate limit errors.
         """
-        if not self.client:
-            logging.error("ResumeService: Gemini client not initialised")
+        if not nvidia_llm.available:
+            logging.error("ResumeService: NVIDIA NIM client not available")
             return None
 
         if not text or not text.strip():
             logging.error("ResumeService: empty resume text")
             return None
 
-        # Truncate to ~5000 chars to stay within token limits
-        truncated_text = text[:5000]
+        # Truncate to ~10,000 chars (NVIDIA NIM has larger context)
+        truncated_text = text[:10000]
         prompt = _RESUME_PROMPT + truncated_text
 
         for attempt in range(max_retries + 1):
             try:
-                logging.info(f"ResumeService: calling Gemini (attempt {attempt + 1})…")
+                logging.info(f"ResumeService: calling NVIDIA NIM (attempt {attempt + 1})…")
 
-                response = self.client.models.generate_content(
-                    model=self.model_name,
-                    contents=prompt,
-                    config={
-                        "temperature": 0.2,
-                        "top_p": 0.95,
-                        "max_output_tokens": 2048,
-                    }
-                )
+                response_text = await nvidia_llm.generate(prompt)
 
-                if not response or not response.text:
-                    logging.warning(f"ResumeService: empty Gemini response on attempt {attempt + 1}")
+                if not response_text:
+                    logging.warning(f"ResumeService: empty NVIDIA response on attempt {attempt + 1}")
                     if attempt < max_retries:
                         await asyncio.sleep(2)
                         continue
                     return None
 
-                result = self._parse_response(response.text)
+                result = self._parse_response(response_text)
                 if result:
                     # Ensure all required keys are present with defaults
                     result.setdefault("skills", [])
@@ -192,8 +156,8 @@ class ResumeService:
 
             except Exception as e:
                 err = str(e).upper()
-                logging.error(f"ResumeService: Gemini error (attempt {attempt + 1}): {e}")
-                if ("RESOURCE_EXHAUSTED" in err or "429" in err) and attempt < max_retries:
+                logging.error(f"ResumeService: NVIDIA error (attempt {attempt + 1}): {e}")
+                if "429" in err and attempt < max_retries:
                     wait = (attempt + 1) * 5
                     logging.warning(f"ResumeService: rate limited, retrying in {wait}s…")
                     await asyncio.sleep(wait)

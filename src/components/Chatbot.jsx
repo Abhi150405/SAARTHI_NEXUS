@@ -69,10 +69,10 @@ const Chatbot = () => {
 
                 // ── Parse the hidden [SOURCE:xxx] marker from the first chunk ──
                 if (!sourceMarkerHandled) {
-                    const sourceMatch = chunk.match(/^\[SOURCE:(ollama|gemini)\]/);
+                    const sourceMatch = chunk.match(/^\[SOURCE:(ollama|nvidia)\]/);
                     if (sourceMatch) {
-                        detectedSource = sourceMatch[1];          // 'ollama' or 'gemini'
-                        chunk = chunk.replace(/^\[SOURCE:(ollama|gemini)\]/, ''); // strip it
+                        detectedSource = sourceMatch[1];          // 'ollama' or 'nvidia'
+                        chunk = chunk.replace(/^\[SOURCE:(ollama|nvidia)\]/, ''); // strip it
                     }
                     sourceMarkerHandled = true;
                 }
@@ -128,7 +128,7 @@ const Chatbot = () => {
                                             }}>
                                                 {msg.source === 'ollama'
                                                     ? '🦙 Local (Ollama)'
-                                                    : '☁️ Gemini'}
+                                                    : '☁️ NVIDIA NIM'}
                                             </div>
                                         )}
                                     </>

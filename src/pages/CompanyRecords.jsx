@@ -95,10 +95,13 @@ const CompanyRecords = () => {
     let maxDeptCount = 1;
 
     if (selectedCompany && selectedCompany.history) {
-        // Chart Data (Oldest to Newest left-to-right)
-        chartData = [...selectedCompany.history]
-            .sort((a,b) => a.year.localeCompare(b.year))
-            .map(h => ({ year: h.year, hires: h.hires || 0 }));
+        const yearMap = {};
+        selectedCompany.history.forEach(h => {
+             yearMap[h.year] = (yearMap[h.year] || 0) + (h.hires || 0);
+        });
+        chartData = Object.entries(yearMap)
+            .sort((a,b) => a[0].localeCompare(b[0]))
+            .map(([year, hires]) => ({ year, hires }));
         
         // Table Data (Using existing sort logic)
         sortedHistory = [...selectedCompany.history].sort((a, b) => {

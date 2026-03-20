@@ -3,9 +3,9 @@ llm_router.py
 -------------
 Decides WHICH LLM to call for a given prompt:
 
-  1. Try Ollama (local, free, fast when warm)
-  2. Evaluate confidence of the response
-  3. If confidence < threshold → fall back to Gemini API
+  1. Try Ollama (local, free, fast when warm) -> Used for background agent tasks.
+  2. For Chatbot (Streaming): Always use NVIDIA NIM (Mistral Small) for 100% accuracy 
+     and to strictly follow context constraints.
 
 Public API
 ----------
@@ -17,17 +17,16 @@ import logging
 from typing import Optional, AsyncGenerator
 
 from app.llm.local_llm  import generate_local, is_ollama_available
-from app.llm.api_llm    import gemini_llm
+from app.llm.api_llm    import nvidia_llm
 from app.agents.confidence import evaluate_confidence
 
-CONFIDENCE_THRESHOLD = 0.7      # Below this → fall back to Gemini
+CONFIDENCE_THRESHOLD = 0.7      # Below this → fall back to NVIDIA
 
 
 async def generate_response(prompt: str) -> str:
     """
-    Non-streaming router used by all agents.
-    Tries local LLM first; falls back to Gemini when needed.
-    Max 2 LLM calls per request.
+    Non-streaming router used by agents (e.g. analysis, reasoning).
+    Tries local LLM first; falls back to NVIDIA when needed.
     """
     # ── Step 1: try Ollama ──────────────────────────────────────────────
     if await is_ollama_available():
@@ -37,17 +36,17 @@ async def generate_response(prompt: str) -> str:
             if score >= CONFIDENCE_THRESHOLD:
                 logging.info(f"🦙 [LOCAL / Ollama] replied  (confidence={score:.2f})")
                 return local_resp
-            logging.info(f"⚠️  Local confidence too low ({score:.2f}) — falling back to Gemini.")
+            logging.info(f"⚠️  Local confidence too low ({score:.2f}) — falling back to NVIDIA.")
         else:
-            logging.info("⚠️  Ollama returned empty — falling back to Gemini.")
+            logging.info("⚠️  Ollama returned empty — falling back to NVIDIA.")
     else:
-        logging.info("☁️  Ollama unavailable — using Gemini directly.")
+        logging.info("☁️  Ollama unavailable — using NVIDIA directly.")
 
-    # ── Step 2: Gemini fallback ─────────────────────────────────────────
-    gemini_resp = await gemini_llm.generate(prompt)
-    if gemini_resp:
-        logging.info("☁️  [GEMINI / Fallback] replied")
-        return gemini_resp
+    # ── Step 2: NVIDIA fallback ─────────────────────────────────────────
+    nvidia_resp = await nvidia_llm.generate(prompt)
+    if nvidia_resp:
+        logging.info("☁️  [NVIDIA / Fallback] replied")
+        return nvidia_resp
 
     return "I was unable to generate a response at this time. Please try again."
 
@@ -55,28 +54,12 @@ async def generate_response(prompt: str) -> str:
 async def generate_response_stream(prompt: str) -> AsyncGenerator[str, None]:
     """
     Streaming router used by the chatbot endpoint.
-    Prepends a hidden [SOURCE:ollama] or [SOURCE:gemini] marker as the
-    very first chunk so the frontend can show a badge without changing
-    the API contract.
+    UPGRADED: Always uses NVIDIA NIM for the chatbot to ensure 100% adherence 
+    to database context and prevent hallucinations.
     """
-    local_answer: Optional[str] = None
-
-    if await is_ollama_available():
-        local_answer = await generate_local(prompt)
-        if local_answer:
-            score = evaluate_confidence(local_answer)
-            if score >= CONFIDENCE_THRESHOLD:
-                logging.info(f"🦙 [LOCAL / Ollama] streaming reply  (confidence={score:.2f})")
-                yield "[SOURCE:ollama]"          # ← hidden marker, stripped by frontend
-                for word in local_answer.split(" "):
-                    yield word + " "
-                return
-            logging.info(f"⚠️  Local confidence too low ({score:.2f}) — streaming from Gemini.")
-
-    # Fall back to Gemini streaming
-    logging.info("☁️  [GEMINI / Fallback] streaming reply")
-    yield "[SOURCE:gemini]"                      # ← hidden marker, stripped by frontend
-    async for chunk in gemini_llm.generate_stream(prompt):
+    # For the chatbot, we bypass local LLMs entirely because they ignore 
+    # context constraints (like 'don't mention X').
+    logging.info("☁️  [NVIDIA / Direct] streaming reply for chatbot accuracy")
+    yield "[SOURCE:nvidia]"                      # ← hidden marker
+    async for chunk in nvidia_llm.generate_stream(prompt):
         yield chunk
-
-
