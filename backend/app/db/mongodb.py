@@ -8,8 +8,13 @@ class Database:
 
 db = Database()
 
+import certifi
+
 async def connect_to_mongo():
-    db.client = AsyncIOMotorClient(settings.MONGODB_URL)
+    db.client = AsyncIOMotorClient(
+        settings.MONGODB_URL,
+        tlsCAFile=certifi.where()
+    )
     db.db = db.client[settings.DATABASE_NAME]
     try:
         await db.client.admin.command('ping')
