@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException, status
+from pydantic import BaseModel
+from typing import Optional, Dict, Any
+from bson import ObjectId
 from app.db.mongodb import get_database
 
 router = APIRouter()
@@ -57,3 +60,52 @@ async def get_student_detail(email: str = Query(...)):
         "resume_summary": s.get('resume_summary', ''),
         "ats_score": s.get('ats_score', 0),
     }
+
+class PlacementRecordCreate(BaseModel):
+    academic_year: str
+    company_name: str
+    category: str
+    salary_lpa: float
+    visit_date: str
+    total_salary_lpa: Optional[float] = 0.0
+    criteria: Optional[Dict[str, Any]] = {}
+    selections: Optional[Dict[str, Any]] = {}
+    gender_distribution: Optional[Dict[str, Any]] = {}
+
+@router.post("/admin/placement")
+async def create_placement_record(record: PlacementRecordCreate):
+    db = get_database()
+    record_dict = record.dict()
+    # Add timestamps if needed, but simple insert for now
+    result = await db['placement_records'].insert_one(record_dict)
+    if result.inserted_id:
+        return {"message": "Placement record created successfully", "id": str(result.inserted_id)}
+    raise HTTPException(status_code=500, detail="Failed to create placement record")
+
+@router.get("/admin/placements")
+async def get_all_placements():
+    """Fetch all placement records for the admin management table."""
+    db = get_database()
+    # Sort descending by visit_date implicitly, or academic_year
+    records_cursor = db['placement_records'].find({}).sort([("academic_year", -1), ("company_name", 1)])
+    records = await records_cursor.to_list(None)
+    
+    formatted = []
+    for r in records:
+        r_dict = dict(r)
+        r_dict['_id'] = str(r_dict['_id'])
+        formatted.append(r_dict)
+    return formatted
+
+@router.delete("/admin/placement/{record_id}")
+async def delete_placement_record(record_id: str):
+    db = get_database()
+    try:
+        obj_id = ObjectId(record_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid record ID format")
+        
+    result = await db['placement_records'].delete_one({"_id": obj_id})
+    if result.deleted_count == 1:
+        return {"message": "Placement record deleted successfully"}
+    raise HTTPException(status_code=404, detail="Placement record not found")

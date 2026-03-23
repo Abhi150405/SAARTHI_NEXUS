@@ -34,9 +34,13 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
-import { Line, Bar, Pie } from 'react-chartjs-2';
+import { Pie, Bar, Line } from 'react-chartjs-2';
 import '../styles/AdminDashboard.css';
 import { API_URL } from '../config';
+
+// Import the new Placement Management Components
+import AddPlacementRecord from './AddPlacementRecord';
+import ManagePlacementRecords from './ManagePlacementRecords';
 
 ChartJS.register(
     CategoryScale,
@@ -493,13 +497,6 @@ const AdminDashboard = () => {
                         <span>Student Records</span>
                     </button>
                     <button
-                        className={`admin-nav-item ${activeTab === 'companies' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('companies')}
-                    >
-                        <Briefcase size={20} />
-                        <span>Company Master</span>
-                    </button>
-                    <button
                         className={`admin-nav-item ${activeTab === 'feedback' ? 'active' : ''}`}
                         onClick={() => setActiveTab('feedback')}
                     >
@@ -513,12 +510,21 @@ const AdminDashboard = () => {
                         <Bell size={20} />
                         <span>Manage Broadcasts</span>
                     </button>
+                    
+                    <div style={{ padding: '16px 16px 8px', fontSize: '11px', color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Placement Management</div>
                     <button
-                        className={`admin-nav-item ${activeTab === 'reports' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('reports')}
+                        className={`admin-nav-item ${activeTab === 'add-placement' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('add-placement')}
                     >
-                        <FileText size={20} />
-                        <span>Reports</span>
+                        <Database size={20} />
+                        <span>Add Record</span>
+                    </button>
+                    <button
+                        className={`admin-nav-item ${activeTab === 'manage-placements' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('manage-placements')}
+                    >
+                        <Settings size={20} />
+                        <span>Manage Records</span>
                     </button>
                 </nav>
 
@@ -792,6 +798,14 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                         </>
+                    )}
+
+                    {/* Placement Management Tabs */}
+                    {activeTab === 'add-placement' && (
+                        <AddPlacementRecord setActiveTab={setActiveTab} />
+                    )}
+                    {activeTab === 'manage-placements' && (
+                        <ManagePlacementRecords setActiveTab={setActiveTab} />
                     )}
 
                     {/* Student Records Tab */}
