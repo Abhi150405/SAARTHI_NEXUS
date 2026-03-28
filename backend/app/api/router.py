@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.endpoints import auth, profile, chatbot, ml, companies, stats, notifications, experiences, admin, resume
+from app.api.endpoints import auth, profile, chatbot, ml, companies, stats, notifications, experiences, admin, resume, skill_analysis
 
 api_router = APIRouter()
 api_router.include_router(auth.router, tags=["auth"])
@@ -12,7 +12,7 @@ api_router.include_router(stats.router, tags=["stats"])
 api_router.include_router(notifications.router, tags=["notifications"])
 api_router.include_router(experiences.router, tags=["experiences"])
 api_router.include_router(admin.router, tags=["admin"])
-
+api_router.include_router(skill_analysis.router, prefix="/skill-analysis", tags=["skill-analysis"])
 # Temporary placeholders for other routers
 # api_router.include_router(companies.router, prefix="/companies", tags=["companies"])
 # ...
