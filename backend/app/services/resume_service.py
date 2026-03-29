@@ -22,7 +22,7 @@ from app.llm.api_llm import nvidia_llm
 _RESUME_PROMPT = """You are an expert resume parser and career coach. Analyze the resume below and return ONLY a valid JSON object with NO markdown fences, NO extra text before or after.
 
 IMPORTANT RULES:
-- "skills": List SPECIFIC technology names visible in the resume. Examples of GOOD values: "Python", "React.js", "TensorFlow", "MySQL", "Git", "REST APIs". BAD values: "Programming", "Web Development", "Core Skills". List ALL specific technologies you see.
+- "skills": List SPECIFIC technical skills including languages, frameworks, and CS fundamentals (e.g. "DSA", "Aptitude", "OOP", "DBMS", "Operating Systems", "Computer Networks"). Examples of GOOD values: "Python", "React.js", "DSA", "Problem Solving", "Aptitude", "MySQL", "Git". BAD values: "Soft Skills", "Punctuality". List ALL technical competencies you see.
 - "missing_skills": List 5 specific high-demand tech skills NOT in the resume. Good examples: "Docker", "AWS", "Kubernetes", "System Design", "LangChain".
 - "improvements": 5 short, specific, actionable suggestions to improve the resume.
 - "ats_score": Integer from 0-100 rating how ATS-friendly this resume is.

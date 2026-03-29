@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
-import { Target, CheckCircle, AlertTriangle, Loader2, Briefcase, Building2, ChevronDown, BookOpen, PlayCircle, GraduationCap, Code2, CheckCircle2, Sparkles, TrendingUp, Clock, Star } from 'lucide-react';
+import { Target, CheckCircle, AlertTriangle, Loader2, Briefcase, Building2, ChevronDown, BookOpen, PlayCircle, GraduationCap, Code2, CheckCircle2, Sparkles, TrendingUp, Clock, Star, Trophy } from 'lucide-react';
 import { API_URL } from '../config';
-import { analyzeSkillGap, buildYouTubeSearchUrl } from '../services/skillAnalysisService';
+import { analyzeSkillGap, buildYouTubeSearchUrl, isSkillSatisfied } from '../services/skillAnalysisService';
 import skillData from '../data/skillData.json';
 import '../styles/SkillAnalysis.css';
 
@@ -53,6 +53,9 @@ const SkillAnalysis = () => {
 
     const [studentProfile, setStudentProfile] = useState({});
     const [studentSkills, setStudentSkills] = useState([]);
+    const [modelMatchPercentage, setModelMatchPercentage] = useState(0);
+    const [topMatches, setTopMatches] = useState([]);
+    const [isLoadingTopMatches, setIsLoadingTopMatches] = useState(false);
     const [loading, setLoading] = useState(true);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [aiAnalysis, setAiAnalysis] = useState(null);
@@ -130,21 +133,59 @@ const SkillAnalysis = () => {
 
     const getMissingSkills = () => {
         const required = getRequiredSkills();
-        return required.filter(skill => !studentSkills.includes(skill));
+        return required.filter(skill => !isSkillSatisfied(studentSkills, skill));
     };
 
     const getMatchPercentage = () => {
-        const required = getRequiredSkills();
-        if (required.length === 0) return 0;
-        const common = required.filter(skill => studentSkills.includes(skill));
-        return Math.round((common.length / required.length) * 100);
+        return modelMatchPercentage;
     };
+
+    // 100% Real-time NLP Matching: Calculate match percentage locally
+    useEffect(() => {
+        const required = getRequiredSkills();
+        if (!selectedTarget || required.length === 0 || studentSkills.length === 0) {
+            setModelMatchPercentage(0);
+            return;
+        }
+        const matched = required.filter(s => isSkillSatisfied(studentSkills, s)).length;
+        setModelMatchPercentage(Math.round((matched / required.length) * 100));
+    }, [studentSkills, selectedTarget, analysisMode]);
 
     // Reset AI analysis when mode or target changes
     useEffect(() => {
         setAiAnalysis(null);
         setAiError(null);
     }, [analysisMode, selectedTarget]);
+
+    // 100% Real-time Top Matches Calculation
+    useEffect(() => {
+        if (studentSkills.length === 0) {
+            setTopMatches([]);
+            return;
+        }
+        const matches = [];
+        companies.forEach(companyName => {
+            const reqSkills = companySkills[companyName] || [];
+            if (reqSkills.length > 0) {
+                const matchedCount = reqSkills.filter(s => isSkillSatisfied(studentSkills, s)).length;
+                const pct = Math.round((matchedCount / reqSkills.length) * 100);
+                
+                const companyInfo = companyMap[companyName];
+                matches.push({
+                    target_id: companyName,
+                    company_name: companyInfo.display_name,
+                    company_slug: companyInfo.company_name,
+                    match_percentage: pct,
+                    sector: companyInfo.sector || 'Tech',
+                    ctc_lpa: companyInfo.roles_offered?.[0]?.ctc_lpa || 'N/A'
+                });
+            }
+        });
+        
+        matches.sort((a, b) => b.match_percentage - a.match_percentage);
+        setTopMatches(matches.slice(0, 6)); // Top 6 Matches in sidebar
+        setIsLoadingTopMatches(false);
+    }, [studentSkills]);
 
     // Loading step cycling
     useEffect(() => {
@@ -210,7 +251,7 @@ const SkillAnalysis = () => {
     const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
     const matchPct = getMatchPercentage();
     const requiredSkills = getRequiredSkills();
-    const matchedCount = requiredSkills.filter(s => studentSkills.includes(s)).length;
+    const matchedCount = requiredSkills.filter(s => isSkillSatisfied(studentSkills, s)).length;
     const missingCount = requiredSkills.length - matchedCount;
     const getBarColor = (pct) => pct >= 70 ? 'green' : pct >= 40 ? 'amber' : 'red';
     const currentTargets = analysisMode === 'role' ? roles : companies;
@@ -314,17 +355,17 @@ const SkillAnalysis = () => {
                             {currentTargets
                                 .filter(item => item.toLowerCase().includes(targetSearch.toLowerCase()))
                                 .map((item, idx) => (
-                                <button
-                                    key={item}
-                                    className={`sa-target-card ${selectedTarget === item ? 'active' : ''}`}
-                                    onClick={() => setSelectedTarget(item)}
-                                >
-                                    <div className={`sa-target-avatar ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}>
-                                        {item[0]}
-                                    </div>
-                                    <span className="sa-target-name">{item}</span>
-                                </button>
-                            ))}
+                                    <button
+                                        key={item}
+                                        className={`sa-target-card ${selectedTarget === item ? 'active' : ''}`}
+                                        onClick={() => setSelectedTarget(item)}
+                                    >
+                                        <div className={`sa-target-avatar ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}`}>
+                                            {item[0]}
+                                        </div>
+                                        <span className="sa-target-name">{item}</span>
+                                    </button>
+                                ))}
                         </div>
                     </div>
 
@@ -377,7 +418,7 @@ const SkillAnalysis = () => {
                             </div>
                             <div className="sa-skills-container sa-required-skills">
                                 {requiredSkills.map((skill, i) => {
-                                    const hasSkill = studentSkills.map(s => s.toLowerCase()).includes(skill.toLowerCase());
+                                    const hasSkill = isSkillSatisfied(studentSkills, skill);
                                     return (
                                         <span key={i} className={`sa-req-skill-tag ${hasSkill ? 'matched' : 'missing'}`}>
                                             {hasSkill ? <CheckCircle2 size={11} /> : null}
@@ -429,6 +470,71 @@ const SkillAnalysis = () => {
                             <span>{aiError}</span>
                         </div>
                     )}
+
+                    {/* Premium Recruiter Fit Section (Moved to Sidebar) */}
+                    <div className="sa-recruiter-fit-section" style={{ marginTop: '32px' }}>
+                        <div className="sa-section-header">
+                            <div className="sa-header-main">
+                                <Trophy className="sa-section-icon" size={20} />
+                                <h2>Recruiter Fit</h2>
+                            </div>
+                            <Sparkles className="sa-special-icon" size={16} />
+                        </div>
+
+                        {isLoadingTopMatches ? (
+                            <div className="sa-match-loading">
+                                <div className="sa-loading-dots">
+                                    <div className="sa-dot" />
+                                    <div className="sa-dot" />
+                                    <div className="sa-dot" />
+                                </div>
+                                <span>Scanning Database...</span>
+                            </div>
+                        ) : (
+                            <div className="sa-match-list">
+                                {topMatches.length > 0 ? topMatches.map((match, idx) => {
+                                    const scoreColor = match.match_percentage >= 70 ? '#10B981' : match.match_percentage >= 40 ? '#F59E0B' : '#EF4444';
+                                    return (
+                                    <div 
+                                        key={idx} 
+                                        className="sa-match-list-item"
+                                        style={{ '--index': idx }}
+                                        onClick={() => {
+                                            setAnalysisMode('company');
+                                            setSelectedTarget(match.target_id);
+                                        }}
+                                    >
+                                        <div className="sa-ml-left">
+                                            <div className="sa-ml-icon-box">
+                                                <Building2 size={18} />
+                                            </div>
+                                            <div className="sa-ml-info">
+                                                <h3>{match.company_name}</h3>
+                                                <div className="sa-ml-meta">
+                                                    <span className="sa-ml-tier">
+                                                        {match.ctc_lpa >= 15 ? 'Super Dream' : match.ctc_lpa >= 10 ? 'Dream' : 'Mass'}
+                                                    </span>
+                                                    <span>{match.ctc_lpa} LPA</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="sa-ml-right">
+                                            <span className="sa-ml-score" style={{ color: scoreColor }}>
+                                                {match.match_percentage}%
+                                            </span>
+                                            <span className="sa-ml-score-label">Match</span>
+                                        </div>
+                                    </div>
+                                )}) : (
+                                    <div className="sa-no-matches">
+                                        <AlertTriangle size={24} />
+                                        <p>Add skills to match recruiters</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
                 </div>
 
                 {/* ─── ZONE C: MAIN STAGE ─── */}
@@ -438,6 +544,7 @@ const SkillAnalysis = () => {
                     {!aiAnalysis && !isAnalyzing && (
                         <div className="sa-idle">
                             {/* Venn Diagram — labels above circles */}
+
                             <div className="sa-venn-wrapper">
                                 <div className="sa-venn-labels-row">
                                     <span className="sa-venn-label left">Your skills</span>
