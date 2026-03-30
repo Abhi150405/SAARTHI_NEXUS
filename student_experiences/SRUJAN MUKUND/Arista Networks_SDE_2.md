@@ -1,0 +1,57 @@
+# Interview Experience: SRUJAN MUKUND
+
+**Company:** Arista Networks
+**Role:** SDE
+**Branch:** CS
+**Batch:** 2025
+**Date:** Wed Feb 19 2025 14:19:09 GMT+0000 (Coordinated Universal Time)
+**Views:** 0
+
+---
+
+
+
+
+
+## Hi folks, Myself Srujan Mukund sharing my On-Campus SWE Interview Experience of Arista Networks.👇 
+---
+Arista Networks is a ‘dream category’ company which visits Pune Institute of Computer Technology for SWE role. This year there was tight criteria of 9 CGPA and was visiting the campus after 2 years so every one equally exicted and ready to crack the seat.
+
+**Round 1: Online Assessment**
+
+The test consisted of MCQs related to Core Subjects and 3 Coding Questions. MCQs were also having negative marking scheme.
+
+    Coding question 1: Maximum Subarray Sum.
+    Coding question 2: Graph question-BFS (delayed flights). consist of flight’s timing and delayed flights array and have to return no of corresponding delayed flights.
+    Coding question 3:DP array question.
+I was able to solve 1 complete (2nd) whereas the other 2 were partially solved. Among 120 candidates 19 Candidate were shortlisted for the Interviews where mostly the total score was considered. Interviews were scheduled in-person at our campus.
+
+**Round 2: Technical Interview I (1.5 hrs)**
+
+This round for all candidates were parallelly scheduled and every one of us has to carry laptops for the round they were asking us to write the code over some collaborative platform. The round started with quick introduction firstly my interviewer introduced himself and then I went for my turn and given him a short summary about my profile. First question he asked me was, he showed me a C code Snippet and asked the output it was related to the call by reference and call by value. Then there where 2 Coding question among which 1 was common for all the candidates.
+
+    Question 1(Common): Largest BST in Binary Tree — he wanted me to write the code from scratch. I solved the problem on paper first as i have not solved it before and explained the approach first and then written the code. He tested the code by giving different test cases and I had to optimize and reverify it.
+    Question 2: Adding two Numbers which are in Linked List form — I had done it before so explained him and started coding it.
+I was able to solve both of them and then he asked some OS question- What is mutex, semaphore, difference between mutex and semaphore. Some Memory Allocation question in C, Call by reference, Pointers in C. Discussion ended up by question on my Summer Internship, followed by questions from my side.
+
+**Round 3: Technical Interview II (1 hr)**
+
+This round was Virtual round immediately after the1st one, some of the candidates were eliminated from round 1.This round started with my introduction and then interviewer wanted me to go through my Resume and explain him my projects. He noted some points and then asked me how would i implement those in my projects. Some discussion on which data structure to use, how would i retrieve the required information from the same. Also asked about the background of the project its team and distribution. Most of the time of this round was project discussion.
+
+Then some OS question like what is Virtual memory, Pages, difference between 32 bit and 64 bit OS, what is Physical address space. Some discussion over my semester results.
+
+**Round 4: Technical + Managerial (45-50 min)**
+
+This round was also scheduled virtually. After giving our intros he asked me about my internship experience and was bit interested in the work i have done there. I explained him the what technology I have worked on and what was the potential impact of our project. Then he asked me about Databases and as I had mentioned Mysql and MongoDb in my resume, he asked me to list down various queries for both and highlight some similarities and differences. One question he asked was if I have to retrieve from large number of records what could be done for database optimization for faster retrieval. I was firstly no able to think other than partitioning the large data into parts. He was not completely convinced by the answer and after some time i told him that indexing is the optimal solution, which he was expecting me to answer and then some question on What is index, index table, can we have index on 2 or more attribute and what happed to the speed of retrieval if index are added for every col….
+
+Then asked about my carrier goals also asked me about do i have interest for System Software and its working. Explained me some working and changes made from the start of the organization.
+
+**Round 5: HR(30 min)**
+
+This Round was last round and 5 candidates were selected for this round. Here HR asked me about my background, hometown, why do I wanted to join arista networks, hobbies and how was the overall experience during entire interview process. Some discussion over compensation they were offering, any prior offer which i was holding and normal HR type questions.
+
+**Conclusion✅️**
+
+At the end after all the process and some playful prank they announced the result and 5 Candidates including me were selected.
+
+

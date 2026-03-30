@@ -1,0 +1,14 @@
+{
+  "id": "67aa04f24aede12179500aab",
+  "name": "Smit Khandelwal",
+  "company": "Siemens",
+  "role": "Intern",
+  "branch": "CS",
+  "batch": "2026",
+  "date": "Mon Feb 10 2025 13:53:54 GMT+0000 (Coordinated Universal Time)",
+  "views": 0,
+  "email": "c2k22180@ms.pict.edu",
+  "content_markdown": "### 1. 🏢 **Company & Role**\n\n*   **Company:** [Siemens] \n*   **Role:** [SDE Intern]\n*   **Batch/Year of Graduation:** [2026]\n*   **Branch:** [Computer Science]\n\n---\n\n### 3. 💬 **Interview Rounds**\n\n#### Round 1: [Online Assessment]\n* Half the weightage was given to 2 coding questions at the end, which were both pretty easy, if you know even basic programming.\n* The other half was given to MCQs, mostly logical reasoning and mathematical questions, a few about C++ or OOPS (though i dont remember much at this point)\n\n\n\n#### Round 2: [Technical Interview]\n* Most students underwent 2 techincal interviews, but only one was conducted for me. I eventually learnt that there was a vast difference in the candidates' technical interview experience, because it was conducted by their future teams. Maybe they scout candidates for particular roles only, based on their resumes.\nSome people were asked about OOPS and fundamentals. My interview involved system design.\n* We discussed a project of mine - a social media website exclusive to PICT students. I explained my tech-stack decisions, we delved into how i would scale the system. Talked about security, rate limiters, drawbacks of using rate limiters at various levels in a multi-server system, etc. i avoided the topic of cache invalidation, and confessed that i did not know much about system design, but the interviewer was happy with my knowledge.\n* DSA question - sort an array of 0s and 1s. \n\n#### Round 3 [HR]:\n\n*   Gave a simple puzzle. Asked a couple of classic HR questions -\n1. How do you stay updated on current trends?\n2. Tell me about a time when you had to resolve a dispute within your group?\n\n* I forget the rest of the questions, but they were similar to the ones above.\n\n---\n\n\n",
+  "profile_pic": "https://lh3.googleusercontent.com/a/ACg8ocJuWaUlcRZ01uSOK5BqvTpWUb1y-stur5F8j2RFSeEOwD4Fih4=s96-c",
+  "uid": "smit-khandelwals-experience-at-siemens-intern-2024-D980FV"
+}
