@@ -56,6 +56,18 @@ async def register_student(drive_id: str, reg: DriveRegistrationCreate):
     drive = await db['placement_drives'].find_one({"_id": ObjectId(drive_id)})
     if not drive:
         raise HTTPException(status_code=404, detail="Drive not found")
+        
+    # Check branch eligibility
+    student = await db['students'].find_one({"email": reg.studentEmail})
+    if not student:
+        raise HTTPException(status_code=404, detail="Student profile not found")
+        
+    raw_dept = (student.get('department') or '').upper()
+    mapped_branch = 'E&CE' if ('ELECTRONICS' in raw_dept and 'COMPUTER' in raw_dept) else raw_dept
+    
+    allowed_branches = drive.get('allowedBranches', [])
+    if allowed_branches and mapped_branch not in allowed_branches:
+        raise HTTPException(status_code=403, detail="You are not eligible (branch not allowed)")
     
     # Check duplicate
     existing = await db['drive_registrations'].find_one({

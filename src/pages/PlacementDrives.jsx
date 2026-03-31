@@ -51,10 +51,11 @@ const PlacementDrives = () => {
         init();
     }, []);
 
-    const checkEligibility = (criteria) => {
+    const checkEligibility = (drive) => {
         if (!profile) return { isEligible: false, reasons: ['Profile data missing. Please update your profile.'] };
         
         const reasons = [];
+        const criteria = drive.criteria;
         const mySsc = parseFloat(profile.tenth_percentage) || 0;
         const myHsc = parseFloat(profile.twelfth_percentage) || 0;
         const myCgpa = parseFloat(profile.college_cgpa) || 0;
@@ -64,6 +65,14 @@ const PlacementDrives = () => {
         if (myHsc < criteria.hsc) reasons.push(`HSC (${myHsc}%) is below required ${criteria.hsc}%`);
         if (myCgpa < criteria.cgpa) reasons.push(`CGPA (${myCgpa}) is below required ${criteria.cgpa}`);
         if (myAmcat < criteria.amcat) reasons.push(`AMCAT (${myAmcat}) is below required ${criteria.amcat}`);
+
+        const rawDept = (profile.department || profile.dept || '').toUpperCase();
+        const mappedBranch = (rawDept.includes('ELECTRONICS') && rawDept.includes('COMPUTER')) ? 'E&CE' : rawDept;
+        
+        const allowed = drive.allowedBranches || [];
+        if (allowed.length > 0 && !allowed.includes(mappedBranch)) {
+            reasons.push(`You are not eligible for this drive (branch criteria not met)`);
+        }
 
         return { isEligible: reasons.length === 0, reasons };
     };
@@ -128,7 +137,7 @@ const PlacementDrives = () => {
                         </div>
                     ) : (
                         drives.map(drive => {
-                            const { isEligible, reasons } = checkEligibility(drive.criteria);
+                            const { isEligible, reasons } = checkEligibility(drive);
                             
                             return (
                                 <div key={drive._id} style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -165,6 +174,12 @@ const PlacementDrives = () => {
                                             <span style={{ fontWeight: 600, fontSize: '14px' }}>{drive.criteria.amcat}</span>
                                         </div>
                                     </div>
+                                    
+                                    {drive.allowedBranches && drive.allowedBranches.length > 0 && (
+                                        <div style={{ fontSize: '14px', color: '#A3A3A3', marginTop: '4px' }}>
+                                            <strong style={{ color: '#D4D4D4' }}>Allowed Branches:</strong> {drive.allowedBranches.join(', ')}
+                                        </div>
+                                    )}
 
                                     <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>
                                         <div style={{ flex: 1 }}>

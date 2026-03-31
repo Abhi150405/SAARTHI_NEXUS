@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class DriveCriteria(BaseModel):
@@ -14,6 +14,7 @@ class PlacementDriveBase(BaseModel):
     ctc: str
     requirements: str
     criteria: DriveCriteria
+    allowedBranches: List[str] = Field(default_factory=list)
 
 class PlacementDriveCreate(PlacementDriveBase):
     pass
@@ -24,6 +25,7 @@ class PlacementDriveUpdate(BaseModel):
     ctc: Optional[str] = None
     requirements: Optional[str] = None
     criteria: Optional[DriveCriteria] = None
+    allowedBranches: Optional[List[str]] = None
 
 class DriveRegistrationBase(BaseModel):
     driveId: str

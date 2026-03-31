@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Database, Plus, Trash2, Edit2, Users, Download, X } from 'lucide-react';
 import { API_URL } from '../config';
 
+const BRANCH_OPTIONS = ["CE", "IT", "AI&DS", "E&CE", "E&TC"];
+
 const ManagePlacementDrives = () => {
     const [drives, setDrives] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,7 +18,8 @@ const ManagePlacementDrives = () => {
         role: '',
         ctc: '',
         requirements: '',
-        criteria: { ssc: '', hsc: '', cgpa: '', amcat: '' }
+        criteria: { ssc: '', hsc: '', cgpa: '', amcat: '' },
+        allowedBranches: []
     });
 
     useEffect(() => {
@@ -51,7 +54,8 @@ const ManagePlacementDrives = () => {
                     hsc: parseFloat(formData.criteria.hsc) || 0,
                     cgpa: parseFloat(formData.criteria.cgpa) || 0,
                     amcat: parseInt(formData.criteria.amcat) || 0
-                }
+                },
+                allowedBranches: formData.allowedBranches
             };
 
             const res = await fetch(url, {
@@ -94,16 +98,27 @@ const ManagePlacementDrives = () => {
                 hsc: drive.criteria.hsc,
                 cgpa: drive.criteria.cgpa,
                 amcat: drive.criteria.amcat
-            }
+            },
+            allowedBranches: drive.allowedBranches || []
         });
         setShowFormModal(true);
+    };
+
+    const toggleBranch = (branch) => {
+        setFormData(prev => ({
+            ...prev,
+            allowedBranches: prev.allowedBranches.includes(branch)
+                ? prev.allowedBranches.filter(b => b !== branch)
+                : [...prev.allowedBranches, branch]
+        }));
     };
 
     const openCreateForm = () => {
         setSelectedDrive(null);
         setFormData({
             companyName: '', role: '', ctc: '', requirements: '',
-            criteria: { ssc: '', hsc: '', cgpa: '', amcat: '' }
+            criteria: { ssc: '', hsc: '', cgpa: '', amcat: '' },
+            allowedBranches: []
         });
         setShowFormModal(true);
     };
@@ -228,6 +243,20 @@ const ManagePlacementDrives = () => {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <label style={{ fontSize: '13px', color: '#A3A3A3' }}>Requirements / JD</label>
                                     <textarea className="doc-textarea" required rows="3" value={formData.requirements} onChange={e => setFormData({...formData, requirements:e.target.value})}></textarea>
+                                </div>
+                                <h3 style={{ fontSize: '15px', marginTop: '8px', color: '#F5F5F5', borderBottom: '1px solid #333', paddingBottom: '8px' }}>Allowed Branches</h3>
+                                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                                    {BRANCH_OPTIONS.map(branch => (
+                                        <label key={branch} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13.5px', color: '#FFF', cursor: 'pointer' }}>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={formData.allowedBranches.includes(branch)}
+                                                onChange={() => toggleBranch(branch)}
+                                                style={{ accentColor: '#F97316', width: '16px', height: '16px' }}
+                                            />
+                                            {branch}
+                                        </label>
+                                    ))}
                                 </div>
                                 <h3 style={{ fontSize: '15px', marginTop: '8px', color: '#F5F5F5', borderBottom: '1px solid #333', paddingBottom: '8px' }}>Eligibility Criteria</h3>
                                 <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
