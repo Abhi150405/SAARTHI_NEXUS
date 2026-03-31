@@ -8,7 +8,7 @@ const getApiUrl = () => {
     }
 
     const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
-    const url = `${protocol}//${hostname}:5000`;
+    const url = `${protocol}//${hostname}:8000`;
     console.log('📡 Saarthi Nexus API identified at:', url);
     return url;
 };
