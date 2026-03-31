@@ -41,6 +41,7 @@ import { API_URL } from '../config';
 // Import the new Placement Management Components
 import AddPlacementRecord from './AddPlacementRecord';
 import ManagePlacementRecords from './ManagePlacementRecords';
+import ManagePlacementDrives from './ManagePlacementDrives';
 
 ChartJS.register(
     CategoryScale,
@@ -513,6 +514,13 @@ const AdminDashboard = () => {
                     
                     <div style={{ padding: '16px 16px 8px', fontSize: '11px', color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Placement Management</div>
                     <button
+                        className={`admin-nav-item ${activeTab === 'placement-drives' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('placement-drives')}
+                    >
+                        <Briefcase size={20} />
+                        <span>Campus Drives</span>
+                    </button>
+                    <button
                         className={`admin-nav-item ${activeTab === 'add-placement' ? 'active' : ''}`}
                         onClick={() => setActiveTab('add-placement')}
                     >
@@ -801,6 +809,9 @@ const AdminDashboard = () => {
                     )}
 
                     {/* Placement Management Tabs */}
+                    {activeTab === 'placement-drives' && (
+                        <ManagePlacementDrives setActiveTab={setActiveTab} />
+                    )}
                     {activeTab === 'add-placement' && (
                         <AddPlacementRecord setActiveTab={setActiveTab} />
                     )}

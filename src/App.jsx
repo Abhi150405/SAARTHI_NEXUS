@@ -13,6 +13,7 @@ import AboutUs from './pages/AboutUs';
 import Experiences from './pages/Experiences';
 import AddExperience from './pages/AddExperience';
 import Internships from './pages/Internships';
+import PlacementDrives from './pages/PlacementDrives';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import Signup from './pages/Signup';
@@ -93,6 +94,7 @@ function App() {
           <Route path="skills"          element={<AuthGuard><SkillAnalysis /></AuthGuard>} />
           <Route path="eligibility"     element={<AuthGuard><Eligibility /></AuthGuard>} />
           <Route path="records"         element={<AuthGuard><CompanyRecords /></AuthGuard>} />
+          <Route path="drives"          element={<AuthGuard><PlacementDrives /></AuthGuard>} />
           <Route path="internships"     element={<AuthGuard><Internships /></AuthGuard>} />
           <Route path="experiences"     element={<AuthGuard><Experiences /></AuthGuard>} />
           <Route path="add-experience"  element={<AuthGuard><AddExperience /></AuthGuard>} />

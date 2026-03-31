@@ -24,6 +24,7 @@ const mainNav = [
   { path: '/app/skills', label: 'Skill Analysis', icon: BookOpen },
   { path: '/app/eligibility', label: 'Eligibility', icon: UserCheck },
   { path: '/app/records', label: 'Placement Records', icon: Building2 },
+  { path: '/app/drives', label: 'Campus Drives', icon: Briefcase },
   { path: '/app/internships', label: 'Internships', icon: Briefcase },
   { path: '/app/experiences', label: 'Community', icon: MessageSquare },
   { path: '/app/add-experience', label: 'Add Experience', icon: PlusCircle },
