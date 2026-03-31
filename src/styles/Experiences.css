@@ -232,6 +232,56 @@
   border-color: var(--border-medium);
 }
 
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: var(--bg-card);
+  padding: 1.25rem;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-item label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filter-item select {
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border-light);
+  background: var(--bg-body);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.filter-item select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+@media (max-width: 640px) {
+  .filter-controls {
+    gap: 0.75rem;
+  }
+}
+
 /* ===== SEARCH BAR ===== */
 .search-controls {
   margin-bottom: 1.5rem;
@@ -261,12 +311,43 @@
   box-shadow: 0 0 0 4px var(--primary-light);
 }
 
-.search-icon {
+.search-icon,
+.sort-icon {
   position: absolute;
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-light);
+}
+
+.sort-wrapper {
+  position: relative;
+  min-width: 180px;
+}
+
+.sort-select {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.8rem;
+  border-radius: var(--radius-xl);
+  border: 1.5px solid var(--border-light);
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.9rem;
+  transition: all var(--transition-base);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.sort-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+@media (max-width: 640px) {
+  .search-controls {
+    flex-direction: column;
+  }
 }
 
 /* ===== EXPERIENCE CARDS ===== */

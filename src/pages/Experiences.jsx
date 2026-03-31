@@ -9,7 +9,8 @@ import {
     TrendingUp,
     Quote,
     BarChart3,
-    ClipboardList
+    ClipboardList,
+    ArrowUpDown
 } from 'lucide-react';
 import '../styles/Experiences.css';
 import { API_URL } from '../config';
@@ -25,6 +26,10 @@ const Experiences = () => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [feedbackSearch, setFeedbackSearch] = useState('');
+    const [sortBy, setSortBy] = useState('latest');
+    const [selectedCompany, setSelectedCompany] = useState('All');
+    const [selectedYear, setSelectedYear] = useState('All');
+    const [selectedBranch, setSelectedBranch] = useState('All');
 
     useEffect(() => {
         fetchInitialData();
@@ -51,11 +56,33 @@ const Experiences = () => {
         }
     };
 
-    const filteredExperiences = experiences.filter(exp =>
-        exp.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        exp.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        exp.student_name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredExperiences = experiences.filter(exp => {
+        const matchesSearch = (exp.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                               exp.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                               exp.student_name?.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesCompany = selectedCompany === 'All' || exp.company_name === selectedCompany;
+        const matchesYear = selectedYear === 'All' || String(exp.year) === selectedYear;
+        const matchesBranch = selectedBranch === 'All' || exp.branch === selectedBranch;
+        
+        return matchesSearch && matchesCompany && matchesYear && matchesBranch;
+    });
+
+    const uniqueCompanies = ['All', ...new Set(experiences.map(exp => exp.company_name).filter(Boolean))].sort();
+    const uniqueYears = ['All', ...new Set(experiences.map(exp => String(exp.year)).filter(Boolean))].sort((a,b) => b.localeCompare(a));
+    const uniqueBranches = ['All', ...new Set(experiences.map(exp => exp.branch).filter(Boolean))].sort();
+
+    const sortedExperiences = [...filteredExperiences].sort((a, b) => {
+        if (sortBy === 'latest') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+        if (sortBy === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+        if (sortBy === 'year') {
+            const yearA = String(a.year || '');
+            const yearB = String(b.year || '');
+            return yearB.localeCompare(yearA); // Latest years first
+        }
+        if (sortBy === 'company') return (a.company_name || '').localeCompare(b.company_name || '');
+        if (sortBy === 'branch') return (a.branch || '').localeCompare(b.branch || '');
+        return 0;
+    });
 
     const filteredFeedbacks = feedbacks.filter(fb =>
         fb.company_name.toLowerCase().includes(feedbackSearch.toLowerCase())
@@ -136,10 +163,45 @@ const Experiences = () => {
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
+                            <div className="sort-wrapper">
+                                <ArrowUpDown className="sort-icon" size={18} />
+                                <select 
+                                    value={sortBy} 
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="sort-select"
+                                >
+                                    <option value="latest">Latest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                    <option value="year">Sort by Year</option>
+                                    <option value="company">Sort by Company</option>
+                                    <option value="branch">Sort by Branch</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="filter-controls">
+                            <div className="filter-item">
+                                <label>Company</label>
+                                <select value={selectedCompany} onChange={(e) => setSelectedCompany(e.target.value)}>
+                                    {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                            <div className="filter-item">
+                                <label>Batch</label>
+                                <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+                                    {uniqueYears.map(y => <option key={y} value={y}>{y}</option>)}
+                                </select>
+                            </div>
+                            <div className="filter-item">
+                                <label>Branch</label>
+                                <select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)}>
+                                    {uniqueBranches.map(b => <option key={b} value={b}>{b}</option>)}
+                                </select>
+                            </div>
                         </div>
 
                         <div className="list-container">
-                            {filteredExperiences.length > 0 ? filteredExperiences.map((exp, i) => {
+                            {sortedExperiences.length > 0 ? sortedExperiences.map((exp, i) => {
                                 const initial = exp.student_name ? exp.student_name.charAt(0).toLowerCase() : 'u';
                                 const displayDate = exp.formatted_date || (exp.created_at ? new Intl.DateTimeFormat('en-IN', {
                                     weekday: 'long',
@@ -163,6 +225,9 @@ const Experiences = () => {
                                                     <span> 💼 {exp.role}</span> • 
                                                     <span> 👁️ {exp.reads || 0} Reads</span>
                                                 </div>
+                                            </div>
+                                            <div className={`status-badge ${exp.status?.toLowerCase() === 'selected' ? 'selected' : 'rejected'}`} style={{ marginLeft: 'auto' }}>
+                                                {exp.status || 'Selected'}
                                             </div>
                                         </div>
 

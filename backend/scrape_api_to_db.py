@@ -8,13 +8,56 @@ from dotenv import load_dotenv
 import certifi
 
 def parse_status(content):
-    status_m = re.search(r'(?:\*\*|\#)?\s*Verdict\s*(?:\*\*|:)?\s*(.*)', content, re.IGNORECASE)
-    if status_m:
-        stat_val = status_m.group(1).upper()
-        if 'SELECT' in stat_val: return 'Selected'
-        elif 'REJECT' in stat_val or 'NOT' in stat_val or 'REVOKE' in stat_val: return 'Rejected'
-        else: return 'Selected'
-    return 'Selected'
+    if not content:
+        return 'Selected'
+        
+    content_upper = content.upper()
+    # Focus on the last few paragraphs (last 1000-1500 characters)
+    last_portion = content[-1500:].upper()
+    
+    # 1. Look for explicit verdict sections, prioritized by LAST occurrence
+    verdict_patterns = [
+        r'(?:\*\*|\#)?\s*(?:Final\s+)?(?:Verdict|Result|Outcome)\s*(?:\*\*|:)?\s*([^\n]*)'
+    ]
+    
+    for pattern in verdict_patterns:
+        matches = list(re.finditer(pattern, content, re.IGNORECASE))
+        if matches:
+            last_match = matches[-1]
+            stat_val = last_match.group(1).upper()
+            if 'SELECT' in stat_val: return 'Selected'
+            if 'REJECT' in stat_val or 'NOT' in stat_val or 'FAILED' in stat_val or 'UNFORTUNATE' in stat_val: return 'Rejected'
+            if 'OFFER' in stat_val: return 'Selected'
+
+    # 2. Search for common phrases specifically in the LAST portion
+    rejection_phrases = [
+        "WAS NOT SELECTED", "REJECTED", "COULDN'T MAKE IT", "COULD NOT MAKE IT", 
+        "FAILED", "NOT IN THE FINAL LIST", "BETTER LUCK NEXT TIME", "UNFORTUNATELY", 
+        "WAS NOT ON THE LIST", "UNSUCCESSFUL", "DID NOT GET THE OFFER"
+    ]
+    selection_phrases = [
+        "I WAS SELECTED", "GOT THE OFFER", "RECEIVED THE OFFER", 
+        "MY NAME WAS ON THE LIST", "FINALLY SELECTED", "WAS SELECTED", "OFFER LETTER"
+    ]
+    
+    for phrase in rejection_phrases:
+        if phrase in last_portion:
+            return 'Rejected'
+            
+    for phrase in selection_phrases:
+        if phrase in last_portion:
+            return 'Selected'
+            
+    # 3. Check for marker emojis in the last portion
+    if "✅" in last_portion or "🎉" in last_portion or "🎊" in last_portion: return 'Selected'
+    if "❌" in last_portion or "😞" in last_portion: return 'Rejected'
+    
+    # 4. Fallback search on full text (if still not found in last portion)
+    for phrase in rejection_phrases:
+        if phrase in content_upper:
+            return 'Rejected'
+
+    return 'Selected' # Default fallback
 
 def main():
     load_dotenv()
