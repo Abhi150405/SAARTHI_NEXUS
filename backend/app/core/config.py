@@ -21,5 +21,19 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or ""
     NVIDIA_API_KEY: str = os.getenv("NVIDIA_API_KEY") or ""
     PORT: int = int(os.environ.get("PORT", 8000))
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "https://saarthi-nexus.vercel.app", # Potential common deployment
+        "https://saarthi-nexus.onrender.com"
+    ]
+
+    def __init__(self, **values):
+        super().__init__(**values)
+        origins = os.getenv("CORS_ORIGINS")
+        if origins:
+            self.CORS_ORIGINS = [o.strip() for o in origins.split(",")]
 
 settings = Settings()
