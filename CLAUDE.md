@@ -4,141 +4,95 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SAARTHI Nexus is an AI-Powered Training and Placement Intelligence Platform. It's a full-stack application with:
+Antigravity Kit is an AI-powered design intelligence toolkit providing searchable databases of UI styles, color palettes, font pairings, chart types, and UX guidelines. It works as a skill/workflow for AI coding assistants (Claude Code, Windsurf, Cursor, etc.).
 
-- **Frontend**: React 19 + Vite + React Router DOM (HashRouter)
-- **Backend**: Python FastAPI + Motor (async MongoDB driver)
-- **Styling**: Tailwind CSS v4 + Vanilla CSS with CSS variables
-- **Charts**: Recharts + Chart.js
-- **Icons**: Lucide React
-
-## Common Commands
-
-### Frontend Development
+## Search Command
 
 ```bash
-# Install dependencies
-npm install
-
-# Start development server (port 5173)
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Run ESLint
-npm run lint
-
-# Deploy to GitHub Pages
-npm run deploy
+python3 src/ui-ux-pro-max/scripts/search.py "<query>" --domain <domain> [-n <max_results>]
 ```
 
-### Backend Development
+**Domain search:**
+- `product` - Product type recommendations (SaaS, e-commerce, portfolio)
+- `style` - UI styles (glassmorphism, minimalism, brutalism) + AI prompts and CSS keywords
+- `typography` - Font pairings with Google Fonts imports
+- `color` - Color palettes by product type
+- `landing` - Page structure and CTA strategies
+- `chart` - Chart types and library recommendations
+- `ux` - Best practices and anti-patterns
 
+**Stack search:**
 ```bash
-cd backend
-
-# Setup Python virtual environment
-python -m venv venv
-
-# Activate (Windows)
-venv\Scripts\activate
-
-# Activate (Unix)
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run backend server (port 8000)
-python run.py
-
-# Or directly with uvicorn
-uvicorn app.main:app --reload --port 8000
+python3 src/ui-ux-pro-max/scripts/search.py "<query>" --stack <stack>
 ```
-
-### Full Stack Development
-
-Run frontend and backend simultaneously:
-- Frontend: `npm run dev` → http://localhost:5173
-- Backend: `python backend/run.py` → http://localhost:8000
+Available stacks: `html-tailwind` (default), `react`, `nextjs`, `astro`, `vue`, `nuxtjs`, `nuxt-ui`, `svelte`, `swiftui`, `react-native`, `flutter`, `shadcn`, `jetpack-compose`
 
 ## Architecture
 
-### Frontend Structure
-
-**Routing** (`src/App.jsx`):
-- Uses `HashRouter` for GitHub Pages compatibility
-- `/` - Landing page (public)
-- `/login/student`, `/login/admin`, `/signup` - Auth pages
-- `/admin/dashboard` - Admin dashboard (admin-only)
-- `/app/*` - Main app routes with Layout sidebar
-  - `/app/dashboard` - **Public** (no auth required)
-  - `/app/skills`, `/app/eligibility`, etc. - Protected (student auth required)
-
-**Key Directories**:
-- `src/pages/` - Route-level page components
-- `src/components/` - Reusable components
-  - `src/components/landing/` - Landing page sections
-- `src/styles/` - Component-specific CSS files
-- `src/config.js` - API URL configuration (auto-detects local vs production)
-
-**Authentication**:
-- Client-side auth via `localStorage` (`isAuthenticated`, `user`)
-- AuthGuard/AdminGuard components protect routes
-- No JWT tokens - simple session-based approach
-
-### Backend Structure
-
-**Entry Point**: `backend/run.py` (uvicorn server)
-
-**Key Directories**:
-- `backend/app/api/endpoints/` - API route handlers (auth, profile, companies, stats, etc.)
-- `backend/app/db/` - MongoDB connection and queries
-- `backend/app/schemas/` - Pydantic models
-- `backend/app/services/` - Business logic services
-- `backend/app/llm/` - LLM/NVIDIA NIM integration
-- `backend/app/agents/` - AI agent implementations
-
-**API Pattern**:
-- All routes mounted under `/api/*` prefix
-- `backend/app/api/router.py` aggregates all endpoint modules
-
-**Environment Variables** (backend/.env):
 ```
-MONGODB_URI=
-SECRET_KEY=
-NVIDIA_NIM_API_KEY=
+src/ui-ux-pro-max/                # Source of Truth
+├── data/                         # Canonical CSV databases
+│   ├── products.csv, styles.csv, colors.csv, typography.csv, ...
+│   └── stacks/                   # Stack-specific guidelines
+├── scripts/
+│   ├── search.py                 # CLI entry point
+│   ├── core.py                   # BM25 + regex hybrid search engine
+│   └── design_system.py          # Design system generation
+└── templates/
+    ├── base/                     # Base templates (skill-content.md, quick-reference.md)
+    └── platforms/                # Platform configs (claude.json, cursor.json, ...)
+
+cli/                              # CLI installer (uipro-cli on npm)
+├── src/
+│   ├── commands/init.ts          # Install command with template generation
+│   └── utils/template.ts         # Template rendering engine
+└── assets/                       # Bundled assets (~564KB)
+    ├── data/                     # Copy of src/ui-ux-pro-max/data/
+    ├── scripts/                  # Copy of src/ui-ux-pro-max/scripts/
+    └── templates/                # Copy of src/ui-ux-pro-max/templates/
+
+.claude/skills/ui-ux-pro-max/     # Claude Code skill (symlinks to src/)
+.factory/skills/ui-ux-pro-max/   # Droid (Factory) skill (symlinks to src/)
+.shared/ui-ux-pro-max/            # Symlink to src/ui-ux-pro-max/
+.claude-plugin/                   # Claude Marketplace publishing
 ```
 
-## Data Flow Patterns
+The search engine uses BM25 ranking combined with regex matching. Domain auto-detection is available when `--domain` is omitted.
 
-### API Calls
-All frontend API calls use the `API_URL` from `src/config.js`:
-```javascript
-import { API_URL } from '../config';
-const response = await fetch(`${API_URL}/api/endpoint`);
-```
+## Sync Rules
 
-### Backend Wake
-`App.jsx` periodically pings `/health` to keep the backend awake (important for free-tier hosting).
+**Source of Truth:** `src/ui-ux-pro-max/`
 
-## Styling Conventions
+When modifying files:
 
-- **Tailwind CSS v4** via `@tailwindcss/vite` plugin
-- **CSS Variables** defined in `src/index.css` for theming
-- **Component CSS** in `src/styles/*.css` for complex components
-- **Responsive design** with mobile-first approach
-- **Dark theme only** (no light mode support)
+1. **Data & Scripts** - Edit in `src/ui-ux-pro-max/`:
+   - `data/*.csv` and `data/stacks/*.csv`
+   - `scripts/*.py`
+   - Changes automatically available via symlinks in `.claude/`, `.factory/`, `.shared/`
 
-## Database
+2. **Templates** - Edit in `src/ui-ux-pro-max/templates/`:
+   - `base/skill-content.md` - Common SKILL.md content
+   - `base/quick-reference.md` - Quick reference section (Claude only)
+   - `platforms/*.json` - Platform-specific configs
 
-MongoDB accessed via Motor (async driver). Key collections:
-- `users` - Student and admin accounts
-- `companies` - Placement records
-- `experiences` - Student interview experiences
-- `notifications` - System notifications
-- `chats` - Chatbot conversation history
+3. **CLI Assets** - Run sync before publishing:
+   ```bash
+   cp -r src/ui-ux-pro-max/data/* cli/assets/data/
+   cp -r src/ui-ux-pro-max/scripts/* cli/assets/scripts/
+   cp -r src/ui-ux-pro-max/templates/* cli/assets/templates/
+   ```
+
+4. **Reference Folders** - No manual sync needed. The CLI generates these from templates during `uipro init`.
+
+## Prerequisites
+
+Python 3.x (no external dependencies required)
+
+## Git Workflow
+
+Never push directly to `main`. Always:
+
+1. Create a new branch: `git checkout -b feat/...` or `fix/...`
+2. Commit changes
+3. Push branch: `git push -u origin <branch>`
+4. Create PR: `gh pr create`
