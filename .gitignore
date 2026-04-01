@@ -1,42 +1,80 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-.env
-.env.*
-
+# Dependency directories
+node_modules/
+jspm_packages/
 venv/
 .venv/
 env/
 .env/
-__pycache__/
-*.py[cod]
-*$py.class
-.pytest_cache/
-.coverage
-htmlcov/
 
-# Editor directories and files
-.vscode/*
+# Build outputs
+dist/
+dist-ssr/
+build/
+*.local
+
+# Environment variables (Secrets)
+.env
+.env.*
+backend/.env
+
+# Workspace and Tooling
+.claude/
+.github/
+.vscode/
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.venv/
-backend/.env
-temp.json
+
+# Logs and Debug outputs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+build_output.txt
+builderr.txt
+eslint-log.json
+vite-build-log.txt
 backend_log.txt
 backend/backend_log.txt
+backend/gemini_debug_response.txt
+backend/results.txt
+
+# Testing and Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary and Data Dumps
+tmp_*.json
+backend/tmp_*.json
+backend/evaluation_results.json
+temp.json
+pict_interview_experiences.json
+placement_data_*.json
+skill_data.json
+
+# Personal / Project Assets (Not needed for deployment)
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.docx
+*.pdf
+evaluation_dashboard_master.png
+saarthi_final_evaluation_dashboard.png
+backend/evaluation_dashboard_comprehensive.png
+backend/evaluation_dashboard_master_v3.png
+backend/evaluation_metrics.png
+
+# Raw student data (if sensitive)
+student_experiences/

@@ -117,20 +117,7 @@ const Chatbot = () => {
                                 {msg.type === 'bot' ? (
                                     <>
                                         <div dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.text) }} />
-                                        {msg.source && (
-                                            <div style={{
-                                                marginTop: '6px',
-                                                fontSize: '11px',
-                                                opacity: 0.65,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '4px',
-                                            }}>
-                                                {msg.source === 'ollama'
-                                                    ? '🦙 Local (Ollama)'
-                                                    : '☁️ NVIDIA NIM'}
-                                            </div>
-                                        )}
+
                                     </>
                                 ) : (
                                     msg.text

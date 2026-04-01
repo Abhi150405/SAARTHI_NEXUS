@@ -18,3 +18,5 @@ scikit-learn
 PyPDF2
 python-docx
 httpx
+matplotlib
+seaborn

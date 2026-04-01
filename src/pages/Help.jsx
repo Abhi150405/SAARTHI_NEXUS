@@ -113,11 +113,23 @@ const Help = () => {
 
             setIsTyping(false); // Stop typing indicator, streaming begins
 
+            let sourceHandled = false;
+
             while (true) {
                 const { value: chunk, done } = await reader.read();
                 if (done) break;
 
-                const text = decoder.decode(chunk, { stream: true });
+                let text = decoder.decode(chunk, { stream: true });
+
+                // Strip the [SOURCE:xxx] marker if present in the first chunk
+                if (!sourceHandled) {
+                    const sourceMatch = text.match(/^\[SOURCE:(ollama|nvidia)\]/);
+                    if (sourceMatch) {
+                        text = text.replace(/^\[SOURCE:(ollama|nvidia)\]/, '');
+                    }
+                    sourceHandled = true;
+                }
+
                 accumulated += text;
 
                 // Update last message with streamed content
