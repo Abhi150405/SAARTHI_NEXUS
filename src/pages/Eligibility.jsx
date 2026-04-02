@@ -139,13 +139,14 @@ const ALL_SECTORS = [...new Set(companyList.map(c => c.sector))].sort();
 /* ═══════════════════════════════════════════════════
    ELIGIBILITY CHECK
    ═══════════════════════════════════════════════════ */
-const checkEligibility = (company, profile) => {
+const checkEligibility = (company, profile, maxCtc) => {
     const el = company.eligibility || {};
     const checks = {
         cgpa: !el.min_cgpa || parseFloat(profile.cgpa) >= el.min_cgpa,
         tenth: !el.min_10th || parseFloat(profile.tenth) >= el.min_10th,
         twelfth: !el.min_12th || parseFloat(profile.twelfth) >= el.min_12th,
-        amcat: !el.min_amcat || el.min_amcat === 0 || parseFloat(profile.amcat) >= el.min_amcat,
+        // AMCAT is only required for companies with package > 20 LPA
+        amcat: maxCtc <= 20 || !el.min_amcat || el.min_amcat === 0 || parseFloat(profile.amcat) >= el.min_amcat,
         branch: !el.allowed_branches || el.allowed_branches.length === 0 || el.allowed_branches.includes(profile.department),
         backlogs: el.active_backlogs_allowed || parseInt(profile.backlogs) === 0
     };
@@ -202,8 +203,8 @@ const Eligibility = () => {
     // ── Computed data ──
     const enrichedCompanies = useMemo(() => {
         return companyList.map(c => {
-            const { isEligible, checks, failedChecks } = checkEligibility(c, profile);
             const maxCtc = Math.max(...(c.roles_offered || []).map(r => r.ctc_lpa || 0), 0);
+            const { isEligible, checks, failedChecks } = checkEligibility(c, profile, maxCtc);
             return { ...c, isEligible, checks, failedChecks, maxCtc };
         });
     }, [profile]);
@@ -601,7 +602,10 @@ const Eligibility = () => {
                                             { key: 'tenth', label: '10th', yours: profile.tenth + '%', req: el.min_10th ? el.min_10th + '%' : null },
                                             { key: 'twelfth', label: '12th', yours: profile.twelfth + '%', req: el.min_12th ? el.min_12th + '%' : null },
                                             { key: 'amcat', label: 'AMCAT', yours: profile.amcat + '%', req: el.min_amcat ? el.min_amcat + '%' : null },
-                                        ].filter(item => item.req && item.req !== '0%' && item.req !== 0).map(item => (
+                                        ].filter(item => {
+                                            if (item.key === 'amcat' && company.maxCtc <= 20) return false;
+                                            return item.req && item.req !== '0%' && item.req !== 0;
+                                        }).map(item => (
                                             <div key={item.key} className={`el-check-row ${company.checks[item.key] ? 'pass' : 'fail'}`}>
                                                 <StatusDot pass={company.checks[item.key]} />
                                                 <span className="el-check-label">{item.label}</span>
@@ -723,7 +727,10 @@ const Eligibility = () => {
                             <div className="el-modal-section">
                                 <h4>Eligibility Criteria</h4>
                                 <div className="el-modal-checks">
-                                    {Object.entries(modalCompany.checks).map(([key, passed]) => (
+                                    {Object.entries(modalCompany.checks).filter(([key]) => {
+                                        if (key === 'amcat' && modalCompany.maxCtc <= 20) return false;
+                                        return true;
+                                    }).map(([key, passed]) => (
                                         <div key={key} className={`el-modal-check ${passed ? 'pass' : 'fail'}`}>
                                             {passed ? <Check size={14} /> : <X size={14} />}
                                             <span>{CRITERIA_LABELS[key] || key}</span>

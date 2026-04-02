@@ -114,3 +114,10 @@ async def export_registrations(drive_id: str):
     return Response(content=output.getvalue(), media_type="text/csv", headers={
         "Content-Disposition": f"attachment; filename=drive_{drive_id}_registrations.csv"
     })
+
+@router.get("/registrations/student/{email}")
+async def list_student_registrations(email: str):
+    db = get_database()
+    regs = await db['drive_registrations'].find({"studentEmail": email}).to_list(1000)
+    # returns list of drive IDs student has registered for
+    return [r['driveId'] for r in regs]

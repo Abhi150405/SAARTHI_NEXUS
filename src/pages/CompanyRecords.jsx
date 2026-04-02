@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { 
     Search, Building, Calendar, IndianRupee, BookOpen, 
     ChevronRight, Users, TrendingUp, Award, Layers, 
-    BarChart2, CalendarDays, SlidersHorizontal, ArrowUpDown 
+    BarChart2, CalendarDays, SlidersHorizontal, ArrowUpDown,
+    Target, MessageSquare, ClipboardCheck, Info, Sparkles 
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import '../styles/CompanyRecords.css';
@@ -14,6 +15,7 @@ const CompanyRecords = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [companies, setCompanies] = useState([]);
     const [selectedCompany, setSelectedCompany] = useState(null);
+    const [feedbacks, setFeedbacks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [detailsLoading, setDetailsLoading] = useState(false);
     const [sortOrder, setSortOrder] = useState('desc');
@@ -45,6 +47,14 @@ const CompanyRecords = () => {
             const data = await response.json();
             setSelectedCompany(data);
             setSortOrder('desc');
+
+            // Fetch feedbacks
+            const feedRes = await fetch(`${API_URL}/api/company/${encodeURIComponent(name)}/feedback`);
+            if (feedRes.ok) {
+                setFeedbacks(await feedRes.json());
+            } else {
+                setFeedbacks([]);
+            }
 
             if (window.innerWidth <= 1024) {
                 setTimeout(() => {
@@ -487,7 +497,82 @@ const CompanyRecords = () => {
                                 </div>
                             </div>
 
-                            {/* BLOCK 5: AGGREGATE DEPT */}
+                            {/* BLOCK 5: RECRUITER FEEDBACK */}
+                            {feedbacks.length > 0 && (
+                                <div className="cr-card cr-feedback-section">
+                                    <div className="cr-section-header">
+                                        <div>
+                                            <span className="cr-sec-ov">Recruiter Insights</span>
+                                            <h4 className="cr-sec-title">Drive Observation & Feedback</h4>
+                                        </div>
+                                        <Award size={18} color="#F97316" />
+                                    </div>
+                                    
+                                    <div className="cr-feedback-list">
+                                        {feedbacks.map((f, idx) => (
+                                            <div key={idx} className="cr-feedback-card">
+                                                <div className="cr-fb-header">
+                                                    <div className="cr-fb-meta">
+                                                        <span className="cr-fb-date">{new Date(f.date).toLocaleDateString('en-IN', {month:'long', year:'numeric'})}</span>
+                                                        <span className="cr-fb-admin">Authored by {f.admin_name}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="cr-fb-grid">
+                                                    <div className="cr-fb-sub">
+                                                        <div className="cr-fb-label"><Target size={14} /> Funnel Statistics</div>
+                                                        <div className="cr-fb-stats">
+                                                            <div className="fb-stat-item">
+                                                                <span>Aptitude</span>
+                                                                <strong>{f.students_appeared?.aptitude_test || '-'}</strong>
+                                                            </div>
+                                                            <div className="fb-stat-item">
+                                                                <span>Technical</span>
+                                                                <strong>{f.students_appeared?.technical_test || '-'}</strong>
+                                                            </div>
+                                                            <div className="fb-stat-item">
+                                                                <span>Tech Int.</span>
+                                                                <strong>{f.students_appeared?.technical_interview || '-'}</strong>
+                                                            </div>
+                                                            <div className="fb-stat-item">
+                                                                <span>HR Int.</span>
+                                                                <strong>{f.students_appeared?.hr_interview || '-'}</strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="cr-fb-sub">
+                                                        <div className="cr-fb-label"><BarChart2 size={14} /> Evaluation Scores</div>
+                                                        <div className="cr-fb-scores">
+                                                            {Object.entries(f.overall_observation).map(([key, val]) => (
+                                                                val && (
+                                                                    <div key={key} className="fb-score-pill">
+                                                                        <span className="fb-score-key">{key.replace(/_/g, ' ')}</span>
+                                                                        <span className="fb-score-val">{val}/5</span>
+                                                                    </div>
+                                                                )
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="cr-fb-remarks">
+                                                    <div className="fb-remark-item">
+                                                        <div className="fb-remark-label"><Sparkles size={14} /> Training Suggestions</div>
+                                                        <p>{f.training_suggestions}</p>
+                                                    </div>
+                                                    <div className="fb-remark-item">
+                                                        <div className="fb-remark-label"><MessageSquare size={14} /> Industry Remarks</div>
+                                                        <p>{f.industry_institute_remarks}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* BLOCK 6: AGGREGATE DEPT */}
                             {sortedDepts.length > 0 && (
                                 <div className="cr-card cr-agg-dept">
                                     <div className="cr-section-header" style={{borderBottom:'1px solid #1F1F1F', margin:'0 0 16px 0', padding:'0 0 16px 0'}}>

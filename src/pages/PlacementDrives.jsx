@@ -8,6 +8,7 @@ const PlacementDrives = () => {
     const [loading, setLoading] = useState(true);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
     const [selectedDrive, setSelectedDrive] = useState(null);
+    const [appliedDriveIds, setAppliedDriveIds] = useState([]);
 
     const [regForm, setRegForm] = useState({
         name: '', collegeEmail: '', personalEmail: '', mobile: '',
@@ -41,6 +42,12 @@ const PlacementDrives = () => {
                 const drivesRes = await fetch(`${API_URL}/api/drives/`);
                 if (drivesRes.ok) {
                     setDrives(await drivesRes.json());
+                }
+
+                // Fetch registrations
+                const regsRes = await fetch(`${API_URL}/api/drives/registrations/student/${user.email}`);
+                if (regsRes.ok) {
+                    setAppliedDriveIds(await regsRes.json());
                 }
             } catch (err) {
                 console.error('Failed to load data:', err);
@@ -107,6 +114,7 @@ const PlacementDrives = () => {
             if (res.ok) {
                 alert('Successfully registered for the drive!');
                 setShowRegisterModal(false);
+                setAppliedDriveIds(prev => [...prev, selectedDrive._id]);
             } else {
                 const data = await res.json();
                 alert(`Registration failed: ${data.detail || 'Unknown error'}`);
@@ -199,7 +207,7 @@ const PlacementDrives = () => {
                                         
                                         <button 
                                             onClick={() => handleOpenRegister(drive)}
-                                            disabled={!isEligible}
+                                            disabled={!isEligible || appliedDriveIds.includes(drive._id)}
                                             style={{
                                                 padding: '10px 24px', 
                                                 borderRadius: '8px',
@@ -209,14 +217,16 @@ const PlacementDrives = () => {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '8px',
-                                                cursor: isEligible ? 'pointer' : 'not-allowed',
-                                                backgroundColor: isEligible ? '#F97316' : 'rgba(255,255,255,0.05)',
-                                                color: isEligible ? '#FFF' : '#737373',
-                                                transition: 'all 0.2s'
+                                                cursor: (isEligible && !appliedDriveIds.includes(drive._id)) ? 'pointer' : 'not-allowed',
+                                                backgroundColor: appliedDriveIds.includes(drive._id) ? 'rgba(16, 185, 129, 0.1)' : (isEligible ? '#F97316' : 'rgba(255,255,255,0.05)'),
+                                                color: appliedDriveIds.includes(drive._id) ? '#10B981' : (isEligible ? '#FFF' : '#737373'),
+                                                transition: 'all 0.2s',
+                                                border: appliedDriveIds.includes(drive._id) ? '1px solid #10B981' : 'none'
                                             }}
                                         >
-                                            {isEligible ? 'Apply Now' : 'Not Eligible'}
-                                            {isEligible && <ChevronRight size={16} />}
+                                            {appliedDriveIds.includes(drive._id) ? 'Applied' : (isEligible ? 'Apply Now' : 'Not Eligible')}
+                                            {isEligible && !appliedDriveIds.includes(drive._id) && <ChevronRight size={16} />}
+                                            {appliedDriveIds.includes(drive._id) && <CheckCircle size={16} />}
                                         </button>
                                     </div>
                                 </div>

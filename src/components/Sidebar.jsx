@@ -15,7 +15,8 @@ import {
   X,
   PlusCircle,
   Briefcase,
-  Menu
+  Menu,
+  Zap
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -32,7 +33,7 @@ const mainNav = [
 
 const secondaryNav = [
   { path: '/app/profile', label: 'My Profile', icon: UserCheck },
-  { path: '/app/resume', label: 'Resume Match', icon: FileText },
+  { path: '/app/resume', label: 'AI Profiler', icon: Zap },
   { path: '/app/help', label: 'AI Help', icon: HelpCircle },
   { path: '/app/notifications', label: 'Alerts', icon: Bell },
   { path: '/app/about', label: 'About Us', icon: Info },

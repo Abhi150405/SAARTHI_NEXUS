@@ -82,3 +82,11 @@ async def get_company_details(name: str):
         "visit_count": len(history),
         "history": history
     }
+
+@router.get("/company/{name}/feedback")
+async def get_company_feedback(name: str):
+    db = get_database()
+    feedbacks = await db['company_feedback'].find({"company_name": name}).sort("date", -1).to_list(1000)
+    for f in feedbacks:
+        f['_id'] = str(f['_id'])
+    return feedbacks
