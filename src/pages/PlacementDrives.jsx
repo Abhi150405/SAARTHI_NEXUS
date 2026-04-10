@@ -211,7 +211,6 @@ const PlacementDrives = () => {
                                             style={{
                                                 padding: '10px 24px', 
                                                 borderRadius: '8px',
-                                                border: 'none',
                                                 fontWeight: 600,
                                                 fontSize: '14px',
                                                 display: 'flex',

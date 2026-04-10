@@ -60,12 +60,25 @@
 .logo-section {
     display: flex;
     align-items: center;
+    gap: 8px;
 }
 
 .brand-logo {
     height: 32px;
     width: auto;
     display: block;
+    flex-shrink: 0;
+}
+
+/* Brand name text  */
+.brand-name {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #F97316;
+    white-space: nowrap;
+    text-transform: uppercase;
+    line-height: 1;
 }
 
 .mobile-close {
@@ -309,20 +322,32 @@
 
 .sidebar.collapsed .sidebar-header {
     justify-content: center;
-    padding: 0;
+    padding: 0 8px;
 }
 
+/* In collapsed state: show logo + brand text stacked vertically */
+.sidebar.collapsed .sidebar-header-top {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+
+/* Logo always visible at a slightly smaller size */
 .sidebar.collapsed .brand-logo {
+    height: 24px;
+    display: block;
+}
+
+/* Brand name: hidden when collapsed, shown on hover */
+.sidebar.collapsed .brand-name {
     display: none;
 }
 
-.sidebar.collapsed .sidebar-header-top {
-    justify-content: center;
-    gap: 0;
-}
-
+/* Hide the toggle button in collapsed state (CSS hover handles expand) */
 .sidebar.collapsed .sidebar-toggle-trigger {
-    padding: 8px;
+    display: none;
 }
 
 .sidebar.collapsed .mobile-close {
@@ -361,7 +386,7 @@
     display: none;
 }
 
-/* Tooltip on hover if collapsed (optional, but let's keep it simple for now) */
+/* Smooth width transition on desktop */
 @media (min-width: 1025px) {
     .sidebar {
         transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);

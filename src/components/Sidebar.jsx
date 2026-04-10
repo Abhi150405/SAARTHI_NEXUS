@@ -57,6 +57,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleSidebar }) => {
         <div className="sidebar-header-top">
           <div className="logo-section cursor-pointer" onClick={() => { navigate('/'); onClose(); }}>
             <img src="/logo.svg" alt="SAARTHI Nexus Logo" className="brand-logo" />
+            <span className="brand-name">SAARTHI NEXUS</span>
           </div>
           <button className="sidebar-toggle-trigger" onClick={onToggleSidebar} title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}>
             <Menu size={20} />

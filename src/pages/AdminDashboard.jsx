@@ -42,6 +42,7 @@ import { API_URL } from '../config';
 import AddPlacementRecord from './AddPlacementRecord';
 import ManagePlacementRecords from './ManagePlacementRecords';
 import ManagePlacementDrives from './ManagePlacementDrives';
+import AttendanceControlPanel from './AttendanceControlPanel';
 
 ChartJS.register(
     CategoryScale,
@@ -521,6 +522,13 @@ const AdminDashboard = () => {
                         <span>Campus Drives</span>
                     </button>
                     <button
+                        className={`admin-nav-item ${activeTab === 'attendance' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('attendance')}
+                    >
+                        <ShieldCheck size={20} />
+                        <span>Attendance Control</span>
+                    </button>
+                    <button
                         className={`admin-nav-item ${activeTab === 'add-placement' ? 'active' : ''}`}
                         onClick={() => setActiveTab('add-placement')}
                     >
@@ -817,6 +825,9 @@ const AdminDashboard = () => {
                     )}
                     {activeTab === 'manage-placements' && (
                         <ManagePlacementRecords setActiveTab={setActiveTab} />
+                    )}
+                    {activeTab === 'attendance' && (
+                        <AttendanceControlPanel />
                     )}
 
                     {/* Student Records Tab */}

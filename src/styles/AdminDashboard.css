@@ -1326,4 +1326,48 @@
     background: rgba(249,115,22,0.18) !important;
     transform: scale(1.1);
 }
+
+/* === AUTO EXPAND ON HOVER FOR ADMIN === */
+@media (min-width: 1025px) {
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar {
+        width: 80px;
+        overflow: visible;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar:hover {
+        width: 280px;
+    }
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar span,
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar .admin-user-profile,
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar .admin-user-info,
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar .admin-sidebar-header span {
+        opacity: 0;
+        display: none;
+    }
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar:hover span,
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar:hover .admin-user-profile,
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar:hover .admin-user-info,
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar:hover .admin-sidebar-header span {
+        display: inline;
+        animation: fadeIn 0.3s forwards;
+    }
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar .admin-logo-box {
+        margin: 0 auto;
+        transition: margin 0.3s;
+    }
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar:hover .admin-logo-box {
+        margin: 0;
+    }
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar .admin-nav-item {
+        justify-content: center;
+        padding-left: 0;
+    }
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-sidebar:hover .admin-nav-item {
+        justify-content: flex-start;
+        padding-left: 1rem;
+    }
+    .admin-dashboard-root.admin-sidebar-collapsed .admin-main {
+        margin-left: 0px; 
+    }
+}
 

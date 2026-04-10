@@ -147,93 +147,119 @@ Return EXACTLY this JSON structure:
    (count of student skills that semantically satisfy required_skills / total required_skills) * 100
    Round to nearest integer. Use your reasoning to identify synonyms (e.g. DSA = Data Structures) and related terminology.
 10. overall_summary must address the student by their first name.
+11. Very Important: You MUST LIMIT the missing_skills array to a MAXIMUM of 4 most critical skills. Do not output more than 4 missing skills.
 """
 
 @router.post("/")
 async def analyze_skill_gap(request: AnalysisRequest):
-    api_key = os.getenv("GOOGLE_API_KEY")
-    if not api_key:
-        raise HTTPException(status_code=500, detail="GOOGLE_API_KEY is not set in backend environment.")
-
-    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    nvidia_api_key = os.getenv("NVIDIA_API_KEY")
+    google_api_key = os.getenv("GOOGLE_API_KEY")
     
-    input_text = f"{SYSTEM_PROMPT}\n\n=== STUDENT INPUT ===\n{request.model_dump_json(indent=2)}"
+    if not nvidia_api_key and not google_api_key:
+        raise HTTPException(status_code=500, detail="Neither NVIDIA_API_KEY nor GOOGLE_API_KEY is set in backend environment.")
 
-    payload = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": input_text}
-                ]
-            }
-        ],
-        "generationConfig": {
-            "temperature": 0.3,
-            "topP": 0.8,
-            "maxOutputTokens": 8192,
-            "responseMimeType": "application/json"
-        }
-    }
+    input_text = f"{SYSTEM_PROMPT}\n\n=== STUDENT INPUT ===\n{request.model_dump_json(indent=2)}"
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(gemini_url, json=payload, timeout=60.0)
-            response.raise_for_status()
-            data = response.json()
-            raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
-            
-            # ── Robust JSON parsing with cleanup ──
-            def clean_json(text: str) -> str:
-                """Fix common Gemini JSON issues."""
-                # Strip markdown code fences
-                text = re.sub(r'^```(?:json)?\s*', '', text, flags=re.MULTILINE)
-                text = re.sub(r'```\s*$', '', text, flags=re.MULTILINE)
-                text = text.strip()
-                # Remove trailing commas before } or ]
-                text = re.sub(r',\s*([\]}])', r'\1', text)
-                # Remove single-line // comments
-                text = re.sub(r'//[^\n]*', '', text)
-                return text
-
+            error_details = []
             result_json = None
-            parse_errors = []
 
-            # Attempt 1: direct parse
-            try:
-                result_json = json.loads(raw_text, strict=False)
-            except json.JSONDecodeError as e1:
-                parse_errors.append(f"Direct parse: {e1}")
+            def parse_llm_json(text: str):
+                """Helper to cleanly parse JSON or throw ValueError."""
+                def clean_json(t: str) -> str:
+                    t = re.sub(r'^```(?:json)?\s*', '', t, flags=re.MULTILINE)
+                    t = re.sub(r'```\s*$', '', t, flags=re.MULTILINE)
+                    t = t.strip()
+                    t = re.sub(r',\s*([\]}])', r'\1', t)
+                    t = re.sub(r'//[^\n]*', '', t)
+                    return t
 
-            # Attempt 2: clean then parse
-            if result_json is None:
+                parse_errors = []
                 try:
-                    cleaned = clean_json(raw_text)
-                    result_json = json.loads(cleaned, strict=False)
+                    return json.loads(text, strict=False)
+                except json.JSONDecodeError as e1:
+                    parse_errors.append(f"Direct parse: {e1}")
+
+                try:
+                    return json.loads(clean_json(text), strict=False)
                 except json.JSONDecodeError as e2:
                     parse_errors.append(f"Cleaned parse: {e2}")
 
-            # Attempt 3: extract first { ... } block, clean, parse
-            if result_json is None:
-                json_match = re.search(r'\{[\s\S]*\}', raw_text)
+                json_match = re.search(r'\{[\s\S]*\}', text)
                 if json_match:
                     try:
-                        extracted = clean_json(json_match.group(0))
-                        result_json = json.loads(extracted, strict=False)
+                        return json.loads(clean_json(json_match.group(0)), strict=False)
                     except json.JSONDecodeError as e3:
                         parse_errors.append(f"Extracted parse: {e3}")
 
-            if result_json is None:
                 raise ValueError(
-                    f"Failed to parse Gemini JSON after 3 attempts. "
+                    f"Failed to parse LLM JSON after 3 attempts. "
                     f"Errors: {'; '.join(parse_errors)}. "
-                    f"Raw (first 500 chars): {raw_text[:500]}"
+                    f"Raw (first 500 chars): {text[:500]}"
                 )
-                    
+
+            # --- NVIDIA Try First ---
+            if nvidia_api_key:
+                nvidia_url = "https://integrate.api.nvidia.com/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {nvidia_api_key}",
+                    "Accept": "application/json",
+                }
+                payload = {
+                    "model": "meta/llama-3.1-70b-instruct",
+                    "messages": [{"role": "user", "content": input_text}],
+                    "max_tokens": 4096,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+                try:
+                    response = await client.post(nvidia_url, headers=headers, json=payload, timeout=60.0)
+                    response.raise_for_status()
+                    data = response.json()
+                    raw_text = data["choices"][0]["message"]["content"]
+                    result_json = parse_llm_json(raw_text)
+                except Exception as e:
+                    err_msg = e.response.text if isinstance(e, httpx.HTTPError) and getattr(e, "response", None) else str(e)
+                    print(f"NVIDIA API Error or Parse Error: {err_msg}")
+                    error_details.append(f"NVIDIA Error: {err_msg}")
+
+            # --- Gemini Fallback attempt ---
+            if result_json is None and google_api_key:
+                gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={google_api_key}"
+                payload = {
+                    "contents": [
+                        {
+                            "parts": [
+                                {"text": input_text}
+                            ]
+                        }
+                    ],
+                    "generationConfig": {
+                        "temperature": 0.3,
+                        "topP": 0.8,
+                        "maxOutputTokens": 8192,
+                        "responseMimeType": "application/json"
+                    }
+                }
+                try:
+                    response = await client.post(gemini_url, json=payload, timeout=60.0)
+                    response.raise_for_status()
+                    data = response.json()
+                    raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
+                    result_json = parse_llm_json(raw_text)
+                except Exception as e:
+                    err_msg = e.response.text if isinstance(e, httpx.HTTPError) and getattr(e, "response", None) else str(e)
+                    print(f"Gemini API Error or Parse Error: {err_msg}")
+                    error_details.append(f"Gemini Error: {err_msg}")
+
+            if result_json is None:
+                raise HTTPException(status_code=502, detail=f"LLM API Errors: {' | '.join(error_details)}")
+
             return result_json
             
-        except httpx.HTTPError as e:
-            error_details = e.response.text if getattr(e, "response", None) else str(e)
-            raise HTTPException(status_code=502, detail=f"Gemini API Error: {error_details}")
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 

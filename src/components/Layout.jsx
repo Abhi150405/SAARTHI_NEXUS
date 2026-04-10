@@ -7,16 +7,12 @@ import NotificationBar from './NotificationBar';
 
 const Layout = () => {
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
-    const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-    const toggleSidebar = () => {
-        setSidebarCollapsed(!sidebarCollapsed);
-    };
-
     return (
-        <div className={`layout-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <div className="layout-root">
             <NotificationBar />
+
             {/* Mobile Header */}
             <header className="mobile-header">
                 <div className="flex items-center justify-between w-full">
@@ -43,12 +39,19 @@ const Layout = () => {
                 </div>
             </header>
 
-            <Sidebar 
-                isOpen={sidebarOpen} 
-                onClose={() => setSidebarOpen(false)} 
-                isCollapsed={sidebarCollapsed}
-                onToggleSidebar={toggleSidebar}
-            />
+            {/*
+              sidebar-shell is the hover zone.
+              It stays 70px wide (icon-only) and expands to 240px on CSS :hover.
+              No JS hover state needed — pure CSS handles the expansion.
+            */}
+            <div className={`sidebar-shell ${sidebarOpen ? 'mobile-open' : ''}`}>
+                <Sidebar
+                    isOpen={sidebarOpen}
+                    onClose={() => setSidebarOpen(false)}
+                    isCollapsed={true}
+                    onToggleSidebar={() => {}}
+                />
+            </div>
 
             {/* Overlay for mobile */}
             {sidebarOpen && (
@@ -58,11 +61,13 @@ const Layout = () => {
                 />
             )}
 
-            <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}>
+            {/* Main content — offset by 70px (collapsed sidebar width) */}
+            <main className="main-content">
                 <div className="container">
                     <Outlet />
                 </div>
             </main>
+
             <Chatbot />
         </div>
     );
