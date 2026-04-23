@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Target, CheckCircle, AlertTriangle, Loader2, Briefcase, Building2, ChevronDown, BookOpen, PlayCircle, GraduationCap, Code2, CheckCircle2, Sparkles, TrendingUp, Clock, Star, Trophy } from 'lucide-react';
 import { API_URL } from '../config';
@@ -13,38 +13,42 @@ const SkillAnalysis = () => {
     const [selectedTarget, setSelectedTarget] = useState('');
 
     // ── Derive companies and roles from skill_data.json ──
-    // Deduplicate companies by display_name, keep the first entry
-    const companyMap = {};
-    skillData.forEach(c => {
-        const name = (c.display_name || '').replace(/_$/, ''); // strip trailing underscore
-        if (!companyMap[name]) companyMap[name] = c;
-    });
-    const companies = Object.keys(companyMap);
-
-    // Build companySkills: display_name -> combined must_have + good_to_have
-    const companySkills = {};
-    companies.forEach(name => {
-        const c = companyMap[name];
-        const allSkills = new Set();
-        (c.roles_offered || []).forEach(r => {
-            (r.must_have_skills || []).forEach(s => allSkills.add(s));
-            (r.good_to_have_skills || []).forEach(s => allSkills.add(s));
+    const { companies, companyMap, companySkills, roles, roleMap, roleSkills } = useMemo(() => {
+        // Deduplicate companies by display_name, keep the first entry
+        const companyMap = {};
+        skillData.forEach(c => {
+            const name = (c.display_name || '').replace(/_$/, ''); // strip trailing underscore
+            if (!companyMap[name]) companyMap[name] = c;
         });
-        companySkills[name] = [...allSkills];
-    });
+        const companies = Object.keys(companyMap);
 
-    // Build roles: unique role_titles aggregated across all companies
-    const roleMap = {};
-    skillData.forEach(c => {
-        (c.roles_offered || []).forEach(r => {
-            if (!roleMap[r.role_title]) roleMap[r.role_title] = new Set();
-            (r.must_have_skills || []).forEach(s => roleMap[r.role_title].add(s));
-            (r.good_to_have_skills || []).forEach(s => roleMap[r.role_title].add(s));
+        // Build companySkills: display_name -> combined must_have + good_to_have
+        const companySkills = {};
+        companies.forEach(name => {
+            const c = companyMap[name];
+            const allSkills = new Set();
+            (c.roles_offered || []).forEach(r => {
+                (r.must_have_skills || []).forEach(s => allSkills.add(s));
+                (r.good_to_have_skills || []).forEach(s => allSkills.add(s));
+            });
+            companySkills[name] = [...allSkills];
         });
-    });
-    const roles = Object.keys(roleMap);
-    const roleSkills = {};
-    roles.forEach(r => { roleSkills[r] = [...roleMap[r]]; });
+
+        // Build roles: unique role_titles aggregated across all companies
+        const roleMap = {};
+        skillData.forEach(c => {
+            (c.roles_offered || []).forEach(r => {
+                if (!roleMap[r.role_title]) roleMap[r.role_title] = new Set();
+                (r.must_have_skills || []).forEach(s => roleMap[r.role_title].add(s));
+                (r.good_to_have_skills || []).forEach(s => roleMap[r.role_title].add(s));
+            });
+        });
+        const roles = Object.keys(roleMap);
+        const roleSkills = {};
+        roles.forEach(r => { roleSkills[r] = [...roleMap[r]]; });
+
+        return { companies, companyMap, companySkills, roles, roleMap, roleSkills };
+    }, []);
 
     // Set initial target once data is derived
     if (!selectedTarget && companies.length > 0) {
@@ -210,7 +214,7 @@ const SkillAnalysis = () => {
         setResourceTabs(prev => ({ ...prev, [skillIndex]: tab }));
     };
 
-    const chartData = (() => {
+    const chartData = useMemo(() => {
         // Compute skill frequency across all companies for dynamic chart
         const freq = {};
         const targetSkills = getRequiredSkills();
@@ -242,7 +246,7 @@ const SkillAnalysis = () => {
                 borderRadius: 4,
             }]
         };
-    })();
+    }, [selectedTarget, analysisMode, companySkills, roleSkills]);
 
     // Helpers
     const fullName = studentProfile.firstName

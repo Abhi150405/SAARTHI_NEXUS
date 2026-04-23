@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     DATABASE_NAME: str = "saarthi_nexus"
     GEMINI_API_KEY: str = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or ""
     NVIDIA_API_KEY: str = os.getenv("NVIDIA_API_KEY") or ""
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID") or ""
     PORT: int = int(os.environ.get("PORT", 8000))
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",

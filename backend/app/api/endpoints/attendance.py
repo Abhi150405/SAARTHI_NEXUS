@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form, Response
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
@@ -171,6 +171,53 @@ async def get_session_records(session_id: str):
     for r in records:
         r["_id"] = str(r["_id"])
     return records
+
+@router.get("/sessions/{session_id}/download-csv")
+async def download_attendance_csv(session_id: str):
+    """Download attendance records for a session as CSV file."""
+    db = get_database()
+
+    # Fetch session details
+    try:
+        session = await db.attendance_sessions.find_one({"_id": ObjectId(session_id)})
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid session ID format")
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    # Fetch attendance records
+    records = await db.attendance_records.find({"session_id": session_id}).to_list(length=1000)
+
+    # Create CSV in memory
+    output = io.StringIO()
+    fieldnames = ['Student Name', 'Student Email', 'Student ID', 'Status', 'Timestamp', 'Distance (m)', 'Latitude', 'Longitude']
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer.writeheader()
+
+    for r in records:
+        writer.writerow({
+            'Student Name': r.get('student_name', ''),
+            'Student Email': r.get('student_email', ''),
+            'Student ID': r.get('student_id', ''),
+            'Status': r.get('status', ''),
+            'Timestamp': r.get('timestamp', '').isoformat() if isinstance(r.get('timestamp'), datetime) else str(r.get('timestamp', '')),
+            'Distance (m)': round(r.get('distance', 0), 2) if r.get('distance') else '',
+            'Latitude': r.get('latitude', ''),
+            'Longitude': r.get('longitude', '')
+        })
+
+    output.seek(0)
+    csv_content = output.getvalue()
+
+    # Sanitize company name for filename
+    company_name = session.get('company_name', 'attendance').replace('/', '-').replace('\\', '-')
+    filename = f"attendance_{company_name}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 @router.post("/mark")
 async def mark_attendance(req: MarkAttendanceRequest):

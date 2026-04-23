@@ -85,7 +85,7 @@ const HeroSection = ({ isAuthenticated, user }) => {
                     {/* Terminal pill — always goes to analytics (public) */}
                     <motion.div 
                         variants={itemVariants} 
-                        onClick={handleViewAnalytics}
+                        onClick={() => navigate('/login')}
                         className="inline-flex items-center gap-3 px-5 py-3 rounded-lg bg-[#111111]/80 backdrop-blur-sm border border-[#2A2A2A] font-mono text-[13px] mb-8 cursor-pointer hover:border-[#F97316]/30 hover:bg-[#111111] transition-all duration-300 group"
                     >
                         <span className="terminal-cursor w-2 h-4 bg-[#F97316] animate-pulse rounded-sm inline-block"></span>
