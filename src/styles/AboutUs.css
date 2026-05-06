@@ -59,7 +59,21 @@
 
 @media (max-width: 768px) {
     .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 540px) {
+    .team-grid {
         grid-template-columns: 1fr;
+    }
+
+    .team-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .project-info p {
+        font-size: 0.95rem;
     }
 }
 

@@ -6,6 +6,7 @@ import httpx
 import os
 import json
 import re
+from app.db.mongodb import get_database
 
 router = APIRouter()
 
@@ -148,6 +149,7 @@ Return EXACTLY this JSON structure:
    Round to nearest integer. Use your reasoning to identify synonyms (e.g. DSA = Data Structures) and related terminology.
 10. overall_summary must address the student by their first name.
 11. Very Important: You MUST LIMIT the missing_skills array to a MAXIMUM of 4 most critical skills. Do not output more than 4 missing skills.
+12. EXPLICIT MATCHING RULE: SQL, MySQL, PostgreSQL, Oracle, DBMS, RDBMS, and Database Management System are fully equivalent. If a student has any of these, consider all others matched.
 """
 
 @router.post("/")
@@ -158,7 +160,28 @@ async def analyze_skill_gap(request: AnalysisRequest):
     if not nvidia_api_key and not google_api_key:
         raise HTTPException(status_code=500, detail="Neither NVIDIA_API_KEY nor GOOGLE_API_KEY is set in backend environment.")
 
-    input_text = f"{SYSTEM_PROMPT}\n\n=== STUDENT INPUT ===\n{request.model_dump_json(indent=2)}"
+    # --- Fetch Interview Experiences ---
+    db = get_database()
+    interview_context = ""
+    if db is not None:
+        try:
+            company_target = request.target.name
+            # Basic search for matching company name (case-insensitive)
+            experiences = await db['interview_experience'].find({"company_name": {"$regex": company_target, "$options": "i"}}).sort("date", -1).to_list(3)
+            
+            if experiences:
+                interview_context = "\n\n=== RECENT INTERVIEW EXPERIENCES FOR THIS COMPANY ===\n"
+                for exp in experiences:
+                    interview_context += f"Role: {exp.get('role', 'N/A')}\n"
+                    interview_context += f"Rounds: {exp.get('rounds', 'N/A')}\n"
+                    interview_context += f"Experience: {exp.get('experience', '')[:400]}...\n"
+                    interview_context += f"Suggestions: {exp.get('suggestions', '')[:200]}\n"
+                    interview_context += "-" * 30 + "\n"
+                interview_context += "Use these interview experiences to tailor the skill gap analysis and roadmap to reflect the actual interview process of this company if applicable.\n"
+        except Exception as e:
+            print(f"Failed to fetch interview experience: {e}")
+
+    input_text = f"{SYSTEM_PROMPT}{interview_context}\n\n=== STUDENT INPUT ===\n{request.model_dump_json(indent=2)}"
 
     async with httpx.AsyncClient() as client:
         try:

@@ -20,3 +20,4 @@ python-docx
 httpx
 matplotlib
 seaborn
+google-auth

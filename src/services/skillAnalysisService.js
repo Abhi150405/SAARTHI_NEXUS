@@ -41,54 +41,54 @@ export function buildYouTubeSearchUrl(searchQuery) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;
 }
 
+// NLP Helper: Levenshtein Distance for fuzzy matching
+const getSimilarity = (a, b) => {
+    const longer = a.length > b.length ? a : b;
+    const shorter = a.length > b.length ? b : a;
+    if (longer.length === 0) return 1.0;
+    
+    const costs = [];
+    for (let i = 0; i <= a.length; i++) {
+        let lastValue = i;
+        for (let j = 0; j <= b.length; j++) {
+            if (i === 0) costs[j] = j;
+            else {
+                if (j > 0) {
+                    let newValue = costs[j - 1];
+                    if (a.charAt(i - 1) !== b.charAt(j - 1))
+                        newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                    costs[j - 1] = lastValue;
+                    lastValue = newValue;
+                }
+            }
+        }
+        if (i > 0) costs[b.length] = lastValue;
+    }
+    return (longer.length - costs[b.length]) / longer.length;
+};
+
+// 2. Common Synonym Dictionary
+const skillSynonyms = {
+    'dsa': ['data structures', 'algorithms', 'data structures and algorithms', 'dsa'],
+    'cpp': ['c++', 'c plus plus', 'cpp'],
+    'js': ['javascript', 'js', 'vanilla js'],
+    'react': ['react.js', 'reactjs', 'react js', 'frontend'],
+    'ml': ['machine learning', 'ml', 'ai', 'artificial intelligence'],
+    'sql': ['dbms', 'databases', 'database', 'rdbms', 'mysql', 'postgresql', 'oracle', 'sql', 'sql server', 'database management', 'database management system'],
+    'networking': ['cn', 'computer networks', 'networking'],
+    'os': ['operating systems', 'os', 'operating system'],
+    'oop': ['object oriented programming', 'oop', 'oops'],
+};
+
 /**
  * Smartly checks if a required skill is satisfied by a student's profile.
  * This is 100% local and consumes 0 Gemini tokens.
  */
 export function isSkillSatisfied(studentSkills, requiredSkill) {
     if (!studentSkills || !requiredSkill) return false;
-    
-    // NLP Helper: Levenshtein Distance for fuzzy matching
-    const getSimilarity = (a, b) => {
-        const longer = a.length > b.length ? a : b;
-        const shorter = a.length > b.length ? b : a;
-        if (longer.length === 0) return 1.0;
-        
-        const costs = [];
-        for (let i = 0; i <= a.length; i++) {
-            let lastValue = i;
-            for (let j = 0; j <= b.length; j++) {
-                if (i === 0) costs[j] = j;
-                else {
-                    if (j > 0) {
-                        let newValue = costs[j - 1];
-                        if (a.charAt(i - 1) !== b.charAt(j - 1))
-                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                        costs[j - 1] = lastValue;
-                        lastValue = newValue;
-                    }
-                }
-            }
-            if (i > 0) costs[b.length] = lastValue;
-        }
-        return (longer.length - costs[b.length]) / longer.length;
-    };
 
     // 1. Normalization
     const req = requiredSkill.toLowerCase().trim();
-    
-    // 2. Common Synonym Dictionary
-    const skillSynonyms = {
-        'dsa': ['data structures', 'algorithms', 'data structures and algorithms', 'dsa'],
-        'cpp': ['c++', 'c plus plus', 'cpp'],
-        'js': ['javascript', 'js', 'vanilla js'],
-        'react': ['react.js', 'reactjs', 'react js', 'frontend'],
-        'ml': ['machine learning', 'ml', 'ai', 'artificial intelligence'],
-        'sql': ['dbms', 'databases', 'mysql', 'postgresql', 'oracle', 'sql', 'sql server'],
-        'networking': ['cn', 'computer networks', 'networking'],
-        'os': ['operating systems', 'os', 'operating system'],
-        'oop': ['object oriented programming', 'oop', 'oops'],
-    };
 
     return studentSkills.some(studentSkill => {
         const stud = studentSkill.toLowerCase().trim();

@@ -7,7 +7,13 @@ import NotificationBar from './NotificationBar';
 
 const Layout = () => {
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
+    const [isCollapsed, setIsCollapsed] = React.useState(true);
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // On mobile (≤1024px), when the sidebar slides in it should NEVER be
+    // collapsed — icons + labels must both be visible.
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
+    const collapsedForSidebar = isMobile ? false : isCollapsed;
 
     return (
         <div className="layout-root">
@@ -48,8 +54,8 @@ const Layout = () => {
                 <Sidebar
                     isOpen={sidebarOpen}
                     onClose={() => setSidebarOpen(false)}
-                    isCollapsed={true}
-                    onToggleSidebar={() => {}}
+                    isCollapsed={collapsedForSidebar}
+                    onToggleSidebar={() => setIsCollapsed(prev => !prev)}
                 />
             </div>
 

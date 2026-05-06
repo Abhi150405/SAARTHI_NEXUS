@@ -344,6 +344,27 @@ input:focus, select:focus {
   .cr-detail-view { padding: 16px; }
   .cr-hero { flex-direction: column; gap: 20px; }
   .cr-hero-right { align-items: flex-start; }
+  /* On tablet/mobile the topbar is replaced by 56px mobile header */
+  .cr-page {
+    height: auto;
+    min-height: calc(100vh - 56px);
+    overflow: visible;
+  }
+}
+
+@media (max-width: 640px) {
+  .cr-header {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .cr-title { font-size: 20px; }
+  .cr-header-right { flex-wrap: wrap; }
+  .cr-kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cr-detail-view { padding: 12px; }
+  .cr-sidebar { max-height: 280px; }
+  .cr-table-outer { -webkit-overflow-scrolling: touch; }
 }
 
 /* Recruiter Feedback Styles */

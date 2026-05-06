@@ -84,7 +84,33 @@ async def chat(request: Request):
                 f"Hired: {hires} (CE: {d['selections']['CE']}, IT: {d['selections']['IT']}, E&TC: {d['selections']['E&TC']}) | "
                 f"Criteria: {d.get('criteria', {}).get('min_cgpa', 'N/A')} CGPA"
             )
+
+    # ── Inject Interview Experiences ────────────────────────────────
+    exp_collection = db['interview_experience']
+    is_interview_query = any(word in query_lower for word in ["interview", "experience", "rounds", "questions", "asked", "process"])
     
+    if found_companies:
+        exps = await exp_collection.find({"company_name": {"$in": found_companies}}).sort("date", -1).to_list(5)
+        if exps:
+            context_parts.append("--- RECENT INTERVIEW EXPERIENCES ---")
+            for exp in exps:
+                context_parts.append(
+                    f"Company: {exp['company_name']} | Role: {exp.get('role', 'N/A')} | "
+                    f"Rounds: {exp.get('rounds', 'N/A')} | "
+                    f"Experience: {exp.get('experience', '')[:600]}... | "
+                    f"Suggestions: {exp.get('suggestions', '')[:200]}"
+                )
+    elif is_interview_query:
+        exps = await exp_collection.find().sort("date", -1).to_list(3)
+        if exps:
+            context_parts.append("--- SOME RECENT INTERVIEW EXPERIENCES ---")
+            for exp in exps:
+                context_parts.append(
+                    f"Company: {exp['company_name']} | Role: {exp.get('role', 'N/A')} | "
+                    f"Rounds: {exp.get('rounds', 'N/A')} | "
+                    f"Experience: {exp.get('experience', '')[:300]}..."
+                )
+
     context_string = "\n\n".join(context_parts) if context_parts else "No specific database records found for this query."
     
     return StreamingResponse(

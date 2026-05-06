@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Target, Users, Clock, Send, ShieldCheck, Upload, FileText, X, CheckCircle } from 'lucide-react';
+import { Target, Users, Clock, Send, ShieldCheck, Upload, FileText, X, CheckCircle, Download } from 'lucide-react';
 import { API_URL } from '../config';
 import '../styles/AdminDashboard.css';
 
@@ -180,6 +180,40 @@ const AttendanceControlPanel = () => {
         }
     };
 
+    const handleDownloadCsv = async (sessionId, companyName) => {
+        try {
+            const res = await fetch(`${API_URL}/api/attendance/sessions/${sessionId}/download-csv`);
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+
+                // Extract filename from Content-Disposition header if available
+                const contentDisposition = res.headers.get('Content-Disposition');
+                let filename = `attendance_${companyName || 'session'}.csv`;
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                    if (filenameMatch && filenameMatch[1]) {
+                        filename = filenameMatch[1];
+                    }
+                }
+
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            } else {
+                const err = await res.json();
+                alert(`Failed to download: ${err.detail || 'Unknown error'}`);
+            }
+        } catch (err) {
+            console.error('Download error:', err);
+            alert('Error downloading CSV file');
+        }
+    };
+
     return (
         <div className="admin-panel glass full-width" style={{ marginTop: '1rem' }}>
             <div className="panel-header">
@@ -342,7 +376,37 @@ const AttendanceControlPanel = () => {
 
                         {selectedSessionId && (
                             <>
-                                <div className="doc-section-title">Live Attendance List</div>
+                                <div className="doc-section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>Live Attendance List</span>
+                                    <button
+                                        onClick={() => handleDownloadCsv(selectedSessionId, sessions.find(s => s._id === selectedSessionId)?.company_name)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            background: 'rgba(34, 197, 94, 0.15)',
+                                            border: '1px solid rgba(34, 197, 94, 0.3)',
+                                            borderRadius: '6px',
+                                            color: '#22c55e',
+                                            fontSize: '0.85rem',
+                                            fontWeight: '500',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={e => {
+                                            e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)';
+                                            e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+                                        }}
+                                        onMouseLeave={e => {
+                                            e.currentTarget.style.background = 'rgba(34, 197, 94, 0.15)';
+                                            e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                                        }}
+                                    >
+                                        <Download size={16} />
+                                        Download CSV
+                                    </button>
+                                </div>
                                 <div className="table-responsive" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                     <table className="nexus-table">
                                         <thead>

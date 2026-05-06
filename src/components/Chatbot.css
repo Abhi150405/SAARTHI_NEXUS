@@ -201,6 +201,19 @@
     transform: none;
 }
 
+@media (max-width: 640px) {
+    .chat-window {
+        width: calc(100vw - 24px);
+        height: 65vh;
+        max-height: 500px;
+    }
+
+    .chatbot-container {
+        right: 12px;
+        bottom: 12px;
+    }
+}
+
 @media (max-width: 480px) {
     .chat-window {
         width: calc(100vw - 2rem);

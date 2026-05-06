@@ -158,28 +158,62 @@ const Notifications = () => {
                                                     <span style={{ fontSize: '0.85rem', color: '#A3A3A3' }}>Window: {formatTime(notif.start_time)} to {formatTime(notif.end_time)}</span>
                                                 </div>
                                                 
-                                                {!attendanceStatus[notif._id] ? (
-                                                    <button 
-                                                        className="submit-btn" 
-                                                        style={{ width: '100%', padding: '0.5rem', display: 'flex', justifyContent: 'center', gap: '0.5rem', background: '#F97316', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                                                        onClick={() => handleMarkAttendance(notif)}
-                                                        disabled={marking[notif._id]}
-                                                    >
-                                                        <MapPin size={16} />
-                                                        {marking[notif._id] ? 'Getting GPS Location...' : 'Mark Attendance Now'}
-                                                    </button>
-                                                ) : (
-                                                    <div style={{ 
-                                                        padding: '0.75rem', 
-                                                        textAlign: 'center', 
-                                                        borderRadius: '6px', 
-                                                        fontWeight: 600,
-                                                        background: attendanceStatus[notif._id].success ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                                        color: attendanceStatus[notif._id].success ? '#22c55e' : '#ef4444'
-                                                    }}>
-                                                        {attendanceStatus[notif._id].success ? '✅ Attendance Logged' : `❌ ${attendanceStatus[notif._id].status}`}
-                                                    </div>
-                                                )}
+                                                {(() => {
+                                                    const isExpired = notif.end_time && new Date() > new Date(notif.end_time);
+                                                    
+                                                    if (attendanceStatus[notif._id]) {
+                                                        return (
+                                                            <div style={{ 
+                                                                padding: '0.75rem', 
+                                                                textAlign: 'center', 
+                                                                borderRadius: '6px', 
+                                                                fontWeight: 600,
+                                                                background: attendanceStatus[notif._id].success ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                                color: attendanceStatus[notif._id].success ? '#22c55e' : '#ef4444'
+                                                            }}>
+                                                                {attendanceStatus[notif._id].success ? '✅ Attendance Logged' : `❌ ${attendanceStatus[notif._id].status}`}
+                                                            </div>
+                                                        );
+                                                    }
+                                                    
+                                                    if (isExpired) {
+                                                        return (
+                                                            <button 
+                                                                className="submit-btn" 
+                                                                style={{ 
+                                                                    width: '100%', 
+                                                                    padding: '0.5rem', 
+                                                                    display: 'flex', 
+                                                                    justifyContent: 'center', 
+                                                                    gap: '0.5rem', 
+                                                                    background: 'rgba(239, 68, 68, 0.15)', 
+                                                                    color: '#ef4444', 
+                                                                    border: '1px solid rgba(239, 68, 68, 0.3)', 
+                                                                    borderRadius: '4px', 
+                                                                    cursor: 'not-allowed',
+                                                                    opacity: 0.8,
+                                                                    fontWeight: 600
+                                                                }}
+                                                                disabled
+                                                            >
+                                                                Session Expired
+                                                            </button>
+                                                        );
+                                                    }
+                                                    
+                                                    return (
+                                                        <button 
+                                                            className="submit-btn" 
+                                                            style={{ width: '100%', padding: '0.5rem', display: 'flex', justifyContent: 'center', gap: '0.5rem', background: '#F97316', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                                            onClick={() => handleMarkAttendance(notif)}
+                                                            disabled={marking[notif._id]}
+                                                        >
+                                                            <MapPin size={16} />
+                                                            {marking[notif._id] ? 'Getting GPS Location...' : 'Mark Attendance Now'}
+                                                        </button>
+                                                    );
+                                                })()}
+                                                
                                                 <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', color: '#737373', textAlign: 'center' }}>
                                                     Requires GPS Location within campus.
                                                 </p>

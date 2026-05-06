@@ -31,7 +31,7 @@ class MLService:
                 'js': ['javascript', 'js', 'vanilla js'],
                 'react': ['react.js', 'reactjs', 'react js', 'frontend'],
                 'ml': ['machine learning', 'ml', 'ai', 'artificial intelligence'],
-                'sql': ['dbms', 'databases', 'mysql', 'postgresql', 'oracle', 'sql', 'sql server'],
+                'sql': ['dbms', 'databases', 'database', 'rdbms', 'mysql', 'postgresql', 'oracle', 'sql', 'sql server', 'database management', 'database management system'],
                 'networking': ['cn', 'computer networks', 'networking'],
                 'os': ['operating systems', 'os', 'operating system'],
                 'oop': ['object oriented programming', 'oop', 'oops']

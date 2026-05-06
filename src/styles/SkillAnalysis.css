@@ -1603,10 +1603,26 @@
   .sa-venn-wrapper { width: 220px; }
   .sa-venn-circles { width: 220px; }
   .sa-venn-circle { width: 110px; height: 70px; }
+
+  /* Header becomes a compact stack */
+  .sa-header-left h2 { font-size: 18px; }
+
+  /* Full-width analyze button */
+  .sa-analyze-btn { font-size: 14px; height: 48px; }
+
+  /* Mode toggle uses a row layout to save vertical space */
+  .sa-mode-toggle { flex-direction: row; flex-wrap: wrap; }
+  .sa-mode-option { flex: 1; min-width: 120px; }
+
+  /* Quick match shows compactly */
+  .sa-quick-chips { flex-wrap: wrap; }
 }
 
 @media (max-width: 440px) {
   .sa-target-grid { grid-template-columns: 1fr; }
+
+  /* On very small phones, collapse mode options to full width */
+  .sa-mode-option { flex: 0 0 100%; }
 }
 
 /* ── UTILITY ─────────────────────────────────────────────── */
