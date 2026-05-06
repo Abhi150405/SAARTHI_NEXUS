@@ -392,3 +392,85 @@
         transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE OPEN OVERRIDES
+   When the sidebar slides in on mobile it must ALWAYS show
+   both icons AND labels — cancel every "collapsed" rule.
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    /* Force full 240px width regardless of collapsed class */
+    .sidebar.mobile-open {
+        width: 240px !important;
+        transform: translateX(0) !important;
+    }
+
+    /* Restore header layout */
+    .sidebar.mobile-open .sidebar-header {
+        padding: 0 16px !important;
+        justify-content: space-between !important;
+    }
+
+    .sidebar.mobile-open .sidebar-header-top {
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    /* Show brand logo at normal size */
+    .sidebar.mobile-open .brand-logo {
+        height: 32px !important;
+        display: block !important;
+    }
+
+    /* Show brand name */
+    .sidebar.mobile-open .brand-name {
+        display: block !important;
+    }
+
+    /* Show the toggle/close button */
+    .sidebar.mobile-open .sidebar-toggle-trigger {
+        display: none !important; /* hide collapse toggle on mobile — use X button */
+    }
+
+    /* Show the X close button */
+    .sidebar.mobile-open .mobile-close {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Nav items: restore label + left-aligned layout */
+    .sidebar.mobile-open .nav-item {
+        justify-content: flex-start !important;
+        padding: 8px 10px !important;
+    }
+
+    .sidebar.mobile-open .nav-item span {
+        display: inline !important;
+    }
+
+    .sidebar.mobile-open .nav-item svg {
+        margin: 0 !important;
+    }
+
+    /* Restore footer */
+    .sidebar.mobile-open .sidebar-footer {
+        padding: 12px !important;
+        display: block !important;
+        justify-content: initial !important;
+    }
+
+    .sidebar.mobile-open .user-info {
+        justify-content: flex-start !important;
+        gap: 10px !important;
+    }
+
+    .sidebar.mobile-open .user-details {
+        display: block !important;
+    }
+
+    .sidebar.mobile-open .logout-icon-btn {
+        display: flex !important;
+    }
+}

@@ -263,3 +263,18 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 480px) {
+    .score-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .dropzone {
+        min-height: 160px;
+    }
+
+    .full-width-btn {
+        min-height: 48px;
+        font-size: 1rem;
+    }
+}

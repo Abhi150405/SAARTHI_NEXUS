@@ -1164,3 +1164,32 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+@media (max-width: 480px) {
+  .el-page {
+    padding: 12px;
+  }
+  .el-stats-row {
+    grid-template-columns: 1fr;
+  }
+  .el-hero-title {
+    font-size: 22px;
+  }
+  .el-filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .el-sort-wrap select {
+    width: 100%;
+  }
+  .el-view-toggle {
+    align-self: flex-end;
+  }
+  .el-modal-checks {
+    grid-template-columns: 1fr;
+  }
+  /* Insights go single column on tiny screens */
+  .el-insights {
+    grid-template-columns: 1fr;
+  }
+}

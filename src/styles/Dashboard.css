@@ -666,9 +666,55 @@
         flex-direction: column;
         align-items: flex-start;
     }
+    .dash-header-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 640px) {
+    /* On mobile the parent main-content has only 12px padding each side,
+       so we only negate that, not the desktop 2rem */
+    .dash-page {
+        margin: -2rem -12px 0;
+        padding: 1rem 0;
+    }
+
+    .dash-container {
+        padding: 0 12px;
+    }
+
+    .dash-header-left .title {
+        font-size: 22px;
+    }
+
+    .kpi-number {
+        font-size: 22px;
+    }
+
+    .chart-area {
+        height: 180px;
+    }
+
+    /* Year filter wraps nicely */
+    .dash-header-right {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* table horizontal scroll */
+    .table-scroll {
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
 @media (max-width: 500px) {
+    .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 380px) {
     .kpi-grid {
         grid-template-columns: 1fr;
     }

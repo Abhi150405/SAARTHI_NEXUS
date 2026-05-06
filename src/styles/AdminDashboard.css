@@ -818,6 +818,59 @@
     }
 }
 
+@media (max-width: 640px) {
+    .admin-content {
+        padding: 1rem 12px;
+    }
+
+    .admin-top-bar {
+        padding: 0 12px;
+        height: 56px;
+    }
+
+    /* Make tables scrollable on mobile */
+    .nexus-table-wrap,
+    .admin-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nexus-table,
+    .admin-table {
+        min-width: 600px;
+    }
+
+    /* Actions grid single column */
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Modal should take full width on small screens */
+    .student-modal-overlay {
+        padding: 8px;
+    }
+
+    .student-modal,
+    .student-modal-lg {
+        max-width: 100%;
+        border-radius: 16px;
+    }
+
+    .modal-grid-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Document table wraps */
+    .industry-feedback-document {
+        padding: 1.25rem;
+    }
+
+    /* Branch pills wrapping */
+    .branch-filter-row {
+        padding: 0.5rem 12px;
+    }
+}
+
 /* --- Enhanced Student Records --- */
 .student-summary-row {
     display: grid;

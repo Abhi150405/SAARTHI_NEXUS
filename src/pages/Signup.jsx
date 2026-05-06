@@ -613,7 +613,7 @@ const Signup = () => {
                                 </AnimatePresence>
 
                                 {/* Name + ID row */}
-                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#A3A3A3' }}>
                                             Full Name
@@ -691,7 +691,7 @@ const Signup = () => {
                                 </div>
 
                                 {/* Password Row */}
-                                <div className="grid grid-cols-2 gap-4 mb-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
                                     <div>
                                         <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#A3A3A3' }}>
                                             Password
