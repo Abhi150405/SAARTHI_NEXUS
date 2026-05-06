@@ -1,6 +1,9 @@
 import React from 'react';
 import { Users, GraduationCap, Github, Linkedin, Mail } from 'lucide-react';
 import '../styles/AboutUs.css';
+import AbhijitPhoto from '../assets/Abhijit_Khole.jpeg';
+import AryaPhoto from '../assets/Arya_Kadi.jpeg';
+import PratikPhoto from '../assets/Pratik_Kochare.jpg';
 
 const AboutUs = () => {
     const team = [
@@ -10,7 +13,9 @@ const AboutUs = () => {
             dept: 'E&CE Department',
             college: 'PICT, Pune',
             batch: 'Class of 2027',
-            initials: 'AK'
+            photo: AbhijitPhoto,
+            github: 'https://github.com/Abhi150405',
+            email: 'abhijitkhole15@gmail.com'
         },
         {
             name: 'Pratik Kochare',
@@ -18,7 +23,9 @@ const AboutUs = () => {
             dept: 'E&CE Department',
             college: 'PICT, Pune',
             batch: 'Class of 2027',
-            initials: 'PK'
+            photo: PratikPhoto,
+            github: 'https://github.com/thepratikpk',
+            email: 'pratikkocharetnp@gmail.com'
         },
         {
             name: 'Arya Kadi',
@@ -26,7 +33,9 @@ const AboutUs = () => {
             dept: 'E&CE Department',
             college: 'PICT, Pune',
             batch: 'Class of 2027',
-            initials: 'AK'
+            photo: AryaPhoto,
+            github: 'https://github.com/aryakadi',
+            email: 'pictarya11@gmail.com'
         }
     ];
 
@@ -54,19 +63,21 @@ const AboutUs = () => {
                     {team.map((member, index) => (
                         <div key={index} className="team-card">
                             <div className="member-avatar">
-                                {member.initials}
+                                <img src={member.photo} alt={member.name} />
                             </div>
-                            <h3 className="member-name">{member.name}</h3>
-                            <div className="member-details">
-                                <p className="detail-item">{member.dept}</p>
-                                <p className="detail-item text-muted">{member.batch}</p>
-                                <p className="detail-item text-sm">{member.college}</p>
-                            </div>
+                            <div className="team-card-content">
+                                <h3 className="member-name">{member.name}</h3>
+                                <div className="member-details">
+                                    <p className="detail-item">{member.dept}</p>
+                                    <p className="detail-item text-muted">{member.batch}</p>
+                                    <p className="detail-item text-sm">{member.college}</p>
+                                </div>
 
-                            <div className="social-links">
-                                <button className="social-btn"><Github size={18} /></button>
-                                <button className="social-btn"><Linkedin size={18} /></button>
-                                <button className="social-btn"><Mail size={18} /></button>
+                                <div className="social-links">
+                                    <a href={member.github} target="_blank" rel="noopener noreferrer" className="social-btn"><Github size={18} /></a>
+                                    <button className="social-btn"><Linkedin size={18} /></button>
+                                    <a href={`mailto:${member.email}`} className="social-btn"><Mail size={18} /></a>
+                                </div>
                             </div>
                         </div>
                     ))}
