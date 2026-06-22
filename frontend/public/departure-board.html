@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAARTHI Nexus — Departure Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<style>
+/* ━━━━━━━━━━━━━━━━━━━━━ CUSTOM PROPERTIES ━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  --black:  #0a0a0a;
+  --white:  #f5f0e8;
+  --card:   #ffffff;
+  --yellow: #FFE135;
+  --red:    #FF3B3B;
+  --blue:   #1A6EFF;
+  --green:  #00C86F;
+  --orange: #FF6B00;
+  --gray:   #888888;
+  --gray-light: #c5c5c5;
+  --shadow-sm: 6px 6px 0px var(--black);
+  --shadow-lg: 10px 10px 0px var(--black);
+  --shadow-hover: 3px 3px 0px var(--black);
+  --border: 3px solid var(--black);
+  --sidebar-w: 250px;
+  --font-display: 'Bebas Neue', cursive;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━ RESET ━━━━━━━━━━━━━━━━━━━━━ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--white);
+  color: var(--black);
+  overflow-x: hidden;
+  cursor: none;
+}
+a { text-decoration: none; color: inherit; }
+button { cursor: none; font-family: inherit; border: none; background: none; }
+input { font-family: inherit; outline: none; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━ CUSTOM CURSOR ━━━━━━━━━━━━━━━━━━━━━ */
+.cursor-dot {
+  position: fixed; width: 14px; height: 14px;
+  background: var(--yellow); border: 2px solid var(--black);
+  pointer-events: none; z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: background 0.12s, width 0.12s, height 0.12s;
+}
+.cursor-dot.hover { background: var(--red); width: 18px; height: 18px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━ SIDEBAR ━━━━━━━━━━━━━━━━━━━━━ */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w); background: var(--white);
+  border-right: var(--border); z-index: 100;
+  display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+}
+.sidebar-logo {
+  display: flex; align-items: center; gap: 12px;
+  padding: 24px 20px 20px;
+  border-bottom: var(--border);
+}
+.logo-box {
+  width: 42px; height: 42px;
+  background: var(--orange); border: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 20px; color: var(--card);
+  box-shadow: var(--shadow-hover);
+}
+.logo-text { font-family: var(--font-display); font-size: 22px; letter-spacing: 1px; }
+
+.sidebar-section { padding: 16px 16px 8px; }
+.section-label {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 3px; color: var(--gray);
+  margin-bottom: 8px; padding-left: 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; margin-bottom: 4px;
+  font-family: var(--font-body); font-size: 14px; font-weight: 500;
+  color: var(--black); cursor: none; position: relative;
+  transition: transform 0.1s, box-shadow 0.1s;
+  border: 3px solid transparent;
+}
+.nav-item .nav-icon {
+  width: 20px; height: 20px; background: var(--black);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--white); font-weight: 700;
+  flex-shrink: 0;
+}
+.nav-item .nav-sub {
+  font-family: var(--font-mono); font-size: 10px; color: var(--gray);
+  margin-top: 2px; letter-spacing: 0.5px;
+}
+.nav-item:hover:not(.active) { background: #f0ead8; }
+.nav-item.active {
+  background: var(--yellow); border: var(--border);
+  box-shadow: var(--shadow-sm); font-weight: 700;
+}
+.nav-item.active:hover {
+  transform: translate(3px, 3px); box-shadow: var(--shadow-hover);
+}
+.nav-item.active .nav-icon { background: var(--black); }
+
+.sidebar-footer {
+  margin-top: auto; padding: 16px;
+  border-top: var(--border);
+}
+.user-card {
+  background: var(--white); border: var(--border);
+  box-shadow: var(--shadow-sm); padding: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.user-avatar {
+  width: 36px; height: 36px; background: var(--orange); border: 2px solid var(--black);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 16px; color: var(--card);
+}
+.user-name { font-weight: 700; font-size: 14px; }
+.user-branch { font-family: var(--font-mono); font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
+.signout {
+  display: block; margin-top: 12px; font-family: var(--font-mono);
+  font-size: 11px; color: var(--gray); text-transform: uppercase;
+  letter-spacing: 2px; cursor: none; padding: 4px 0;
+}
+.signout:hover { color: var(--red); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━ MAIN CONTENT ━━━━━━━━━━━━━━━━━━━━━ */
+.main {
+  margin-left: var(--sidebar-w); min-height: 100vh;
+  background: var(--white);
+}
+
+/* HEADER STRIP */
+.header-strip {
+  padding: 32px 40px 28px;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  flex-wrap: wrap; gap: 24px;
+  border-bottom: var(--border);
+}
+.header-left { }
+.header-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px; color: var(--red);
+  margin-bottom: 8px;
+}
+.header-title { font-family: var(--font-display); line-height: 0.88; }
+.header-title .line1 { font-size: 72px; color: var(--black); display: block; }
+.header-title .line2 {
+  font-size: 72px; display: inline-block;
+  color: var(--yellow); background: var(--black);
+  padding: 2px 16px 4px; border: var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-boxes { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat-box {
+  background: var(--card); border: var(--border);
+  box-shadow: var(--shadow-sm); padding: 16px 24px;
+  min-width: 130px; text-align: center;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.stat-box:hover { transform: translate(3px, 3px); box-shadow: var(--shadow-hover); }
+.stat-number {
+  font-family: var(--font-display); font-size: 48px;
+  color: var(--black); line-height: 1;
+}
+.stat-label {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px; color: var(--gray);
+  margin-top: 4px;
+}
+
+/* FILTER BAR */
+.filter-bar {
+  background: var(--yellow); border-bottom: var(--border);
+  padding: 12px 40px; display: flex; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+  transform-origin: left;
+}
+.filter-tabs { display: flex; border: var(--border); box-shadow: var(--shadow-sm); }
+.filter-tab {
+  padding: 10px 18px; font-family: var(--font-mono); font-size: 12px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  border-right: var(--border); background: var(--white); color: var(--black);
+  cursor: none; transition: transform 0.1s, box-shadow 0.1s, background 0.08s;
+  white-space: nowrap;
+}
+.filter-tab:last-child { border-right: none; }
+.filter-tab.active { background: var(--black); color: var(--yellow); }
+.filter-tab:not(.active):hover { background: #f0ead8; }
+
+.search-box {
+  background: var(--white); border: var(--border);
+  padding: 10px 16px; font-family: var(--font-mono); font-size: 12px;
+  color: var(--black); min-width: 220px;
+  flex: 1; max-width: 280px;
+}
+.search-box::placeholder { color: var(--gray); }
+
+.view-toggle { display: flex; border: var(--border); margin-left: auto; }
+.view-btn {
+  padding: 10px 14px; cursor: none; background: var(--white); color: var(--black);
+  border-right: var(--border); display: flex; align-items: center;
+  transition: background 0.08s;
+}
+.view-btn:last-child { border-right: none; }
+.view-btn.active { background: var(--black); color: var(--yellow); }
+.view-btn:not(.active):hover { background: #f0ead8; }
+.view-btn svg { width: 18px; height: 18px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━ TABLE ━━━━━━━━━━━━━━━━━━━━━ */
+.table-wrap { padding: 0; }
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr 1fr 0.8fr 1.3fr 0.9fr 1.1fr;
+  padding: 14px 40px; border-bottom: var(--border);
+  background: var(--white);
+}
+.table-header span {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px; color: var(--gray);
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr 1fr 0.8fr 1.3fr 0.9fr 1.1fr;
+  padding: 18px 40px; align-items: center;
+  border-bottom: 2px solid #e8e3d9;
+  background: var(--card); transition: background 0.15s;
+  position: relative;
+}
+.table-row.urgent { border-left: 4px solid var(--red); }
+.table-row:hover { background: var(--yellow); }
+
+/* Company cell */
+.cell-company { display: flex; align-items: center; gap: 12px; }
+.company-avatar {
+  width: 40px; height: 40px; background: var(--orange); border: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 16px; color: var(--card);
+  flex-shrink: 0;
+}
+.company-name { font-family: var(--font-body); font-weight: 700; font-size: 15px; }
+
+/* Role cell */
+.cell-role { font-family: var(--font-body); font-size: 14px; color: #666; }
+
+/* Package cell */
+.cell-package { display: flex; align-items: baseline; gap: 4px; }
+.pkg-value { font-family: var(--font-display); font-size: 22px; color: var(--green); line-height: 1; }
+.pkg-label { font-family: var(--font-mono); font-size: 10px; color: var(--gray); text-transform: uppercase; }
+
+/* CGPA cell */
+.cell-cgpa { font-family: var(--font-mono); font-size: 14px; }
+
+/* Branches cell */
+.cell-branches { display: flex; gap: 4px; flex-wrap: wrap; }
+.branch-chip {
+  border: 2px solid var(--black); padding: 2px 8px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  text-transform: uppercase; background: var(--white);
+}
+.branch-chip.overflow { background: var(--black); color: var(--yellow); border-color: var(--black); }
+
+/* Deadline cell */
+.cell-deadline { display: flex; align-items: center; gap: 6px; }
+.deadline-text { font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
+.deadline-text.urgent { color: var(--red); }
+.deadline-dot { width: 6px; height: 6px; background: var(--red); }
+.deadline-dot.pulse { animation: pulse 1.2s infinite; }
+
+/* Status cell */
+.btn-apply {
+  background: var(--black); color: var(--yellow); border: var(--border);
+  box-shadow: var(--shadow-sm); padding: 8px 18px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px; cursor: none;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.btn-apply:hover { transform: translate(3px, 3px); box-shadow: var(--shadow-hover); }
+.btn-locked {
+  background: var(--white); color: var(--black); border: var(--border);
+  padding: 8px 18px; font-family: var(--font-mono); font-size: 11px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━ GRID VIEW ━━━━━━━━━━━━━━━━━━━━━ */
+.grid-wrap {
+  display: none; padding: 24px 40px;
+  grid-template-columns: repeat(3, 1fr); gap: 0;
+}
+.grid-wrap.active { display: grid; }
+.table-wrap.hidden { display: none; }
+
+.grid-card {
+  background: var(--card); border: var(--border);
+  position: relative; overflow: hidden;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.grid-card:hover { background: var(--yellow); }
+.gc-band { height: 6px; border-bottom: var(--border); }
+.gc-band.eligible { background: var(--green); }
+.gc-band.locked { background: var(--red); }
+
+.gc-header { padding: 20px 20px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+.gc-company-name { font-family: var(--font-body); font-weight: 700; font-size: 18px; margin-top: 10px; }
+.gc-role { font-family: var(--font-mono); font-size: 11px; color: var(--gray); margin-top: 2px; }
+.gc-pkg-badge {
+  background: var(--yellow); border: var(--border); box-shadow: var(--shadow-hover);
+  padding: 4px 12px; font-family: var(--font-display); font-size: 28px;
+  color: var(--black); line-height: 1; flex-shrink: 0;
+}
+.gc-divider { margin: 16px 20px; border-bottom: 2px dashed var(--black); opacity: 0.2; }
+.gc-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 2px solid var(--black); margin: 0 20px;
+}
+.gc-stat {
+  padding: 10px 0; text-align: center;
+  border-right: 2px solid var(--black);
+}
+.gc-stat:last-child { border-right: none; }
+.gc-stat-val { font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
+.gc-stat-label { font-family: var(--font-mono); font-size: 9px; color: var(--gray); text-transform: uppercase; margin-top: 2px; }
+.gc-branches { padding: 12px 20px; display: flex; gap: 4px; flex-wrap: wrap; }
+.gc-footer {
+  background: var(--black); border-top: var(--border); padding: 14px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.gc-deadline { font-family: var(--font-mono); font-size: 11px; color: var(--gray); }
+.gc-deadline.urgent { color: var(--red); }
+.gc-watermark {
+  position: absolute; bottom: 50px; right: 10px;
+  font-family: var(--font-display); font-size: 60px;
+  transform: rotate(-20deg); opacity: 0.04; pointer-events: none;
+  letter-spacing: 4px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━ ANIMATIONS ━━━━━━━━━━━━━━━━━━━━━ */
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* ━━━━━━━━━━━━━━━━━━━━━ MOBILE ━━━━━━━━━━━━━━━━━━━━━ */
+.mobile-header {
+  display: none; position: fixed; top: 0; left: 0; right: 0;
+  height: 56px; background: var(--white); border-bottom: var(--border);
+  z-index: 200; padding: 0 16px; align-items: center; justify-content: space-between;
+}
+.hamburger {
+  width: 40px; height: 40px; border: 2px solid var(--black); background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; cursor: none; box-shadow: 2px 2px 0px var(--black);
+}
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 90;
+}
+
+@media (max-width: 1024px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s; z-index: 200; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .mobile-header { display: flex; }
+  .main { margin-left: 0; padding-top: 56px; }
+  .header-strip { padding: 20px 20px 16px; }
+  .header-title .line1, .header-title .line2 { font-size: 48px; }
+  .filter-bar { padding: 12px 20px; }
+  .table-header, .table-row { padding-left: 20px; padding-right: 20px; }
+  .grid-wrap { padding: 16px 20px; grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .table-header, .table-row {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+  .hide-mobile { display: none !important; }
+  .grid-wrap { grid-template-columns: 1fr; }
+  .stat-boxes { width: 100%; }
+  .stat-box { flex: 1; min-width: 90px; padding: 12px 16px; }
+  .stat-number { font-size: 36px; }
+  .header-title .line1, .header-title .line2 { font-size: 40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- MOBILE HEADER -->
+<div class="mobile-header">
+  <button class="hamburger" id="menuBtn">☰</button>
+  <span style="font-family:var(--font-display);font-size:20px;">SAARTHI NEXUS</span>
+  <div style="width:40px"></div>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ━━━━━━━━━ SIDEBAR ━━━━━━━━━ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-box">SN</div>
+    <div class="logo-text">SAARTHI NEXUS</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">Command Center</div>
+    <div class="nav-item" data-nav>
+      <div class="nav-icon">▦</div>
+      <div><div>Analytics</div><div class="nav-sub">Stats &amp; Charts</div></div>
+    </div>
+    <div class="nav-item" data-nav>
+      <div class="nav-icon">◎</div>
+      <div><div>Skill Gap</div><div class="nav-sub">AI Analysis</div></div>
+    </div>
+    <div class="nav-item" data-nav>
+      <div class="nav-icon">✓</div>
+      <div><div>Eligibility</div><div class="nav-sub">Company Check</div></div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">Placement Hub</div>
+    <div class="nav-item" data-nav>
+      <div class="nav-icon">▤</div>
+      <div><div>Records</div><div class="nav-sub">Past Data</div></div>
+    </div>
+    <div class="nav-item active" data-nav>
+      <div class="nav-icon">✈</div>
+      <div><div>Drives</div><div class="nav-sub">Active Drives</div></div>
+    </div>
+    <div class="nav-item" data-nav>
+      <div class="nav-icon">◈</div>
+      <div><div>Internships</div><div class="nav-sub">Opportunities</div></div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">Community</div>
+    <div class="nav-item" data-nav>
+      <div class="nav-icon">☷</div>
+      <div><div>Interview Vault</div><div class="nav-sub">Read Stories</div></div>
+    </div>
+    <div class="nav-item" data-nav>
+      <div class="nav-icon">✎</div>
+      <div><div>Write</div><div class="nav-sub">Share Yours</div></div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">A</div>
+      <div>
+        <div class="user-name">Abhi</div>
+        <div class="user-branch">CE Branch</div>
+      </div>
+    </div>
+    <a href="#" class="signout">Sign Out →</a>
+  </div>
+</aside>
+
+<!-- ━━━━━━━━━ MAIN CONTENT ━━━━━━━━━ -->
+<main class="main">
+  <!-- HEADER STRIP -->
+  <div class="header-strip">
+    <div class="header-left">
+      <div class="header-eyebrow" id="eyebrow">CAMPUS PLACEMENT DRIVES — AY 2024–25</div>
+      <div class="header-title">
+        <span class="line1" id="titleLine1">DEPARTURE</span>
+        <span class="line2" id="titleLine2">BOARD</span>
+      </div>
+    </div>
+    <div class="stat-boxes">
+      <div class="stat-box" id="stat1">
+        <div class="stat-number" data-count="5">0</div>
+        <div class="stat-label">Active Drives</div>
+      </div>
+      <div class="stat-box" id="stat2">
+        <div class="stat-number" data-count="3">0</div>
+        <div class="stat-label">Eligible</div>
+      </div>
+      <div class="stat-box" id="stat3">
+        <div class="stat-number" data-count="1">0</div>
+        <div class="stat-label">Closing Today</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar" id="filterBar">
+    <div class="filter-tabs" id="filterTabs">
+      <button class="filter-tab active" data-filter="all">All Drives</button>
+      <button class="filter-tab" data-filter="eligible">Eligible ✓</button>
+      <button class="filter-tab" data-filter="closing">Closing Soon ⚡</button>
+      <button class="filter-tab" data-filter="applied">Applied ●</button>
+    </div>
+    <input class="search-box" type="text" placeholder="Search drives..." id="searchBox">
+    <div class="view-toggle">
+      <button class="view-btn active" id="listViewBtn" title="List View">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="view-btn" id="gridViewBtn" title="Grid View">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLE VIEW -->
+  <div class="table-wrap" id="tableWrap">
+    <div class="table-header">
+      <span>Company</span>
+      <span>Role</span>
+      <span>Package</span>
+      <span class="hide-mobile">Min CGPA</span>
+      <span class="hide-mobile">Branches</span>
+      <span>Deadline</span>
+      <span>Status</span>
+    </div>
+    <div id="tableBody"></div>
+  </div>
+
+  <!-- GRID VIEW -->
+  <div class="grid-wrap" id="gridWrap"></div>
+</main>
+
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━ DATA ━━━━━━━━━━━━━━━━━━━━━ */
+const DRIVES = [
+  { id:1, company:"PhonePe", initials:"PH", role:"Software Engineer", pkg:"33.57", cgpa:"6.74", branches:["CE","IT","AI&DS","E&CE","EnTC"], deadline:1, status:"locked", eligible:true },
+  { id:2, company:"BMC Softwares", initials:"BM", role:"SDE", pkg:"10", cgpa:"9.0", branches:["IT","E&CE"], deadline:6, status:"locked", eligible:false },
+  { id:3, company:"Arista", initials:"AR", role:"SDE", pkg:"29.5", cgpa:"9.4", branches:["E&CE","CE"], deadline:2, status:"apply", eligible:true },
+  { id:4, company:"Mastercard", initials:"MC", role:"Software Engineer", pkg:"13.4", cgpa:"6.2", branches:["CE","IT"], deadline:1, status:"locked", eligible:true },
+  { id:5, company:"Barclays", initials:"BA", role:"Technology Developer", pkg:"14", cgpa:"6.1", branches:["CE","IT","E&CE"], deadline:4, status:"apply", eligible:true },
+];
+
+/* ━━━━━━━━━━━━━━━━━━━━━ CUSTOM CURSOR ━━━━━━━━━━━━━━━━━━━━━ */
+const dot = document.getElementById('cursorDot');
+document.addEventListener('mousemove', e => {
+  dot.style.left = e.clientX + 'px';
+  dot.style.top = e.clientY + 'px';
+});
+const interactives = () => document.querySelectorAll('button, a, input, .nav-item, .table-row, .grid-card, .signout');
+const bindCursor = () => {
+  interactives().forEach(el => {
+    el.addEventListener('mouseenter', () => dot.classList.add('hover'));
+    el.addEventListener('mouseleave', () => dot.classList.remove('hover'));
+  });
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━ RENDER TABLE ━━━━━━━━━━━━━━━━━━━━━ */
+function renderTable(data) {
+  const body = document.getElementById('tableBody');
+  body.innerHTML = data.map(d => {
+    const urgent = d.deadline <= 2;
+    const branchChips = d.branches.slice(0, 3).map(b =>
+      `<span class="branch-chip">${b}</span>`
+    ).join('');
+    const overflow = d.branches.length > 3
+      ? `<span class="branch-chip overflow">+${d.branches.length - 3}</span>` : '';
+    const dlText = d.deadline === 1 ? '1 DAY' : `${d.deadline} DAYS`;
+    const statusBtn = d.status === 'apply'
+      ? `<button class="btn-apply">Apply Now →</button>`
+      : `<span class="btn-locked">✗ Locked</span>`;
+    return `
+      <div class="table-row${urgent ? ' urgent' : ''}" data-company="${d.company.toLowerCase()}" data-eligible="${d.eligible}" data-closing="${urgent}" data-applied="false">
+        <div class="cell-company">
+          <div class="company-avatar">${d.initials}</div>
+          <span class="company-name">${d.company}</span>
+        </div>
+        <div class="cell-role">${d.role}</div>
+        <div class="cell-package">
+          <span class="pkg-value">${d.pkg}</span>
+          <span class="pkg-label">LPA</span>
+        </div>
+        <div class="cell-cgpa hide-mobile">${d.cgpa}</div>
+        <div class="cell-branches hide-mobile">${branchChips}${overflow}</div>
+        <div class="cell-deadline">
+          ${urgent ? '<div class="deadline-dot pulse"></div>' : ''}
+          <span class="deadline-text${urgent ? ' urgent' : ''}">${dlText}</span>
+        </div>
+        <div>${statusBtn}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━ RENDER GRID ━━━━━━━━━━━━━━━━━━━━━ */
+function renderGrid(data) {
+  const grid = document.getElementById('gridWrap');
+  grid.innerHTML = data.map(d => {
+    const urgent = d.deadline <= 2;
+    const bandClass = d.eligible ? 'eligible' : 'locked';
+    const branchChips = d.branches.map(b =>
+      `<span class="branch-chip">${b}</span>`
+    ).join('');
+    const dlText = d.deadline === 1 ? '1 DAY' : `${d.deadline} DAYS`;
+    const statusBtn = d.status === 'apply'
+      ? `<button class="btn-apply" style="font-size:10px;padding:6px 14px;">Apply →</button>`
+      : `<span class="btn-locked" style="font-size:10px;padding:6px 14px;">✗ Locked</span>`;
+    return `
+      <div class="grid-card" data-company="${d.company.toLowerCase()}" data-eligible="${d.eligible}" data-closing="${urgent}" data-applied="false">
+        <div class="gc-band ${bandClass}"></div>
+        <div class="gc-header">
+          <div>
+            <div class="company-avatar">${d.initials}</div>
+            <div class="gc-company-name">${d.company}</div>
+            <div class="gc-role">${d.role}</div>
+          </div>
+          <div class="gc-pkg-badge">${d.pkg}</div>
+        </div>
+        <div class="gc-divider"></div>
+        <div class="gc-stats">
+          <div class="gc-stat"><div class="gc-stat-val">${d.cgpa}</div><div class="gc-stat-label">CGPA</div></div>
+          <div class="gc-stat"><div class="gc-stat-val">${d.branches.length}</div><div class="gc-stat-label">Branches</div></div>
+          <div class="gc-stat"><div class="gc-stat-val">${dlText}</div><div class="gc-stat-label">Deadline</div></div>
+        </div>
+        <div class="gc-branches">${branchChips}</div>
+        <div class="gc-footer">
+          <span class="gc-deadline${urgent ? ' urgent' : ''}">${urgent ? '⬤ ' : ''}${dlText} LEFT</span>
+          ${statusBtn}
+        </div>
+        <div class="gc-watermark">${d.eligible ? 'ELIGIBLE' : 'LOCKED'}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━ INIT RENDER ━━━━━━━━━━━━━━━━━━━━━ */
+renderTable(DRIVES);
+renderGrid(DRIVES);
+bindCursor();
+
+/* ━━━━━━━━━━━━━━━━━━━━━ FILTER TABS ━━━━━━━━━━━━━━━━━━━━━ */
+document.querySelectorAll('.filter-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    applyFilters();
+  });
+});
+
+function applyFilters() {
+  const activeFilter = document.querySelector('.filter-tab.active').dataset.filter;
+  const query = document.getElementById('searchBox').value.toLowerCase();
+  const allRows = document.querySelectorAll('.table-row');
+  const allCards = document.querySelectorAll('.grid-card');
+
+  const filterEl = (el) => {
+    let show = true;
+    const company = el.dataset.company;
+    if (query && !company.includes(query)) show = false;
+    if (activeFilter === 'eligible' && el.dataset.eligible !== 'true') show = false;
+    if (activeFilter === 'closing' && el.dataset.closing !== 'true') show = false;
+    if (activeFilter === 'applied' && el.dataset.applied !== 'true') show = false;
+    el.style.display = show ? '' : 'none';
+  };
+
+  allRows.forEach(filterEl);
+  allCards.forEach(filterEl);
+
+  // Animate visible rows
+  const visible = [...allRows].filter(r => r.style.display !== 'none');
+  gsap.fromTo(visible,
+    { opacity: 0, y: 16 },
+    { opacity: 1, y: 0, stagger: 0.06, duration: 0.4, ease: 'power3.out' }
+  );
+}
+
+document.getElementById('searchBox').addEventListener('input', applyFilters);
+
+/* ━━━━━━━━━━━━━━━━━━━━━ VIEW TOGGLE ━━━━━━━━━━━━━━━━━━━━━ */
+const listBtn = document.getElementById('listViewBtn');
+const gridBtn = document.getElementById('gridViewBtn');
+const tableWrap = document.getElementById('tableWrap');
+const gridWrap = document.getElementById('gridWrap');
+
+listBtn.addEventListener('click', () => {
+  listBtn.classList.add('active'); gridBtn.classList.remove('active');
+  tableWrap.classList.remove('hidden'); gridWrap.classList.remove('active');
+});
+gridBtn.addEventListener('click', () => {
+  gridBtn.classList.add('active'); listBtn.classList.remove('active');
+  tableWrap.classList.add('hidden'); gridWrap.classList.add('active');
+  gsap.fromTo('.grid-card', { opacity:0, y:20 }, { opacity:1, y:0, stagger:0.07, duration:0.4, ease:'power3.out' });
+});
+
+/* ━━━━━━━━━━━━━━━━━━━━━ MOBILE SIDEBAR ━━━━━━━━━━━━━━━━━━━━━ */
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+document.getElementById('menuBtn').addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+});
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+});
+
+/* ━━━━━━━━━━━━━━━━━━━━━ ROW HOVER GSAP ━━━━━━━━━━━━━━━━━━━━━ */
+function bindRowHovers() {
+  document.querySelectorAll('.table-row').forEach(row => {
+    row.addEventListener('mouseenter', () => gsap.to(row, { backgroundColor: '#FFE135', duration: 0.15 }));
+    row.addEventListener('mouseleave', () => gsap.to(row, { backgroundColor: '#ffffff', duration: 0.15 }));
+  });
+  document.querySelectorAll('.btn-apply').forEach(btn => {
+    btn.addEventListener('mouseenter', () => gsap.to(btn, { x: 3, y: 3, boxShadow: '3px 3px 0px #0a0a0a', duration: 0.12 }));
+    btn.addEventListener('mouseleave', () => gsap.to(btn, { x: 0, y: 0, boxShadow: '6px 6px 0px #0a0a0a', duration: 0.12 }));
+  });
+}
+bindRowHovers();
+
+/* ━━━━━━━━━━━━━━━━━━━━━ GSAP PAGE LOAD ANIMATIONS ━━━━━━━━━━━━━━━━━━━━━ */
+const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+// 1. Sidebar nav items
+tl.fromTo('[data-nav]', { x: -30, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.08, duration: 0.5 }, 0);
+
+// 2. Header title
+tl.fromTo('#titleLine1', { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8 }, 0.1);
+tl.fromTo('#titleLine2', { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8 }, 0.25);
+
+// 3. Eyebrow
+tl.fromTo('#eyebrow', { y: -10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, 0.05);
+
+// 4. Stat boxes slide up + countUp
+tl.fromTo('.stat-box', { y: -20, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.1, duration: 0.5 }, 0.3);
+
+// CountUp animation
+document.querySelectorAll('.stat-number').forEach((el, i) => {
+  const target = parseInt(el.dataset.count);
+  gsap.fromTo(el, { textContent: 0 }, {
+    textContent: target, duration: 1.2, delay: 0.6 + i * 0.15,
+    ease: 'power2.out',
+    snap: { textContent: 1 },
+    onUpdate() { el.textContent = Math.round(parseFloat(el.textContent)); }
+  });
+});
+
+// 5. Filter bar
+tl.fromTo('#filterBar', { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: 'power2.out' }, 0.4);
+
+// 6. Table rows
+tl.fromTo('.table-row', { y: 20, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.07, duration: 0.5 }, 0.55);
+
+// 7. Table header
+tl.fromTo('.table-header', { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.45);
+</script>
+</body>
+</html>

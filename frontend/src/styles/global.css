@@ -1,0 +1,509 @@
+@import './variables.css';
+@import 'tailwindcss';
+
+@theme {
+  --font-bebas: 'Bebas Neue', cursive;
+  --font-grotesk: 'Space Grotesk', sans-serif;
+  --font-mono-space: 'Space Mono', monospace;
+}
+
+@layer base {
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: var(--font-sans);
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    button {
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    /* ===== MODERN SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--border-medium);
+        border-radius: var(--radius-full);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-light);
+    }
+
+    /* ===== SELECTION ===== */
+    ::selection {
+        background: rgba(249, 115, 22, 0.15);
+        color: var(--text-main);
+    }
+
+    /* ===== FOCUS VISIBLE ===== */
+    :focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+        border-radius: var(--radius-sm);
+    }
+}
+
+/* ===== CARD SYSTEM ===== */
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--border-light);
+    transition: transform var(--transition-spring), box-shadow var(--transition-base), border-color var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: rgba(249, 115, 22, 0.15);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+/* ===== BUTTON SYSTEM ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all var(--transition-base);
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: -0.01em;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.btn:hover::after {
+    opacity: 1;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    border: 1.5px solid var(--border-medium);
+    color: var(--text-main);
+    background: var(--bg-card);
+    backdrop-filter: blur(8px);
+}
+
+.btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn:active {
+    transform: translateY(0) scale(0.97);
+}
+
+/* ===== LAYOUT HELPERS (non-conflicting with Tailwind) ===== */
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.page-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+/* ===== LAYOUT ROOT & RESPONSIVE ===== */
+.layout-root {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 70px;   /* Always offset by collapsed sidebar width */
+    padding: 2rem;
+    padding-top: 5rem;
+    background: var(--bg-body);
+    min-height: 100vh;
+    position: relative;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === HOVER SIDEBAR SHELL === */
+/* Always-visible icon strip that expands to full sidebar on hover */
+.sidebar-shell {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 70px;
+    z-index: 1050;
+    overflow: visible;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Expand shell on hover so mouse events stay inside when sidebar is wide */
+.sidebar-shell:hover {
+    width: 240px;
+}
+
+/* Sidebar expands on shell hover — pure CSS, no JS */
+.sidebar-shell:hover .sidebar.collapsed {
+    width: 240px;
+}
+
+/* Restore header to horizontal layout on hover */
+.sidebar-shell:hover .sidebar.collapsed .sidebar-header {
+    justify-content: space-between;
+    padding: 0 16px;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .sidebar-header-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .brand-logo {
+    height: 32px;
+    display: block;
+}
+
+/* Restore full brand name on hover */
+.sidebar-shell:hover .sidebar.collapsed .brand-name {
+    font-size: 11px;
+    opacity: 1;
+}
+
+/* Restore toggle button on hover */
+.sidebar-shell:hover .sidebar.collapsed .sidebar-toggle-trigger {
+    display: flex;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .brand-logo {
+    display: block;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .nav-item {
+    justify-content: flex-start;
+    padding: 8px 10px;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .nav-item span {
+    display: inline;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .nav-item svg {
+    margin: 0;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .user-details {
+    display: block;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .logout-icon-btn {
+    display: flex;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .sidebar-footer {
+    padding: 12px;
+    justify-content: initial;
+    display: flex;
+}
+
+.sidebar-shell:hover .sidebar.collapsed .user-info {
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+/* Mobile open state */
+.sidebar-shell.mobile-open .sidebar.collapsed {
+    width: 240px;
+    transform: translateX(0);
+}
+
+/* Subtle ambient glow behind content */
+.main-content::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.04), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.main-content>.container {
+    position: relative;
+    z-index: 1;
+}
+
+.mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--bg-sidebar);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 var(--spacing-md);
+    z-index: 100;
+    align-items: center;
+}
+
+.mobile-toggle {
+    background: none;
+    border: none;
+    color: var(--text-main);
+}
+
+.logo-text-mobile {
+    font-weight: 800;
+    color: var(--primary);
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+.animate-bounce-in {
+    animation: fadeInDown 0.5s var(--transition-spring) both;
+}
+
+/* Stagger animations for lists */
+.animate-fade-in:nth-child(1) { animation-delay: 0ms; }
+.animate-fade-in:nth-child(2) { animation-delay: 60ms; }
+.animate-fade-in:nth-child(3) { animation-delay: 120ms; }
+.animate-fade-in:nth-child(4) { animation-delay: 180ms; }
+.animate-fade-in:nth-child(5) { animation-delay: 240ms; }
+.animate-fade-in:nth-child(6) { animation-delay: 300ms; }
+.animate-fade-in:nth-child(7) { animation-delay: 360ms; }
+.animate-fade-in:nth-child(8) { animation-delay: 420ms; }
+
+/* ===== LOADING SPINNER ===== */
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-light);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+        padding-top: 80px;
+        padding-left: var(--spacing-md);
+        padding-right: var(--spacing-md);
+    }
+
+    .mobile-header {
+        display: flex;
+    }
+
+    /* Hide the icon strip on mobile — mobile header takes over */
+    .sidebar-shell {
+        width: 0;
+        overflow: hidden;
+    }
+
+    /* Show sidebar fully when mobile menu is open */
+    .sidebar-shell.mobile-open {
+        width: 240px;
+        overflow: visible;
+    }
+}
+
+@media (max-width: 640px) {
+    .main-content {
+        padding-top: 72px;
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 1.5rem;
+    }
+
+    .mobile-header {
+        height: 56px;
+        padding: 0 12px;
+        z-index: 1100;
+    }
+
+    /* Sidebar overlay covers everything on mobile */
+    .sidebar-overlay {
+        z-index: 1099;
+    }
+
+    /* Sidebar itself is above the overlay */
+    .sidebar-shell.mobile-open {
+        z-index: 1100;
+    }
+
+    /* Card lift animation is too dramatic on mobile */
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Ensure page titles scale well */
+    .page-title {
+        font-size: 1.25rem;
+    }
+
+    /* Buttons should be large enough to tap comfortably */
+    .btn {
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 400px) {
+    .main-content {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}

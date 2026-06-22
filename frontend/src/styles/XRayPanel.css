@@ -1,0 +1,543 @@
+/* ═══════════════════════════════════════════════════════════════════
+   COMPANY X-RAY — CLEAN READABLE CARD (xl- prefix)
+   No sidebar, no tabs. One scrollable card. Big readable fonts.
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Overlay ── */
+.xl-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  cursor: pointer;
+}
+
+/* ── Card ── */
+.xl-card {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  z-index: 201;
+  width: min(880px, 94vw);
+  height: min(640px, 90vh);
+  background: #fafaf6;
+  border: 3px solid #0a0a0a;
+  box-shadow: 8px 8px 0 #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  cursor: default;
+}
+
+/* ── Close ── */
+.xl-close {
+  position: absolute; top: 14px; right: 14px;
+  z-index: 10;
+  background: #f5f2ec; border: 2px solid #0a0a0a;
+  color: #0a0a0a; font-family: 'Space Mono', monospace;
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  padding: 6px 14px;
+  transition: background 0.12s;
+  letter-spacing: 1px;
+}
+.xl-close:hover { background: #FFE135; }
+
+/* ── Scrollable column ── */
+.xl-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #fafaf6;
+}
+.xl-scroll::-webkit-scrollbar { width: 6px; }
+.xl-scroll::-webkit-scrollbar-thumb { background: #ccc; }
+
+/* ── Sections ── */
+.xl-section {
+  padding: 24px 28px;
+  border-bottom: 2px solid #eee;
+}
+.xl-section-last { border-bottom: none; }
+
+/* ── Section header ── */
+.xl-sh {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: #0a0a0a;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.xl-sh::before {
+  content: '';
+  display: block; width: 5px; height: 22px;
+  background: #FFE135; border: 2px solid #0a0a0a;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════
+   HEADER
+══════════════════════════════ */
+.xl-header {
+  padding: 28px 28px 20px;
+  border-bottom: 3px solid #0a0a0a;
+  background: #ffffff;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.xl-header-left {
+  display: flex; align-items: flex-start; gap: 16px;
+  flex: 1; min-width: 0;
+}
+
+.xl-avatar {
+  width: 60px; height: 60px; flex-shrink: 0;
+  background: #FFE135; border: 3px solid #0a0a0a;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 36px; color: #0a0a0a;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 4px 4px 0 #0a0a0a;
+}
+
+.xl-header-info {
+  min-width: 0;
+}
+
+.xl-company-name {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 34px; letter-spacing: 2px; color: #0a0a0a;
+  margin: 0; line-height: 1;
+}
+
+.xl-company-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; color: #999;
+  margin: 4px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.xl-header-badges {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+
+.xl-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px;
+  background: #f5f2ec;
+  border: 1.5px solid #ddd;
+  letter-spacing: 0.5px;
+  color: #555;
+}
+.xl-badge strong { color: #0a0a0a; }
+
+.xl-badge-score {
+  border-width: 2px;
+}
+
+/* Right stat blocks */
+.xl-header-stats {
+  display: flex; gap: 2px; flex-shrink: 0;
+}
+
+.xl-stat-block {
+  padding: 12px 16px;
+  background: #0a0a0a; color: #FFE135;
+  text-align: center;
+  min-width: 80px;
+  border: 2px solid #0a0a0a;
+}
+
+.xl-stat-val {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 28px; line-height: 1;
+}
+
+.xl-stat-lbl {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #999;
+  margin-top: 4px;
+}
+
+/* ══════════════════════════════
+   SALARY CHART — vertical bars
+══════════════════════════════ */
+.xl-salary-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 16px;
+  height: 220px;
+  padding: 0 16px;
+}
+
+.xl-bar-col {
+  flex: 1;
+  max-width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+
+.xl-bar-val {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 18px; color: #0a0a0a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.xl-bar-delta {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.xl-bar-track {
+  flex: 1; width: 100%;
+  background: #f0ede6;
+  border: 2px solid #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+.xl-bar-fill {
+  background: #FFE135;
+  width: 100%;
+  transition: height 0.6s ease;
+}
+
+.xl-bar-year {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; font-weight: 700; color: #0a0a0a;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ══════════════════════════════
+   SEASON DETAIL CARDS
+══════════════════════════════ */
+.xl-season-cards {
+  display: flex; gap: 12px;
+  overflow-x: auto; overflow-y: hidden;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #fafaf6;
+}
+.xl-season-cards::-webkit-scrollbar { height: 5px; }
+.xl-season-cards::-webkit-scrollbar-thumb { background: #ccc; }
+
+.xl-s-card {
+  min-width: 200px; flex-shrink: 0;
+  background: #ffffff;
+  border: 2.5px solid #0a0a0a;
+  box-shadow: 4px 4px 0 #0a0a0a;
+  overflow: hidden;
+}
+
+.xl-sc-head {
+  background: #0a0a0a; color: #FFE135;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; font-weight: 700;
+  padding: 8px 14px;
+  letter-spacing: 1px;
+}
+
+.xl-sc-body {
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.xl-sc-row {
+  display: flex; justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.xl-sc-row span { color: #999; }
+.xl-sc-row strong { color: #0a0a0a; text-align: right; max-width: 120px; word-break: break-word; }
+
+.xl-sc-chips {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin-top: 4px; padding-top: 6px;
+  border-top: 1px solid #eee;
+}
+
+.xl-sc-chip {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; font-weight: 700;
+  background: #FFE135; border: 1.5px solid #0a0a0a;
+  padding: 2px 8px;
+}
+
+/* ══════════════════════════════
+   BRANCH BREAKDOWN
+══════════════════════════════ */
+.xl-branches {
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.xl-br-row {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.xl-br-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px; font-weight: 700; color: #0a0a0a;
+  width: 60px; flex-shrink: 0;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.xl-br-bar-wrap {
+  flex: 1;
+  height: 34px;
+  background: #f0ede6;
+  border: 2px solid #0a0a0a;
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.xl-br-bar {
+  height: 100%;
+  transition: width 0.5s ease;
+  min-width: 4px;
+}
+
+.xl-br-inside {
+  position: absolute;
+  right: 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; font-weight: 700;
+  color: #0a0a0a;
+  white-space: nowrap;
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+/* ══════════════════════════════
+   TWO COLUMN LAYOUT
+══════════════════════════════ */
+.xl-two-col-wrap {
+  display: flex; gap: 24px;
+}
+
+.xl-col-half {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Gender ── */
+.xl-gender-row {
+  display: flex; gap: 8px;
+  margin-bottom: 12px;
+}
+
+.xl-gen-block {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 18px 10px; gap: 2px;
+  border: 2px solid #0a0a0a;
+}
+
+.xl-gen-m { background: #fffbe5; }
+.xl-gen-f { background: #e9f0ff; }
+
+.xl-gen-icon {
+  font-family: serif;
+  font-size: 24px; opacity: 0.25; color: #0a0a0a;
+  line-height: 1;
+}
+
+.xl-gen-block strong {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 42px; line-height: 1; color: #0a0a0a;
+}
+
+.xl-gen-block span {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px; color: #888; font-weight: 700;
+}
+
+.xl-gen-ratio {
+  display: flex; height: 24px;
+  border: 2px solid #0a0a0a;
+  overflow: hidden;
+}
+
+.xl-gen-ratio-m { background: #FFE135; transition: flex 0.6s ease; }
+.xl-gen-ratio-f { background: #1A6EFF; transition: flex 0.6s ease; }
+
+.xl-gen-ratio-labels {
+  display: flex; justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; color: #888;
+  margin-top: 4px;
+}
+
+/* ── Benchmark ── */
+.xl-bench-compare {
+  display: flex; align-items: stretch;
+  border: 2px solid #0a0a0a;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.xl-bench-side {
+  flex: 1;
+  padding: 14px 12px;
+  text-align: center;
+  background: #f5f2ec;
+}
+.xl-bench-co { background: #fffbe5; }
+
+.xl-bench-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.xl-bench-val {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 36px; line-height: 1; color: #0a0a0a;
+}
+.xl-bench-val span {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; color: #999;
+}
+
+.xl-bench-mid {
+  width: 64px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.xl-pctile {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; color: #555;
+  margin-bottom: 6px;
+}
+.xl-pctile strong { color: #0a0a0a; font-size: 14px; }
+
+.xl-pctile-bar {
+  height: 12px;
+  background: #f0ede6;
+  border: 2px solid #0a0a0a;
+}
+
+.xl-pctile-fill {
+  height: 100%;
+  background: #FFE135;
+  transition: width 0.8s ease;
+}
+
+/* ══════════════════════════════
+   ELIGIBILITY TABLE
+══════════════════════════════ */
+.xl-elig-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #0a0a0a;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+}
+
+.xl-elig-table th {
+  background: #0a0a0a;
+  color: #FFE135;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-right: 1px solid #222;
+}
+.xl-elig-table th:last-child { border-right: none; }
+
+.xl-elig-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+.xl-elig-table tr:last-child td { border-bottom: none; }
+
+.xl-elig-table td:first-child {
+  font-weight: 700;
+  color: #0a0a0a;
+  background: #fafaf6;
+  border-right: 1px solid #eee;
+}
+
+.xl-elig-table td:nth-child(2) {
+  color: #0a0a0a;
+  border-right: 1px solid #eee;
+}
+
+/* ══════════════════════════════
+   LOADING / ERROR
+══════════════════════════════ */
+.xl-center-state {
+  height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; padding: 40px;
+}
+
+.xl-loader {
+  width: 180px; height: 48px;
+  border: 2.5px solid #0a0a0a;
+  position: relative; overflow: hidden;
+  background: #fff;
+}
+
+.xl-loader-bar {
+  position: absolute; left: 0; width: 100%; height: 4px; top: 0;
+  background: #FFE135;
+  box-shadow: 0 0 10px rgba(255,225,53,0.8);
+  animation: xl-load-anim 1.4s ease-in-out infinite;
+}
+
+@keyframes xl-load-anim {
+  0%   { top: 0; }
+  50%  { top: calc(100% - 4px); }
+  100% { top: 0; }
+}
+
+.xl-center-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 26px; letter-spacing: 3px; color: #0a0a0a;
+  margin: 0;
+}
+
+.xl-center-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; color: #999;
+  letter-spacing: 1px; margin: 0;
+  text-transform: uppercase;
+}
+
+.xl-err-big {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 100px; color: #eee; line-height: 1;
+}

@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAARTHI Nexus — Placement Records</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --white: #f5f0e8;
+      --card: #ffffff;
+      --yellow: #FFE135;
+      --red: #FF3B3B;
+      --blue: #1A6EFF;
+      --green: #00C86F;
+      --orange: #FF6B00;
+      --gray: #888888;
+      --shadow-sm: 6px 6px 0px var(--black);
+      --shadow-lg: 10px 10px 0px var(--black);
+      --shadow-hover: 3px 3px 0px var(--black);
+      --border: 3px solid var(--black);
+      --sidebar-w: 250px;
+      --fd: 'Bebas Neue', cursive;
+      --fm: 'Space Mono', monospace;
+      --fb: 'DM Sans', sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--fb);
+      background: var(--white);
+      color: var(--black);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    button {
+      cursor: none;
+      font-family: inherit;
+      border: none;
+      background: none;
+    }
+
+    input {
+      font-family: inherit;
+      outline: none;
+      cursor: none;
+    }
+
+    * {
+      border-radius: 0 !important;
+    }
+
+    ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--white);
+      border-left: var(--border);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--black);
+      border: 2px solid var(--white);
+    }
+
+    /* CURSOR */
+    .cursor-dot {
+      position: fixed;
+      width: 14px;
+      height: 14px;
+      background: var(--yellow);
+      border: 2px solid var(--black);
+      pointer-events: none;
+      z-index: 99999;
+      transform: translate(-50%, -50%);
+      transition: background 0.12s, width 0.12s, height 0.12s;
+    }
+
+    .cursor-dot.hover {
+      background: var(--red);
+      width: 18px;
+      height: 18px;
+    }
+
+    /* INTERACTIVE NEUBRUTALISM HOVER */
+    .interactive {
+      transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+    }
+
+    .interactive:hover {
+      transform: translate(3px, 3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-w);
+      background: var(--white);
+      border-right: var(--border);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 20px 20px;
+      border-bottom: var(--border);
+    }
+
+    .logo-box {
+      width: 42px;
+      height: 42px;
+      background: var(--orange);
+      border: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 20px;
+      color: var(--card);
+    }
+
+    .logo-text {
+      font-family: var(--fd);
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-section {
+      padding: 16px 16px 8px;
+    }
+
+    .section-label {
+      font-family: var(--fm);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--gray);
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 3px solid transparent;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .nav-item .ni {
+      width: 20px;
+      height: 20px;
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--white);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .nav-item .ns {
+      font-family: var(--fm);
+      font-size: 10px;
+      color: var(--gray);
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-item:hover:not(.active) {
+      background: #f0ead8;
+    }
+
+    .nav-item.active {
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      font-weight: 700;
+    }
+
+    .nav-item.active:hover {
+      transform: translate(3px, 3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    /* MAIN WRAP */
+    .page-wrap {
+      display: flex;
+      width: 100%;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      background: var(--white);
+      min-height: 100vh;
+      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s;
+      will-change: transform, opacity;
+    }
+
+    /* SKELETONS */
+    .skeleton {
+      background: var(--cream, #f5f0e8);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .skel-text {
+      background: var(--gray);
+      opacity: 0.2;
+      height: 24px;
+      margin-bottom: 8px;
+    }
+
+    .skel-card {
+      height: 160px;
+      width: 240px;
+    }
+
+    /* ERROR STATE */
+    .error-box {
+      background: var(--black);
+      border: var(--border);
+      padding: 32px;
+      text-align: center;
+      color: var(--white);
+      margin: 32px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .error-title {
+      font-family: var(--fd);
+      font-size: 32px;
+      color: var(--yellow);
+      margin-bottom: 12px;
+    }
+
+    .error-btn {
+      background: var(--card);
+      color: var(--black);
+      font-family: var(--fm);
+      font-weight: 700;
+      padding: 10px 24px;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      margin-top: 20px;
+      transition: transform 0.1s;
+      cursor: none;
+    }
+
+    .error-btn:hover {
+      transform: translate(3px, 3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    /* ZONE 1 — HERO STATS */
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: var(--border);
+    }
+
+    .hero-stat {
+      padding: 32px 24px;
+      text-align: center;
+      border-right: var(--border);
+      background: var(--card);
+    }
+
+    .hero-stat:last-child {
+      border-right: none;
+    }
+
+    .hs-num {
+      font-family: var(--fd);
+      font-size: 80px;
+      line-height: 1;
+      letter-spacing: 2px;
+    }
+
+    .hs-label {
+      font-family: var(--fm);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--gray);
+      margin-top: 6px;
+    }
+
+    /* ZONE 2 — YEAR SELECTOR */
+    .year-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 32px;
+      border-bottom: var(--border);
+    }
+
+    .year-tabs {
+      display: flex;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .year-tab {
+      padding: 10px 20px;
+      font-family: var(--fm);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-right: var(--border);
+      background: var(--white);
+      color: var(--black);
+      transition: background 0.08s;
+      white-space: nowrap;
+    }
+
+    .year-tab:last-child {
+      border-right: none;
+    }
+
+    .year-tab.active {
+      background: var(--black);
+      color: var(--yellow);
+    }
+
+    .year-tab:not(.active):hover {
+      background: #f0ead8;
+    }
+
+    .year-mini-stats {
+      background: var(--yellow);
+      border: var(--border);
+      padding: 10px 20px;
+      font-family: var(--fm);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* ZONE 3 — DASHBOARD GRID */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 60% 40%;
+      min-height: 480px;
+      border-bottom: var(--border);
+    }
+
+    .dash-left {
+      padding: 32px;
+      border-right: var(--border);
+    }
+
+    .dash-right {
+      padding: 32px;
+      overflow-y: auto;
+      max-height: 640px;
+    }
+
+    .zone-title {
+      font-family: var(--fd);
+      font-size: 28px;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* BAR CHART */
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      padding: 6px 0;
+    }
+
+    .bar-label {
+      font-family: var(--fm);
+      font-size: 11px;
+      font-weight: 700;
+      width: 80px;
+      flex-shrink: 0;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .bar-container {
+      flex: 1;
+      height: 32px;
+      border: var(--border);
+      background: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0;
+      border-right: 3px solid var(--black);
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .bar-count {
+      font-family: var(--fd);
+      font-size: 22px;
+      width: 50px;
+      text-align: right;
+      color: var(--black);
+    }
+
+    .sort-btn {
+      font-family: var(--fm);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--card);
+      border: var(--border);
+      padding: 6px 14px;
+      box-shadow: var(--shadow-hover);
+    }
+
+    /* LEADERBOARD */
+    .lb-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border: var(--border);
+      margin-bottom: 8px;
+      background: var(--card);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .lb-rank {
+      font-family: var(--fd);
+      font-size: 36px;
+      color: var(--black);
+      opacity: 0.1;
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .lb-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--orange);
+      border: 2px solid var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 15px;
+      color: var(--card);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .lb-info {
+      flex: 1;
+      z-index: 1;
+    }
+
+    .lb-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .lb-meta {
+      font-family: var(--fm);
+      font-size: 10px;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+
+    .lb-count {
+      font-family: var(--fd);
+      font-size: 26px;
+      color: var(--green);
+      z-index: 1;
+    }
+
+    .lb-minibar {
+      height: 4px;
+      background: var(--white);
+      border: 1px solid var(--black);
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .lb-minibar-fill {
+      height: 100%;
+      background: var(--yellow);
+      width: 0;
+    }
+
+    /* ZONE 4 — HALL OF OFFERS */
+    .zone4 {
+      padding: 32px 32px 48px;
+      border-bottom: var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .zone-title-lg {
+      font-family: var(--fd);
+      font-size: 48px;
+      letter-spacing: 2px;
+    }
+
+    .zone-sub {
+      font-family: var(--fm);
+      font-size: 12px;
+      color: var(--gray);
+      margin-top: 4px;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+
+    .search-wrap {
+      margin-top: -8px;
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card);
+      border: var(--border);
+      padding: 10px 16px;
+      font-family: var(--fm);
+      font-size: 12px;
+      color: var(--black);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .search-input:focus {
+      background: #fdfaf0;
+      border-color: var(--orange);
+    }
+
+    .marquee-wrap {
+      overflow: hidden;
+      position: relative;
+      width: 100vw;
+      margin-left: -32px;
+      padding: 10px 32px;
+    }
+
+    .marquee-track {
+      display: flex;
+      gap: 16px;
+      width: max-content;
+    }
+
+    .offer-card {
+      width: 240px;
+      min-height: 160px;
+      background: var(--card);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      flex-shrink: 0;
+    }
+
+    .oc-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--orange);
+      border: 2px solid var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 14px;
+      color: var(--card);
+      margin-bottom: 8px;
+    }
+
+    .oc-company {
+      font-family: var(--fd);
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .oc-role {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .oc-pkg {
+      font-family: var(--fd);
+      font-size: 28px;
+      color: var(--green);
+      margin-top: 8px;
+      line-height: 1;
+    }
+
+    .oc-pkg span {
+      font-family: var(--fm);
+      font-size: 12px;
+      color: var(--gray);
+    }
+
+    .oc-branch {
+      font-family: var(--fm);
+      font-size: 10px;
+      margin-top: 8px;
+      color: var(--black);
+      background: var(--yellow);
+      display: inline-block;
+      padding: 2px 6px;
+      border: 2px solid var(--black);
+    }
+
+    .ppo-badge {
+      position: absolute;
+      top: 12px;
+      right: -4px;
+      background: var(--yellow);
+      color: var(--black);
+      border: var(--border);
+      font-family: var(--fd);
+      font-size: 14px;
+      padding: 2px 8px;
+      transform: rotate(5deg);
+      box-shadow: 2px 2px 0 var(--black);
+      z-index: 2;
+    }
+
+    /* ZONE 5 — RAILWAY MAP */
+    .zone5 {
+      padding: 32px 32px 64px;
+    }
+
+    .rail-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 32px;
+      padding-right: 32px;
+    }
+
+    .rail-headers {
+      display: flex;
+      margin-left: 160px;
+      font-family: var(--fm);
+      font-size: 11px;
+      color: var(--gray);
+      text-transform: uppercase;
+      position: relative;
+    }
+
+    .rh-item {
+      position: absolute;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .rail-row {
+      display: flex;
+      align-items: center;
+      height: 80px;
+      position: relative;
+    }
+
+    .rail-company {
+      width: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding-right: 24px;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .rail-track-container {
+      flex: 1;
+      position: relative;
+      height: 100%;
+    }
+
+    .rail-segment {
+      position: absolute;
+      height: 3px;
+      top: 50%;
+      margin-top: -1.5px;
+      transform-origin: left;
+      z-index: 1;
+      background: var(--black);
+    }
+
+    .rail-station-wrap {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rail-station {
+      border: var(--border);
+      border-radius: 50% !important;
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 18px;
+      color: var(--black);
+      box-shadow: 2px 2px 0 var(--black);
+      position: relative;
+    }
+
+    .rail-station.zero {
+      border: 3px dashed var(--black);
+      background: var(--white);
+      box-shadow: none;
+      color: var(--red);
+    }
+
+    .rail-year {
+      position: absolute;
+      top: 100%;
+      margin-top: 12px;
+      font-family: var(--fm);
+      font-size: 10px;
+      color: var(--gray);
+      white-space: nowrap;
+    }
+
+    .hm-tooltip {
+      position: fixed;
+      background: var(--black);
+      color: var(--yellow);
+      font-family: var(--fm);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 10px 14px;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+      border: 3px solid var(--yellow);
+      line-height: 1.4;
+    }
+
+    /* DETAIL PANEL */
+    .detail-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 60%;
+      max-width: 900px;
+      height: 100vh;
+      background: var(--white);
+      border-left: var(--border);
+      box-shadow: -10px 0 0px var(--black);
+      transform: translateX(100%);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 32px;
+      will-change: transform;
+    }
+
+    .dp-back {
+      font-family: var(--fm);
+      font-size: 12px;
+      font-weight: 700;
+      border: var(--border);
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      padding: 8px 16px;
+      align-self: flex-start;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dp-header {
+      background: var(--yellow);
+      border-top: var(--border);
+      border-bottom: var(--border);
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 -32px 32px;
+    }
+
+    .dph-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .dph-avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--orange);
+      border: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 24px;
+      color: var(--card);
+    }
+
+    .dph-title {
+      font-family: var(--fd);
+      font-size: 40px;
+      line-height: 1;
+    }
+
+    .dph-right {
+      font-family: var(--fm);
+      font-size: 11px;
+      color: #555;
+    }
+
+    .dp-stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .dps-block {
+      flex: 1;
+      border: var(--border);
+      padding: 16px;
+      background: var(--card);
+      text-align: center;
+    }
+
+    .dps-num {
+      font-family: var(--fd);
+      font-size: 32px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .dps-label {
+      font-family: var(--fm);
+      font-size: 10px;
+      color: var(--gray);
+      text-transform: uppercase;
+    }
+
+    .dp-mini-rail {
+      margin-bottom: 32px;
+      padding: 32px 0;
+      border-bottom: var(--border);
+      position: relative;
+    }
+
+    .dp-students-title {
+      font-family: var(--fd);
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .dp-stu-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border: var(--border);
+      margin-bottom: 8px;
+      background: var(--card);
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .dp-stu-row:hover {
+      background: var(--yellow);
+      transform: translate(2px, 2px);
+    }
+
+    .dp-stu-av {
+      width: 28px;
+      height: 28px;
+      border-radius: 50% !important;
+      border: 3px solid var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 12px;
+      color: var(--card);
+      margin-right: 12px;
+    }
+
+    .dp-stu-info {
+      flex: 1;
+    }
+
+    .dp-stu-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .dp-stu-meta {
+      font-family: var(--fm);
+      font-size: 11px;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+
+    .dp-stu-pkg {
+      font-family: var(--fd);
+      font-size: 20px;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dp-cta {
+      background: var(--yellow);
+      border: var(--border);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 32px;
+    }
+
+    .dp-btn {
+      background: var(--black);
+      color: var(--yellow);
+      font-family: var(--fd);
+      font-size: 18px;
+      padding: 10px 24px;
+      border: 2px solid var(--black);
+      transition: transform 0.1s;
+    }
+
+    .dp-btn:hover {
+      transform: translate(3px, 3px);
+      box-shadow: -3px -3px 0 var(--black) inset;
+    }
+
+    .dp-alumni {
+      font-family: var(--fm);
+      font-size: 12px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-box">SN</div>
+      <div class="logo-text">SAARTHI NEXUS</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-label">Placement Hub</div>
+      <div class="nav-item active">
+        <div class="ni">▤</div>
+        <div>
+          <div>Records</div>
+          <div class="ns">Past Data</div>
+        </div>
+      </div>
+      <div class="nav-item">
+        <div class="ni">✈</div>
+        <div>
+          <div>Drives</div>
+          <div class="ns">Active Drives</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="page-wrap">
+    <main class="main-content" id="mainContent">
+      <div id="errorBanner" style="display:none;"></div>
+
+      <!-- ZONE 1 -->
+      <div class="hero-stats" id="zone1"></div>
+
+      <!-- ZONE 2 -->
+      <div class="year-row" id="zone2"></div>
+
+      <!-- ZONE 3 -->
+      <div class="dash-grid" id="zone3">
+        <div class="dash-left">
+          <div class="zone-title">PACKAGE DISTRIBUTION <button class="sort-btn interactive" id="sortBtn">SORT: COUNT
+              ↕</button></div>
+          <div id="barChart"></div>
+        </div>
+        <div class="dash-right">
+          <div class="zone-title">TOP RECRUITERS</div>
+          <div id="leaderboard"></div>
+        </div>
+      </div>
+
+      <!-- ZONE 4 -->
+      <div class="zone4">
+        <div class="zone-title-lg">HALL OF OFFERS</div>
+        <div class="zone-sub">Every offer. Every student. Every year.</div>
+        <div class="search-wrap"><input class="search-input" id="offerSearch"
+            placeholder="Filter by company, branch, package..."></div>
+        <div class="marquee-wrap">
+          <div class="marquee-track" id="marqueeTrack"></div>
+        </div>
+      </div>
+
+      <!-- ZONE 5 -->
+      <div class="zone5" id="zone5">
+        <div class="zone-title-lg">WHICH COMPANIES CAME BACK?</div>
+        <div class="zone-sub">Track record across 4 placement seasons</div>
+        <div class="rail-grid" id="railGrid"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="detailPanel">
+    <button class="dp-back interactive" id="closePanelBtn">← BACK TO OVERVIEW</button>
+    <div id="dpContent"></div>
+  </div>
+
+  <div class="hm-tooltip" id="hmTooltip"></div>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const API_BASE = '/api/placements';
+    let globalYears = [];
+    let currentYearStr = '';
+    let sortByPkg = false;
+    let currentBrackets = [];
+    let marqueeTween = null;
+    let searchTimeout = null;
+    let panelOpen = false;
+
+    /* ━━━━━━━━━━━━ DATA FETCHING ━━━━━━━━━━━━ */
+    async function fetchData(endpoint) {
+      try {
+        const res = await fetch(API_BASE + endpoint);
+        if (!res.ok) throw new Error(res.statusText);
+        return await res.json();
+      } catch (err) {
+        console.error('Fetch failed:', endpoint, err);
+        return null;
+      }
+    }
+
+    function showError() {
+      document.getElementById('errorBanner').style.display = 'block';
+      document.getElementById('errorBanner').innerHTML = `
+    <div class="error-box">
+      <div class="error-title">⚠ FAILED TO LOAD DATA</div>
+      <div>Could not connect to MongoDB API. Make sure the backend is running.</div>
+      <button class="error-btn interactive" onclick="location.reload()">Retry →</button>
+    </div>
+  `;
+    }
+
+    function showSkeletons() {
+      const skelCard = `<div class="skeleton interactive" style="padding:16px; width:100%; height:120px;">
+    <div class="skel-text" style="width:40%"></div>
+    <div class="skel-text" style="width:70%"></div>
+  </div>`;
+
+      document.getElementById('zone1').innerHTML = `
+    <div class="hero-stat skeleton"><div class="skel-text"></div></div>
+    <div class="hero-stat skeleton"><div class="skel-text"></div></div>
+    <div class="hero-stat skeleton"><div class="skel-text"></div></div>
+    <div class="hero-stat skeleton"><div class="skel-text"></div></div>
+  `;
+      document.getElementById('zone2').innerHTML = `<div class="skeleton" style="width:100%;height:40px;"></div>`;
+
+      gsap.to('.skeleton', { opacity: 0.4, duration: 0.8, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: 0.1 });
+    }
+
+    function showZone3Skeleton() {
+      document.getElementById('barChart').innerHTML = `<div class="skeleton" style="width:100%;height:200px;"></div>`;
+      document.getElementById('leaderboard').innerHTML = `<div class="skeleton" style="width:100%;height:200px;"></div>`;
+      document.getElementById('marqueeTrack').innerHTML = `<div class="skeleton skel-card"></div><div class="skeleton skel-card"></div>`;
+    }
+
+    /* ━━━━━━━━━━━━ RENDERERS ━━━━━━━━━━━━ */
+
+    function renderHeroStats(data) {
+      document.getElementById('zone1').innerHTML = `
+    <div class="hero-stat interactive"><div class="hs-num" data-target="${data.total_placed}" style="color:var(--yellow)">0</div><div class="hs-label">Total Placed</div></div>
+    <div class="hero-stat interactive"><div class="hs-num" data-target="${data.highest_lpa}" style="color:var(--green)">0</div><div class="hs-label">Highest Pkg (LPA)</div></div>
+    <div class="hero-stat interactive"><div class="hs-num" data-target="${data.total_companies}" style="color:var(--blue)">0</div><div class="hs-label">Companies</div></div>
+    <div class="hero-stat interactive"><div class="hs-num" data-target="${data.placement_rate || 94}" style="color:var(--green)">0</div><div class="hs-label">Placement %</div></div>
+  `;
+
+      gsap.from('.hero-stat', { y: -30, opacity: 0, stagger: 0.15, duration: 0.6 });
+      document.querySelectorAll('[data-target]').forEach((el, i) => {
+        gsap.to({ val: 0 }, {
+          val: parseFloat(el.dataset.target), duration: 1.8, delay: 0.2 + (i * 0.2), ease: 'power2.out',
+          onUpdate() { el.textContent = Math.round(this.targets()[0].val) + (i === 3 ? '%' : ''); }
+        });
+      });
+    }
+
+    function renderYearTabs(years) {
+      globalYears = years;
+      let tabsHtml = '';
+      years.forEach(y => {
+        const isCurrent = y.year === currentYearStr;
+        const arrow = (y.year === years[years.length - 1].year) ? ' ▶' : '';
+        tabsHtml += `<button class="year-tab interactive ${isCurrent ? 'active' : ''}" data-year="${y.year}">${y.year}${arrow}</button>`;
+      });
+
+      const currData = years.find(y => y.year === currentYearStr) || years[years.length - 1];
+
+      document.getElementById('zone2').innerHTML = `
+    <div class="year-tabs">${tabsHtml}</div>
+    <div class="year-mini-stats">${currData.total_placed} PLACED · ${currData.highest_lpa} LPA HIGHEST · ${currData.total_companies} COMPANIES</div>
+  `;
+
+      gsap.from('.year-tab', { x: -20, opacity: 0, stagger: 0.08 });
+
+      document.querySelectorAll('.year-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          if (tab.dataset.year === currentYearStr) return;
+          currentYearStr = tab.dataset.year;
+          renderYearTabs(globalYears); // Update active state
+          loadYearData(currentYearStr);
+        });
+      });
+    }
+
+    function getBracketColor(bracket) {
+      return { '<10 LPA': '#FF3B3B', '10-20 LPA': '#FF6B00', '20-30 LPA': '#FFE135', '30-40 LPA': '#1A6EFF', '40+ LPA': '#00C86F' }[bracket] || '#888';
+    }
+
+    function renderPackageDistribution() {
+      let b = [...currentBrackets];
+      if (sortByPkg) b.reverse();
+      else b.sort((a, c) => c.count - a.count);
+
+      const mx = Math.max(...b.map(x => x.count), 1);
+      document.getElementById('barChart').innerHTML = b.map(r => `
+    <div class="bar-row">
+      <div class="bar-label">${r.bracket}</div>
+      <div class="bar-container"><div class="bar-fill" data-width="${(r.count / mx) * 100}" style="background:${getBracketColor(r.bracket)}"></div></div>
+      <div class="bar-count">${r.count}</div>
+    </div>`).join('');
+    }
+
+    function animateBars() {
+      gsap.fromTo('.bar-fill', { width: '0%' }, { width: (i, el) => el.dataset.width + '%', duration: 0.9, stagger: 0.12, ease: 'power3.out' });
+      document.querySelectorAll('.bar-count').forEach((el, i) => {
+        const t = parseInt(el.textContent);
+        gsap.fromTo(el, { textContent: 0 }, { textContent: t, duration: 1, delay: i * 0.12, ease: 'power2.out', snap: { textContent: 1 }, onUpdate() { el.textContent = Math.round(parseFloat(el.textContent)); } });
+      });
+    }
+
+    function renderTopRecruiters(companies) {
+      const mx = companies.length > 0 ? companies[0].total_hired : 1;
+      document.getElementById('leaderboard').innerHTML = companies.map((c, i) => `
+    <div class="lb-card interactive">
+      <div class="lb-rank">#${i + 1}</div>
+      <div class="lb-avatar">${c.company.charAt(0)}</div>
+      <div class="lb-info"><div class="lb-name">${c.company}</div><div class="lb-meta">Avg: ${c.avg_lpa} LPA</div>
+      <div class="lb-minibar"><div class="lb-minibar-fill" data-width="${(c.total_hired / mx) * 100}"></div></div></div>
+      <div class="lb-count">${c.total_hired}</div>
+    </div>`).join('');
+    }
+
+    function animateLeaderboard() {
+      gsap.fromTo('.lb-card', { x: 40, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.1, duration: 0.5, ease: 'power3.out' });
+      gsap.fromTo('.lb-minibar-fill', { width: '0%' }, { width: (i, el) => el.dataset.width + '%', duration: 0.8, stagger: 0.1, ease: 'power3.out', delay: 0.2 });
+      document.querySelectorAll('.lb-count').forEach((el, i) => {
+        const t = parseInt(el.textContent);
+        gsap.fromTo(el, { textContent: 0 }, { textContent: t, duration: 1, delay: 0.1 + i * 0.1, ease: 'power2.out', snap: { textContent: 1 }, onUpdate() { el.textContent = Math.round(parseFloat(el.textContent)); } });
+      });
+    }
+
+    function renderHallOfOffers(offers) {
+      const tr = document.getElementById('marqueeTrack');
+      if (!offers || offers.length === 0) {
+        tr.innerHTML = '<div style="font-family:var(--fd); font-size:40px; color:var(--gray);">NO OFFERS RECORDED</div>';
+        return;
+      }
+
+      const cards = offers.map(o => {
+        const role = o.role || 'PLACEMENT';
+        const branches = (o.branches || []).join(', ');
+        const ppoBadge = o.visit_type === 'PPO' ? '<div class="ppo-badge">PPO OFFER</div>' : '';
+
+        return `
+      <div class="offer-card interactive" data-company="${o.company}" data-search="${o.company.toLowerCase()} ${branches.toLowerCase()} ${role.toLowerCase()}">
+        ${ppoBadge}
+        <div class="oc-avatar">${o.company.charAt(0)}</div>
+        <div class="oc-company">${o.company}</div>
+        <div class="oc-role">${role}</div>
+        <div class="oc-pkg">${o.salary_lpa} <span>LPA</span></div>
+        <div class="oc-branch">${branches || 'All Branches'}</div>
+      </div>`;
+      }).join('');
+
+      // Duplicate for seamless loop
+      tr.innerHTML = cards + cards + cards;
+
+      if (marqueeTween) marqueeTween.kill();
+      const wrap = document.querySelector('.marquee-wrap');
+      marqueeTween = gsap.to(tr, { x: -(tr.scrollWidth / 3), duration: 40, ease: 'none', repeat: -1 });
+
+      wrap.addEventListener('mouseenter', () => marqueeTween.pause());
+      wrap.addEventListener('mouseleave', () => marqueeTween.play());
+
+      bindCardClicks();
+    }
+
+    function renderRailwayMap(data) {
+      const rg = document.getElementById('railGrid');
+      if (!data || data.length === 0) return;
+
+      const yearsList = globalYears.map(y => y.year);
+
+      let maxHires = 1;
+      data.forEach(c => {
+        Object.values(c.years).forEach(v => { if (v > maxHires) maxHires = v; });
+      });
+
+      let html = `<div class="rail-headers">`;
+      yearsList.forEach((y, i) => {
+        const pct = (i / (yearsList.length - 1)) * 100;
+        html += `<div class="rh-item" style="left:${pct}%">${y}</div>`;
+      });
+      html += `</div>`;
+
+      data.forEach(c => {
+        let segments = '';
+        let stations = '';
+
+        for (let i = 0; i < yearsList.length; i++) {
+          const yStr = yearsList[i];
+          const h = c.years[yStr] || 0;
+          const pct = (i / (yearsList.length - 1)) * 100;
+
+          if (i < yearsList.length - 1) {
+            const nextY = yearsList[i + 1];
+            const nextH = c.years[nextY] || 0;
+            let color = 'var(--black)';
+            if (nextH > h) color = 'var(--green)';
+            else if (nextH < h) color = 'var(--red)';
+
+            segments += `<div class="rail-segment track-line" style="left:${pct}%; width:${100 / (yearsList.length - 1)}%; background:${color}"></div>`;
+          }
+
+          const size = 24 + (h / maxHires) * 40;
+          let cls = 'rail-station station interactive';
+          let inner = h;
+          if (h === 0) { inner = '✕'; cls += ' zero'; }
+
+          stations += `
+        <div class="rail-station-wrap" style="left:${pct}%">
+          <div class="${cls}" style="width:${size}px;height:${size}px" data-comp="${c.company}" data-yr="${yStr}" data-h="${h}">
+            <span class="rs-num" data-val="${h === 0 ? 0 : h}">${h === 0 ? '✕' : 0}</span>
+          </div>
+          <div class="rail-year">${yStr}</div>
+        </div>`;
+        }
+
+        html += `
+      <div class="rail-row">
+        <div class="rail-company"><div class="lb-avatar">${c.company.charAt(0)}</div>${c.company}</div>
+        <div class="rail-track-container">
+          ${segments}
+          ${stations}
+        </div>
+      </div>`;
+      });
+
+      rg.innerHTML = html;
+
+      // Tooltips
+      const tt = document.getElementById('hmTooltip');
+      document.querySelectorAll('.station').forEach(st => {
+        st.addEventListener('mouseenter', e => {
+          gsap.to(st, { scale: 1.3, duration: 0.2, ease: 'back.out(2)' });
+          tt.innerHTML = `${st.dataset.comp} · ${st.dataset.yr}<br/>${st.dataset.h} STUDENTS HIRED<br/>`;
+          tt.style.left = (e.clientX + 16) + 'px'; tt.style.top = (e.clientY - 32) + 'px';
+          gsap.to(tt, { y: 0, opacity: 1, duration: 0.15 });
+        });
+        st.addEventListener('mousemove', e => { tt.style.left = (e.clientX + 16) + 'px'; tt.style.top = (e.clientY - 32) + 'px'; });
+        st.addEventListener('mouseleave', () => {
+          gsap.to(st, { scale: 1, duration: 0.2 });
+          gsap.to(tt, { y: 8, opacity: 0, duration: 0.1 });
+        });
+      });
+
+      // Re-init ScrollTrigger
+      ScrollTrigger.refresh();
+      ScrollTrigger.create({
+        trigger: '#zone5',
+        start: 'top 75%',
+        onEnter: () => {
+          gsap.fromTo('.rail-row', { x: -20, opacity: 0 }, { x: 0, opacity: 1, stagger: 0.08, duration: 0.4 });
+          gsap.fromTo('.track-line', { scaleX: 0 }, { scaleX: 1, transformOrigin: 'left', stagger: 0.05, duration: 0.6, ease: 'power3.out', delay: 0.2 });
+          gsap.fromTo('.station', { scale: 0 }, { scale: 1, stagger: 0.02, duration: 0.4, ease: 'back.out(1.7)', delay: 0.4 });
+          document.querySelectorAll('.rs-num').forEach((el, i) => {
+            const t = parseInt(el.dataset.val);
+            if (t > 0) gsap.to(el, { textContent: t, duration: 1, ease: 'power2.out', snap: { textContent: 1 }, delay: 0.5 + i * 0.01 });
+          });
+        },
+        once: true
+      });
+    }
+
+    /* ━━━━━━━━━━━━ DETAIL PANEL ━━━━━━━━━━━━ */
+
+    function getBranchColor(b) {
+      if (b === 'CE') return 'var(--blue)';
+      if (b === 'IT') return 'var(--green)';
+      if (b === 'ECE' || b === 'E&TC') return 'var(--orange)';
+      return 'var(--red)';
+    }
+
+    function deriveSector(cat) {
+      if (!cat) return 'INDUSTRY';
+      cat = cat.toLowerCase();
+      if (cat.includes('it') || cat.includes('software')) return 'TECH';
+      if (cat.includes('finance') || cat.includes('bank')) return 'FINANCE';
+      if (cat.includes('consult')) return 'CONSULTING';
+      if (cat.includes('niche')) return 'NICHE';
+      return 'INDUSTRY';
+    }
+
+    function renderDetailPanel(d) {
+      const dp = document.getElementById('dpContent');
+      const sector = deriveSector(d.sector);
+
+      let stuHtml = '';
+      // Since API doesn't have names, we construct anonymous rows based on branch_breakdown
+      if (d.branch_breakdown) {
+        Object.entries(d.branch_breakdown).forEach(([branch, count]) => {
+          for (let i = 0; i < count; i++) {
+            stuHtml += `
+          <div class="dp-stu-row interactive">
+            <div class="dp-stu-av" style="background:${getBranchColor(branch)}">S</div>
+            <div class="dp-stu-info">
+              <div class="dp-stu-name">Placed Student</div>
+              <div class="dp-stu-meta">${branch} · ${d.last_visit_year}</div>
+            </div>
+            <div class="dp-stu-pkg">${d.avg_lpa} LPA ↗</div>
+          </div>`;
+          }
+        });
+      }
+
+      const ppoBadge = d.ppo_count > 0 ? `<div style="background:var(--yellow); border:var(--border); padding:4px 12px; font-family:var(--fd); box-shadow:2px 2px 0 var(--black); transform:rotate(3deg);">PPO OFFERED</div>` : '';
+
+      dp.innerHTML = `
+    <div class="dp-header">
+      <div class="dph-left">
+        <div class="dph-avatar">${d.company.charAt(0)}</div>
+        <div class="dph-title">${d.company}</div>
+        ${ppoBadge}
+      </div>
+      <div class="dph-right">SINCE ${d.first_visit_year}</div>
+    </div>
+    <div class="dp-stats">
+      <div class="dps-block stat-block"><div class="dps-num">${d.total_visits}</div><div class="dps-label">TOTAL VISITS</div></div>
+      <div class="dps-block stat-block"><div class="dps-num">${d.avg_lpa}</div><div class="dps-label">AVG LPA</div></div>
+      <div class="dps-block stat-block"><div class="dps-num">${d.last_visit_year}</div><div class="dps-label">LAST VISIT</div></div>
+      <div class="dps-block stat-block"><div class="dps-num">${sector}</div><div class="dps-label">SECTOR</div></div>
+    </div>
+    <div class="dp-students-title">STUDENTS PLACED HERE</div>
+    <div>${stuHtml || '<div style="font-family:var(--fm);font-size:12px;color:var(--gray)">No individual records available.</div>'}</div>
+    <div class="dp-cta">
+      <button class="dp-btn interactive">VIEW OPEN DRIVES →</button>
+      <div class="dp-alumni">12 ALUMNI IN NETWORK →</div>
+    </div>
+  `;
+    }
+
+    function animateDetailPanel(card) {
+      panelOpen = true;
+      const panel = document.getElementById('detailPanel');
+      const main = document.getElementById('mainContent');
+
+      gsap.to(card, { scale: 1.05, yoyo: true, repeat: 1, duration: 0.15 });
+
+      const tl = gsap.timeline();
+      document.querySelectorAll('.offer-card').forEach(c => {
+        if (c !== card) tl.to(c, { opacity: 0.1, scale: 0.95, duration: 0.3 }, 0);
+      });
+      card.style.borderColor = 'var(--yellow)';
+
+      tl.to(main, { x: '-20%', opacity: 0.3, duration: 0.5, ease: 'power3.out' }, 0.2);
+      tl.to(panel, { x: '0%', duration: 0.5, ease: 'power3.out' }, 0.2);
+
+      tl.fromTo('.dp-header', { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4 }, 0.4);
+      tl.fromTo('.stat-block', { y: 20, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.08, duration: 0.4 }, 0.5);
+      tl.fromTo('.dp-stu-row', { y: 20, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.06, duration: 0.4 }, 0.8);
+    }
+
+    function closePanel() {
+      if (!panelOpen) return;
+      const panel = document.getElementById('detailPanel');
+      const main = document.getElementById('mainContent');
+
+      const tl = gsap.timeline({ onComplete: () => { panelOpen = false; document.querySelectorAll('.offer-card').forEach(c => c.style.borderColor = 'var(--black)'); } });
+      tl.to(panel, { x: '100%', duration: 0.4, ease: 'power3.in' }, 0);
+      tl.to(main, { x: '0%', opacity: 1, duration: 0.4, ease: 'power3.out' }, 0);
+      document.querySelectorAll('.offer-card').forEach(c => {
+        tl.to(c, { opacity: 1, scale: 1, duration: 0.3 }, 0.2);
+      });
+    }
+
+    async function openCompanyDetail(card) {
+      if (panelOpen) return;
+      const compName = card.dataset.company;
+
+      // Show loading in panel
+      document.getElementById('dpContent').innerHTML = `<div class="skeleton" style="width:100%;height:300px;"></div>`;
+      panelOpen = true; // prevent double clicks
+      gsap.to(document.getElementById('detailPanel'), { x: '0%', duration: 0.5, ease: 'power3.out' });
+      gsap.to(document.getElementById('mainContent'), { x: '-20%', opacity: 0.3, duration: 0.5, ease: 'power3.out' });
+
+      const detail = await fetchData(`/company-detail/${encodeURIComponent(compName)}`);
+      if (!detail) {
+        closePanel();
+        alert('Failed to load company details.');
+        return;
+      }
+
+      panelOpen = false; // Reset to let animate logic run
+      renderDetailPanel(detail);
+      animateDetailPanel(card);
+    }
+
+    function bindCardClicks() {
+      document.querySelectorAll('.offer-card').forEach(card => {
+        card.addEventListener('click', () => openCompanyDetail(card));
+      });
+    }
+
+    /* ━━━━━━━━━━━━ INIT SEQUENCE ━━━━━━━━━━━━ */
+
+    async function loadYearData(year) {
+      showZone3Skeleton();
+
+      const [distribution, recruiters, offers] = await Promise.all([
+        fetchData(`/package-distribution?year=${year}`),
+        fetchData(`/top-recruiters?year=${year}&limit=8`),
+        fetchData(`/hall-of-offers?year=${year}&limit=30`)
+      ]);
+
+      if (!distribution || !recruiters || !offers) { showError(); return; }
+
+      currentBrackets = distribution;
+
+      gsap.to('#zone3', {
+        opacity: 0, duration: 0.25, onComplete: () => {
+          renderPackageDistribution();
+          renderTopRecruiters(recruiters);
+          gsap.to('#zone3', { opacity: 1, duration: 0.25 });
+          animateBars();
+          animateLeaderboard();
+        }
+      });
+
+      renderHallOfOffers(offers);
+    }
+
+    async function initPage() {
+      showSkeletons();
+
+      const [summary, byYear, heatmap] = await Promise.all([
+        fetchData('/summary'),
+        fetchData('/by-year'),
+        fetchData('/visit-frequency')
+      ]);
+
+      if (!summary || !byYear || !heatmap) {
+        showError();
+        return;
+      }
+
+      renderHeroStats(summary);
+
+      if (byYear.length > 0) {
+        currentYearStr = byYear[byYear.length - 1].year;
+        renderYearTabs(byYear);
+        renderRailwayMap(heatmap);
+        await loadYearData(currentYearStr);
+      }
+    }
+
+    // Search Filter
+    document.getElementById('offerSearch').addEventListener('input', e => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const q = e.target.value.toLowerCase();
+        document.querySelectorAll('.offer-card').forEach(card => {
+          const match = !q || card.dataset.search.includes(q);
+          gsap.to(card, { opacity: match ? 1 : 0.15, scale: match ? 1 : 0.95, duration: 0.2 });
+        });
+      }, 300);
+    });
+
+    document.getElementById('sortBtn').addEventListener('click', () => {
+      sortByPkg = !sortByPkg;
+      document.getElementById('sortBtn').textContent = sortByPkg ? 'SORT: BRACKET ↕' : 'SORT: COUNT ↕';
+      gsap.to('.bar-row', {
+        opacity: 0, y: -10, duration: 0.2, stagger: 0.04, ease: 'power2.in', onComplete: () => {
+          renderPackageDistribution();
+          animateBars();
+        }
+      });
+    });
+
+    document.getElementById('closePanelBtn').addEventListener('click', closePanel);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+    // Mouse cursor bindings
+    document.addEventListener('mousemove', e => {
+      const dot = document.getElementById('cursorDot');
+      dot.style.left = e.clientX + 'px';
+      dot.style.top = e.clientY + 'px';
+    });
+    // Event delegation for cursor hover
+    document.body.addEventListener('mouseover', e => {
+      if (e.target.closest('button, input, .interactive')) {
+        document.getElementById('cursorDot').classList.add('hover');
+      }
+    });
+    document.body.addEventListener('mouseout', e => {
+      if (e.target.closest('button, input, .interactive')) {
+        document.getElementById('cursorDot').classList.remove('hover');
+      }
+    });
+
+    // START
+    initPage();
+  </script>
+</body>
+
+</html>

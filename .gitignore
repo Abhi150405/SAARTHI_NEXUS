@@ -5,7 +5,8 @@ venv/
 .venv/
 env/
 .env/
-
+.vite
+Vibe_coding
 # Build outputs
 dist/
 dist-ssr/
