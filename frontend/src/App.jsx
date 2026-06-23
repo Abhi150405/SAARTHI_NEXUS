@@ -52,12 +52,18 @@ const AdminGuard = ({ children }) => {
 
 function App() {
   useEffect(() => {
-    const wakeBackend = async () => {
-      try {
-        await fetch(`${API_URL}/health`);
-        console.log('🚀 Backend waking process initiated');
-      } catch (err) {
-        console.error('⚠️ Backend waking failed:', err);
+    const wakeBackend = async (retries = 3, delayMs = 5000) => {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          // mode: 'no-cors' prevents ad blockers from blocking the pre-warm ping
+          await fetch(`${API_URL}/health`, { mode: 'no-cors' });
+          console.log('🚀 Backend pre-warm ping sent (attempt', attempt, ')');
+          return; // success — stop retrying
+        } catch {
+          if (attempt < retries) {
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+          }
+        }
       }
     };
 
