@@ -222,8 +222,41 @@ async def analyze_skill_gap(request: AnalysisRequest):
                     f"Raw (first 500 chars): {text[:500]}"
                 )
 
-            # --- Gemini Try First (Primary for Skill Analysis) ---
-            if google_api_key:
+            # --- NVIDIA Try First (Primary for Skill Analysis) ---
+            if nvidia_api_key:
+                nvidia_url = "https://integrate.api.nvidia.com/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {nvidia_api_key}",
+                    "Accept": "application/json",
+                }
+                payload = {
+                    "model": "meta/llama-3.1-8b-instruct",
+                    "messages": [{"role": "user", "content": input_text}],
+                    "max_tokens": 4096,
+                    "temperature": 0.3,
+                    "top_p": 0.8
+                }
+                try:
+                    response = await client.post(nvidia_url, headers=headers, json=payload, timeout=120.0)
+                    response.raise_for_status()
+                    data = response.json()
+                    raw_text = data["choices"][0]["message"]["content"]
+                    result_json = parse_llm_json(raw_text)
+                    print("✅ Skill Analysis: NVIDIA API responded successfully")
+                except Exception as e:
+                    err_msg = ""
+                    if isinstance(e, httpx.HTTPError):
+                        if getattr(e, "response", None) is not None and e.response.text:
+                            err_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+                        else:
+                            err_msg = f"Network Error: {repr(e)}"
+                    else:
+                        err_msg = f"Error: {repr(e)}"
+                    print(f"NVIDIA API Error or Parse Error: {err_msg}")
+                    error_details.append(f"NVIDIA Error: {err_msg}")
+
+            # --- Gemini Fallback attempt ---
+            if result_json is None and google_api_key:
                 gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={google_api_key}"
                 payload = {
                     "contents": [
@@ -246,37 +279,18 @@ async def analyze_skill_gap(request: AnalysisRequest):
                     data = response.json()
                     raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
                     result_json = parse_llm_json(raw_text)
-                    print("✅ Skill Analysis: Gemini API responded successfully")
+                    print("✅ Skill Analysis: Gemini fallback responded successfully")
                 except Exception as e:
-                    err_msg = e.response.text if isinstance(e, httpx.HTTPError) and getattr(e, "response", None) else str(e)
+                    err_msg = ""
+                    if isinstance(e, httpx.HTTPError):
+                        if getattr(e, "response", None) is not None and e.response.text:
+                            err_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+                        else:
+                            err_msg = f"Network Error: {repr(e)}"
+                    else:
+                        err_msg = f"Error: {repr(e)}"
                     print(f"Gemini API Error or Parse Error: {err_msg}")
                     error_details.append(f"Gemini Error: {err_msg}")
-
-            # --- NVIDIA Fallback attempt ---
-            if result_json is None and nvidia_api_key:
-                nvidia_url = "https://integrate.api.nvidia.com/v1/chat/completions"
-                headers = {
-                    "Authorization": f"Bearer {nvidia_api_key}",
-                    "Accept": "application/json",
-                }
-                payload = {
-                    "model": "meta/llama-3.1-70b-instruct",
-                    "messages": [{"role": "user", "content": input_text}],
-                    "max_tokens": 4096,
-                    "temperature": 0.3,
-                    "top_p": 0.8
-                }
-                try:
-                    response = await client.post(nvidia_url, headers=headers, json=payload, timeout=60.0)
-                    response.raise_for_status()
-                    data = response.json()
-                    raw_text = data["choices"][0]["message"]["content"]
-                    result_json = parse_llm_json(raw_text)
-                    print("✅ Skill Analysis: NVIDIA fallback responded successfully")
-                except Exception as e:
-                    err_msg = e.response.text if isinstance(e, httpx.HTTPError) and getattr(e, "response", None) else str(e)
-                    print(f"NVIDIA API Error or Parse Error: {err_msg}")
-                    error_details.append(f"NVIDIA Error: {err_msg}")
 
             if result_json is None:
                 raise HTTPException(status_code=502, detail=f"LLM API Errors: {' | '.join(error_details)}")
