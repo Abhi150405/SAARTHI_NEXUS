@@ -13,39 +13,36 @@ router = APIRouter()
 
 async def _build_context_from_rag(query: str, db) -> str:
     """
-    Perform semantic vector search and fetch full MongoDB documents
-    for the top-K results. Returns a formatted context string for the LLM.
-    If vector store has no matches, falls back to direct MongoDB regex search.
+    Perform fast semantic vector search or fallback instantly to MongoDB queries.
+    Never blocks or triggers heavy indexing during chat execution to prevent 
+    timeouts and OOM crashes on 512MB RAM cloud environments (Render).
     """
-    # Auto-index vector store if not already indexed
-    try:
-        if not vector_store.is_indexed():
-            logging.info("Chatbot: VectorStore empty at chat time — auto-indexing now...")
-            await vector_store.index_all(db)
-    except Exception as e:
-        logging.warning(f"VectorStore index_all on chat failed: {e}")
-
     results = []
+
+    # 1. Try vector store search with strict safety & fallback
     try:
-        raw_results = vector_store.search(query, n=10)
-        # Filter vector search results by similarity distance (cosine distance: lower is better, usually < 1.3)
-        results = [r for r in raw_results if r.get("distance", 2.0) < 1.35]
-        if not results and raw_results:
-            # If distance filter is too strict, take top 4 matches
-            results = raw_results[:4]
+        if vector_store.is_indexed():
+            import asyncio
+            # Limit vector search wait time to 1.5s max
+            raw_results = await asyncio.wait_for(
+                vector_store.search_async(query, n=8), 
+                timeout=1.5
+            )
+            results = [r for r in raw_results if r.get("distance", 2.0) < 1.35]
+            if not results and raw_results:
+                results = raw_results[:3]
     except Exception as e:
-        logging.error(f"Vector store search failed: {e}")
+        logging.warning(f"Vector search skipped/timed out: {e}")
 
     context_parts = []
     seen_mongo_ids = set()
 
+    # 2. Process vector search results if found
     if results:
-        # ── Separate results by type ──────────────────────────────────────
         placement_results  = [r for r in results if r["type"] == "placement"]
         experience_results = [r for r in results if r["type"] == "experience"]
         stats_results      = [r for r in results if r["type"] == "stats"]
 
-        # ── Placement Records ─────────────────────────────────────────────
         if placement_results:
             placement_ids = []
             for r in placement_results:
@@ -66,20 +63,15 @@ async def _build_context_from_rag(query: str, db) -> str:
                     context_parts.append("📋 RELEVANT PLACEMENT RECORDS:")
                     for d in docs:
                         sel = d.get("selections", {})
-                        ce  = sel.get("CE", 0)
-                        it  = sel.get("IT", 0)
-                        etc = sel.get("E&TC", 0)
-                        aids = sel.get("AI&DS", 0)
+                        ce, it, etc, aids = sel.get("CE", 0), sel.get("IT", 0), sel.get("E&TC", 0), sel.get("AI&DS", 0)
                         total = int(ce) + int(it) + int(etc) + int(aids)
                         cgpa = d.get("criteria", {}).get("min_cgpa", "N/A")
                         context_parts.append(
                             f"  • [{d.get('academic_year', 'N/A')}] {d.get('company_name', 'N/A')} — "
                             f"{d.get('salary_lpa', 'N/A')} LPA | Hired: {total} students "
-                            f"(CE: {ce}, IT: {it}, E&TC: {etc}, AI&DS: {aids}) | "
-                            f"Min CGPA: {cgpa}"
+                            f"(CE: {ce}, IT: {it}, E&TC: {etc}, AI&DS: {aids}) | Min CGPA: {cgpa}"
                         )
 
-        # ── Interview Experiences ─────────────────────────────────────────
         if experience_results:
             exp_ids = []
             for r in experience_results:
@@ -111,7 +103,6 @@ async def _build_context_from_rag(query: str, db) -> str:
                             f"{link_text}"
                         )
 
-        # ── Stats ─────────────────────────────────────────────────────────
         if stats_results:
             years_seen = set()
             context_parts.append("\n📊 RELEVANT PLACEMENT STATISTICS:")
@@ -135,18 +126,24 @@ async def _build_context_from_rag(query: str, db) -> str:
                             f"  Branch-wise: {branch_lines}"
                         )
 
-    # ── Fallback: MongoDB Direct Keyword Search if vector store returned no relevant docs ──
+    # 3. Direct Fast MongoDB Retrieval (Instant Fallback if vector store had no context)
     if not context_parts:
-        # Extract alphanumeric query terms
+        logging.info("Chatbot: Using Instant Direct MongoDB Search Fallback")
         words = [w for w in re.findall(r"\w+", query.lower()) if len(w) > 2]
+        
         if words:
-            regex_pattern = "|".join(words)
+            # Clean non-stopword terms
+            stopwords = {"what", "which", "how", "many", "tell", "about", "pict", "the", "and", "for", "are", "were", "with", "does", "have", "company", "placement", "placements", "salary", "package", "hired", "students"}
+            search_terms = [w for w in words if w not in stopwords]
+            regex_pattern = "|".join(search_terms if search_terms else words)
+            
+            # a) Query Placement Records
             fallback_records = await db["placement_records"].find(
                 {"company_name": {"$regex": regex_pattern, "$options": "i"}}
             ).to_list(10)
 
             if fallback_records:
-                context_parts.append("📋 RELEVANT PLACEMENT RECORDS (Direct Match):")
+                context_parts.append("📋 RELEVANT PLACEMENT RECORDS:")
                 for d in fallback_records:
                     sel = d.get("selections", {})
                     ce, it, etc, aids = sel.get("CE", 0), sel.get("IT", 0), sel.get("E&TC", 0), sel.get("AI&DS", 0)
@@ -156,6 +153,49 @@ async def _build_context_from_rag(query: str, db) -> str:
                         f"  • [{d.get('academic_year', 'N/A')}] {d.get('company_name', 'N/A')} — "
                         f"{d.get('salary_lpa', 'N/A')} LPA | Hired: {total} students "
                         f"(CE: {ce}, IT: {it}, E&TC: {etc}, AI&DS: {aids}) | Min CGPA: {cgpa}"
+                    )
+
+            # b) Query Interview Experiences
+            exp_records = await db["interview_experience"].find(
+                {"$or": [
+                    {"company_name": {"$regex": regex_pattern, "$options": "i"}},
+                    {"role": {"$regex": regex_pattern, "$options": "i"}}
+                ]}
+            ).to_list(5)
+
+            if exp_records:
+                context_parts.append("\n🎤 RELEVANT INTERVIEW EXPERIENCES:")
+                for exp in exp_records:
+                    exp_id = str(exp.get("_id", ""))
+                    experience_link = f"#/app/experience/{exp_id}" if exp_id else None
+                    link_text = f"\n  EXPERIENCE_LINK: {experience_link}" if experience_link else ""
+                    context_parts.append(
+                        f"  Company: {exp.get('company_name', 'N/A')} | "
+                        f"Role: {exp.get('role', 'N/A')} | "
+                        f"Rounds: {exp.get('rounds', 'N/A')}\n"
+                        f"  Experience: {exp.get('experience', '')[:600]}\n"
+                        f"  Tips: {exp.get('suggestions', '')[:300]}"
+                        f"{link_text}"
+                    )
+
+        # c) Check for stats query keywords
+        if any(term in query.lower() for term in ["stat", "total", "highest", "average", "avg", "placed", "branch", "202", "201"]):
+            all_stats = await stats_service.get_all_years_stats()
+            if all_stats:
+                context_parts.append("\n📊 RELEVANT PLACEMENT STATISTICS:")
+                for year, stats in list(all_stats.items())[:3]:
+                    branch_lines = "  ".join([
+                        f"{b}: {s['totalPlaced']} placed (avg {s['avgPackage']})"
+                        for b, s in stats.get("branchStats", {}).items()
+                        if int(s.get("totalPlaced", 0)) > 0
+                    ])
+                    context_parts.append(
+                        f"  [{year}] Total placed: {stats.get('totalPlaced', 0)} students | "
+                        f"{stats.get('totalCompanies', 0)} companies | "
+                        f"Highest: {stats.get('highestPackage', 'N/A')} | "
+                        f"Avg: {stats.get('avgPackage', 'N/A')} | "
+                        f"Median: {stats.get('medianPackage', 'N/A')}\n"
+                        f"  Branch-wise: {branch_lines}"
                     )
 
     return "\n".join(context_parts) if context_parts else "No specific database records found for this query."
@@ -175,7 +215,7 @@ async def chat(request: Request):
     if db is None:
         raise HTTPException(status_code=500, detail="Database not initialized")
 
-    # ── RAG: Semantic vector search + MongoDB fallback ──────────────────
+    # ── RAG: Fast semantic vector search + robust MongoDB direct search fallback ──
     context_string = await _build_context_from_rag(query, db)
     logging.info(f"Chatbot [RAG]: context built ({len(context_string)} chars)")
 
@@ -183,3 +223,4 @@ async def chat(request: Request):
         chatbot_service.get_chat_response_stream(query, context_string, is_first_message),
         media_type="text/plain",
     )
+
