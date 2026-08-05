@@ -41,6 +41,7 @@ async def upload_resume(
             "resume_education": analysis.get("education", ""),
             "experience_years": analysis.get("experience_years", 0),
             "key_achievements": analysis.get("key_achievements", []),
+            "projects": analysis.get("projects", []),
             "ats_score": analysis.get("ats_score", 0),
             "last_resume_update": True # Flag or timestamp
         }

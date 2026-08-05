@@ -195,21 +195,41 @@ const ResumeMatch = () => {
                                 </div>
                             </div>
 
+                            {/* Key Projects */}
+                            {result.projects && result.projects.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Briefcase size={16} className="text-[#FACC15]" />
+                                        <span className="font-black uppercase tracking-widest text-[12px] text-[#F97316]">Key Projects</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {result.projects.map((item, i) => (
+                                            <div key={i} className="flex items-start gap-2">
+                                                <div className="w-2 h-2 bg-[#F97316] border border-[#0F0F0F] mt-1.5 flex-shrink-0" />
+                                                <span className="font-mono text-[13px] text-[#A3A3A3]">{item}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Key Achievements */}
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Briefcase size={16} className="text-[#FACC15]" />
-                                    <span className="font-black uppercase tracking-widest text-[12px] text-[#F97316]">Key Achievements</span>
+                            {result.key_achievements && result.key_achievements.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Star size={16} className="text-[#A3E635]" />
+                                        <span className="font-black uppercase tracking-widest text-[12px] text-[#A3E635]">Key Achievements</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {result.key_achievements.map((item, i) => (
+                                            <div key={i} className="flex items-start gap-2">
+                                                <div className="w-2 h-2 bg-[#A3E635] border border-[#0F0F0F] mt-1.5 flex-shrink-0" />
+                                                <span className="font-mono text-[13px] text-[#A3A3A3]">{item}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    {result.key_achievements.map((item, i) => (
-                                        <div key={i} className="flex items-start gap-2">
-                                            <div className="w-2 h-2 bg-[#F97316] border border-[#0F0F0F] mt-1.5 flex-shrink-0" />
-                                            <span className="font-mono text-[13px] text-[#A3A3A3]">{item}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            )}
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-full min-h-[350px]">
@@ -218,7 +238,7 @@ const ResumeMatch = () => {
                             </div>
                             <h3 className="font-black text-[18px] text-[#F5F5F5] mb-2">AI Analysis Ready</h3>
                             <p className="font-mono text-[13px] text-[#888888] text-center max-w-[280px]">
-                                Upload your resume to see the power of AI extraction. Skills, experience and achievements will be automatically populated.
+                                Upload your resume to see the power of AI extraction. Skills, experience and projects will be automatically populated.
                             </p>
                         </div>
                     )}

@@ -21,3 +21,6 @@ httpx
 matplotlib
 seaborn
 google-auth
+# RAG / Vector Search
+sentence-transformers
+chromadb

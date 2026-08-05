@@ -92,7 +92,7 @@ function App() {
         {/* Every other route is wrapped in AuthGuard → redirects to /signup */}
         <Route path="/app" element={<Layout />}>
           <Route index element={<Navigate to="/app/dashboard" replace />} />
-
+          
           {/* 🌐 PUBLIC — accessible without login */}
           <Route path="dashboard" element={<Dashboard />} />
 

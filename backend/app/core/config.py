@@ -4,10 +4,14 @@ from dotenv import load_dotenv
 
 # Load environment variables
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = backend/app  →  parent = backend/  →  grandparent = project root (SAARTHI_NEXUS/)
+BACKEND_DIR = os.path.dirname(BASE_DIR)
+PROJECT_ROOT = os.path.dirname(BACKEND_DIR)
 env_paths = [
-    os.path.join(os.getcwd(), '.env'),
-    os.path.join(BASE_DIR, '.env'),
-    os.path.join(os.path.dirname(BASE_DIR), '.env')
+    os.path.join(os.getcwd(), '.env'),          # backend/.env  (if run from backend/)
+    os.path.join(PROJECT_ROOT, '.env'),          # SAARTHI_NEXUS/.env  ← actual location
+    os.path.join(BACKEND_DIR, '.env'),           # backend/.env
+    os.path.join(BASE_DIR, '.env'),              # backend/app/.env
 ]
 for path in env_paths:
     if os.path.exists(path):
@@ -19,7 +23,7 @@ class Settings(BaseSettings):
     MONGODB_URL: str = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
     DATABASE_NAME: str = "saarthi_nexus"
     GEMINI_API_KEY: str = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or ""
-    NVIDIA_API_KEY: str = os.getenv("NVIDIA_API_KEY") or ""
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY") or ""
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID") or ""
     PORT: int = int(os.environ.get("PORT", 8000))
     CORS_ORIGINS: list[str] = [

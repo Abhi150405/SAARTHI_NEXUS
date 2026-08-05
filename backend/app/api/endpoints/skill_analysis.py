@@ -154,11 +154,11 @@ Return EXACTLY this JSON structure:
 
 @router.post("/")
 async def analyze_skill_gap(request: AnalysisRequest):
-    nvidia_api_key = os.getenv("NVIDIA_API_KEY")
+    groq_api_key = os.getenv("GROQ_API_KEY")
     google_api_key = os.getenv("GOOGLE_API_KEY")
-    
-    if not nvidia_api_key and not google_api_key:
-        raise HTTPException(status_code=500, detail="Neither NVIDIA_API_KEY nor GOOGLE_API_KEY is set in backend environment.")
+
+    if not groq_api_key and not google_api_key:
+        raise HTTPException(status_code=500, detail="Neither GROQ_API_KEY nor GOOGLE_API_KEY is set in backend environment.")
 
     # --- Fetch Interview Experiences ---
     db = get_database()
@@ -222,27 +222,27 @@ async def analyze_skill_gap(request: AnalysisRequest):
                     f"Raw (first 500 chars): {text[:500]}"
                 )
 
-            # --- NVIDIA Try First (Primary for Skill Analysis) ---
-            if nvidia_api_key:
-                nvidia_url = "https://integrate.api.nvidia.com/v1/chat/completions"
+            # --- Groq (Primary for Skill Analysis) ---
+            if groq_api_key:
+                groq_url = "https://api.groq.com/openai/v1/chat/completions"
                 headers = {
-                    "Authorization": f"Bearer {nvidia_api_key}",
-                    "Accept": "application/json",
+                    "Authorization": f"Bearer {groq_api_key}",
+                    "Content-Type": "application/json",
                 }
                 payload = {
-                    "model": "meta/llama-3.1-8b-instruct",
+                    "model": "llama-3.3-70b-versatile",
                     "messages": [{"role": "user", "content": input_text}],
                     "max_tokens": 4096,
                     "temperature": 0.3,
                     "top_p": 0.8
                 }
                 try:
-                    response = await client.post(nvidia_url, headers=headers, json=payload, timeout=120.0)
+                    response = await client.post(groq_url, headers=headers, json=payload, timeout=60.0)
                     response.raise_for_status()
                     data = response.json()
                     raw_text = data["choices"][0]["message"]["content"]
                     result_json = parse_llm_json(raw_text)
-                    print("✅ Skill Analysis: NVIDIA API responded successfully")
+                    print("✅ Skill Analysis: Groq API responded successfully")
                 except Exception as e:
                     err_msg = ""
                     if isinstance(e, httpx.HTTPError):
@@ -252,8 +252,8 @@ async def analyze_skill_gap(request: AnalysisRequest):
                             err_msg = f"Network Error: {repr(e)}"
                     else:
                         err_msg = f"Error: {repr(e)}"
-                    print(f"NVIDIA API Error or Parse Error: {err_msg}")
-                    error_details.append(f"NVIDIA Error: {err_msg}")
+                    print(f"Groq API Error or Parse Error: {err_msg}")
+                    error_details.append(f"Groq Error: {err_msg}")
 
             # --- Gemini Fallback attempt ---
             if result_json is None and google_api_key:

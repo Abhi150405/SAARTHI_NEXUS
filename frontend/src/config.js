@@ -7,8 +7,15 @@ const getApiUrl = () => {
 
     const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
 
-    // 2. Automated Production detection
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    // 2. Automated Production detection - only fallback to render if on actual production domains
+    const isLocalHost = hostname === 'localhost' || 
+                        hostname === '127.0.0.1' || 
+                        hostname.startsWith('192.168.') || 
+                        hostname.startsWith('10.') || 
+                        hostname.startsWith('172.') || 
+                        hostname.endsWith('.local');
+
+    if (!isLocalHost) {
         const prod_api = 'https://saarthi-nexus.onrender.com';
         console.log('📡 Saarthi Nexus API Production Detection:', prod_api);
         return prod_api;
