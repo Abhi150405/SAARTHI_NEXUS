@@ -2,7 +2,6 @@
 llm_router.py
 -------------
 High-performance LLM Router using Cloud APIs (Groq + Gemini fallback).
-Local LLMs (Ollama) and NVIDIA dependencies removed completely.
 
 Public API
 ----------

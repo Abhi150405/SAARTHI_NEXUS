@@ -6,7 +6,7 @@ pydantic-settings
 motor
 python-multipart
 email-validator
-# google-genai (removed - using NVIDIA NIM via httpx)
+# LLM APIs via httpx (Groq & Google Gemini)
 pymongo
 werkzeug
 joblib

@@ -4,8 +4,6 @@ api_llm.py
 High-performance async wrapper with dual LLM engine support:
   1. Groq API (llama-3.3-70b-versatile) as Primary fast model.
   2. Google Gemini API (gemini-2.5-flash) as Resilient automatic fallback.
-
-No local LLMs or NVIDIA dependencies required.
 """
 
 import os

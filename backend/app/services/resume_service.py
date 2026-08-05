@@ -1,8 +1,7 @@
 """
 resume_service.py  — reliable single-call approach
 ----------------------------------------------------
-Uses ONE well-crafted NVIDIA NIM call that extracts everything in one shot.
-Replaces Gemini to avoid "RESOURCE_EXHAUSTED" errors and quota limits.
+Uses ONE well-crafted API LLM call that extracts everything in one shot.
 """
 
 import io
@@ -154,7 +153,7 @@ class ResumeService:
 
             except Exception as e:
                 err = str(e).upper()
-                logging.error(f"ResumeService: NVIDIA error (attempt {attempt + 1}): {e}")
+                logging.error(f"ResumeService: API LLM error (attempt {attempt + 1}): {e}")
                 if "429" in err and attempt < max_retries:
                     wait = (attempt + 1) * 5
                     logging.warning(f"ResumeService: rate limited, retrying in {wait}s…")
