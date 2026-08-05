@@ -1,0 +1,26 @@
+# requirements-cloud.txt
+# Lightweight requirements for cloud deployment (Render free tier).
+# Excludes sentence-transformers, chromadb, torch — these cause OOM on 512MB RAM.
+# The chatbot will use fast direct MongoDB queries instead of vector search.
+# To enable vector search locally, use requirements.txt and set ENABLE_VECTOR_SEARCH=true.
+
+fastapi
+uvicorn[standard]
+gunicorn
+pydantic
+pydantic-settings
+motor
+python-multipart
+email-validator
+pymongo
+werkzeug
+joblib
+pandas
+numpy
+python-dotenv
+certifi
+scikit-learn
+PyPDF2
+python-docx
+httpx
+google-auth

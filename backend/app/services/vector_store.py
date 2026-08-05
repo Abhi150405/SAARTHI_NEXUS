@@ -107,6 +107,9 @@ class VectorStore:
 
     def is_indexed(self) -> bool:
         """Returns True if the vector store already has documents."""
+        # Short-circuit if embedding is disabled (cloud/low-RAM mode)
+        if not embedding_service.is_available():
+            return False
         try:
             self._ensure_client()
             return (
@@ -122,6 +125,10 @@ class VectorStore:
         Safe to call multiple times (upsert is idempotent).
         Returns counts dict.
         """
+        # No-op when embedding is disabled (cloud/low-RAM mode)
+        if not embedding_service.is_available():
+            logging.info("VectorStore.index_all: skipped (ENABLE_VECTOR_SEARCH=false)")
+            return {"placements": 0, "experiences": 0, "stats": 0}
         self._ensure_client()
         counts = {"placements": 0, "experiences": 0, "stats": 0}
 

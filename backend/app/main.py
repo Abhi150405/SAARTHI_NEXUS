@@ -20,18 +20,23 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_db_client():
     await connect_to_mongo()
-    # Auto-index vector store if it's empty (first run or after clear)
-    try:
-        from app.services.vector_store import vector_store
-        db = __import__("app.db.mongodb", fromlist=["get_database"]).get_database()
-        if not vector_store.is_indexed():
-            import asyncio
-            logging.info("VectorStore is empty — auto-indexing in background…")
-            asyncio.create_task(_run_indexing(db))
-        else:
-            logging.info("VectorStore already indexed — skipping auto-index.")
-    except Exception as e:
-        logging.warning(f"VectorStore auto-index skipped: {e}")
+    # Auto-index vector store only if explicitly enabled (requires enough RAM)
+    # On Render free tier, set ENABLE_VECTOR_SEARCH=false (the default) to avoid OOM crashes
+    import os
+    if os.getenv("ENABLE_VECTOR_SEARCH", "false").strip().lower() == "true":
+        try:
+            from app.services.vector_store import vector_store
+            db = __import__("app.db.mongodb", fromlist=["get_database"]).get_database()
+            if not vector_store.is_indexed():
+                import asyncio
+                logging.info("VectorStore is empty — auto-indexing in background…")
+                asyncio.create_task(_run_indexing(db))
+            else:
+                logging.info("VectorStore already indexed — skipping auto-index.")
+        except Exception as e:
+            logging.warning(f"VectorStore auto-index skipped: {e}")
+    else:
+        logging.info("VectorStore: skipped (ENABLE_VECTOR_SEARCH=false) — using direct MongoDB fallback.")
 
 async def _run_indexing(db):
     try:
