@@ -21,10 +21,10 @@ Usage:
 import os
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 
-import chromadb
-from chromadb.config import Settings as ChromaSettings
+# chromadb is imported lazily inside _ensure_client() so that this module
+# can be safely imported on cloud deployments where chromadb is not installed.
 
 from app.services.embedding_service import embedding_service
 from app.services.stats_service import stats_service
@@ -86,13 +86,16 @@ def _stats_to_text(year: str, stats: dict) -> str:
 
 class VectorStore:
     def __init__(self):
-        self._client: Optional[chromadb.PersistentClient] = None
+        self._client: Optional[Any] = None  # chromadb.PersistentClient, lazily imported
         self._placements_col = None
         self._experiences_col = None
         self._stats_col = None
 
     def _ensure_client(self):
         if self._client is None:
+            # Lazy import — only runs when ENABLE_VECTOR_SEARCH=true and chromadb is installed
+            import chromadb
+            from chromadb.config import Settings as ChromaSettings
             os.makedirs(_CHROMA_PATH, exist_ok=True)
             self._client = chromadb.PersistentClient(
                 path=_CHROMA_PATH,
