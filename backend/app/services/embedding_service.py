@@ -44,6 +44,11 @@ class EmbeddingService:
         vec: np.ndarray = model.encode(text, normalize_embeddings=True)
         return vec.tolist()
 
+    async def embed_async(self, text: str) -> list[float]:
+        """Non-blocking async single text embed."""
+        import asyncio
+        return await asyncio.to_thread(self.embed, text)
+
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Embed a batch of texts — much faster than calling embed() in a loop."""
         if not texts:
@@ -51,6 +56,13 @@ class EmbeddingService:
         model = _get_model()
         vecs: np.ndarray = model.encode(texts, normalize_embeddings=True, batch_size=32, show_progress_bar=False)
         return vecs.tolist()
+
+    async def embed_batch_async(self, texts: list[str]) -> list[list[float]]:
+        """Non-blocking async version that offloads CPU encoding to thread pool."""
+        if not texts:
+            return []
+        import asyncio
+        return await asyncio.to_thread(self.embed_batch, texts)
 
     def is_available(self) -> bool:
         try:

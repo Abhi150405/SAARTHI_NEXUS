@@ -141,7 +141,7 @@ class VectorStore:
                 }
                 for r in records
             ]
-            embeddings = embedding_service.embed_batch(texts)
+            embeddings = await embedding_service.embed_batch_async(texts)
             self._placements_col.upsert(ids=ids, embeddings=embeddings, documents=texts, metadatas=metas)
             counts["placements"] = len(records)
             logging.info(f"VectorStore: indexed {len(records)} placement records ✅")
@@ -161,7 +161,7 @@ class VectorStore:
                 }
                 for e in experiences
             ]
-            embeddings = embedding_service.embed_batch(texts)
+            embeddings = await embedding_service.embed_batch_async(texts)
             self._experiences_col.upsert(ids=ids, embeddings=embeddings, documents=texts, metadatas=metas)
             counts["experiences"] = len(experiences)
             logging.info(f"VectorStore: indexed {len(experiences)} interview experiences ✅")
@@ -177,7 +177,7 @@ class VectorStore:
                 ids.append(doc_id)
                 texts.append(text)
                 metas.append({"type": "stats", "year": year})
-            embeddings_list = embedding_service.embed_batch(texts)
+            embeddings_list = await embedding_service.embed_batch_async(texts)
             self._stats_col.upsert(ids=ids, embeddings=embeddings_list, documents=texts, metadatas=metas)
             counts["stats"] = len(ids)
             logging.info(f"VectorStore: indexed {len(ids)} stat summaries ✅")
@@ -235,6 +235,11 @@ class VectorStore:
 
         # Return top-N overall
         return results[:n]
+
+    async def search_async(self, query: str, n: int = 10) -> list[dict]:
+        """Non-blocking async search wrapper."""
+        import asyncio
+        return await asyncio.to_thread(self.search, query, n)
 
     def clear(self):
         """Delete and recreate all collections (full reset)."""

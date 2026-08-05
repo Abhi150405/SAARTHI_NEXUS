@@ -72,7 +72,7 @@ _YEAR_PATTERN = re.compile(
 )
 
 _SKILL_KEYWORDS = [
-    "python", "java", "c\+\+", "react", "node", "sql", "ml",
+    "python", "java", r"c\+\+", "react", "node", "sql", "ml",
     "machine learning", "deep learning", "data science", "aws",
     "azure", "docker", "kubernetes", "flutter", "django", "fastapi",
 ]
