@@ -86,8 +86,8 @@ async def create_placement_record(record: PlacementRecordCreate):
 async def get_all_placements():
     """Fetch all placement records for the admin management table."""
     db = get_database()
-    # Sort descending by visit_date implicitly, or academic_year
-    records_cursor = db['placement_records'].find({}).sort([("academic_year", -1), ("company_name", 1)])
+    # Sort descending by visit_date implicitly, or academic_year. EXCLUDE embeddings!
+    records_cursor = db['placement_records'].find({}, {"embedding": 0}).sort([("academic_year", -1), ("company_name", 1)])
     records = await records_cursor.to_list(None)
     
     formatted = []

@@ -33,7 +33,8 @@ async def add_interview_experience(request: Request):
 async def get_interview_experiences(company: str = Query(None)):
     db = get_database()
     query = {"company_name": company} if company else {}
-    experiences = await db['interview_experience'].find(query).sort("date", -1).to_list(None)
+    # Exclude embeddings to prevent massive JSON payloads slowing down the frontend
+    experiences = await db['interview_experience'].find(query, {"embedding": 0}).sort("date", -1).to_list(None)
     for exp in experiences:
         exp['_id'] = str(exp['_id'])
     return experiences

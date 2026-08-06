@@ -9,9 +9,9 @@ const pg = { initial:{opacity:0,y:12}, animate:{opacity:1,y:0}, transition:{dura
 
 const AboutUs = () => {
     const team = [
-        { name:'Abhijit Khole', dept:'E&CE Department', college:'PICT, Pune', batch:'Class of 2027', photo:AbhijitPhoto, github:'https://github.com/Abhi150405', email:'abhijitkhole15@gmail.com' },
-        { name:'Pratik Kochare', dept:'E&CE Department', college:'PICT, Pune', batch:'Class of 2027', photo:PratikPhoto, github:'https://github.com/thepratikpk', email:'pratikkocharetnp@gmail.com' },
-        { name:'Arya Kadi', dept:'E&CE Department', college:'PICT, Pune', batch:'Class of 2027', photo:AryaPhoto, github:'https://github.com/aryakadi', email:'pictarya11@gmail.com' },
+        { name:'Abhijit Khole', dept:'E&CE Department', college:'PICT, Pune', batch:'Class of 2027', photo:AbhijitPhoto, github:'https://github.com/Abhi150405', linkedin:'https://www.linkedin.com/in/abhijit-khole/', email:'abhijitkhole15@gmail.com' },
+        { name:'Pratik Kochare', dept:'E&CE Department', college:'PICT, Pune', batch:'Class of 2027', photo:PratikPhoto, github:'https://github.com/thepratikpk', linkedin:'https://www.linkedin.com/in/pratik-kochare/', email:'pratikkocharetnp@gmail.com' },
+        { name:'Arya Kadi', dept:'E&CE Department', college:'PICT, Pune', batch:'Class of 2027', photo:AryaPhoto, github:'https://github.com/aryakadi', linkedin:'https://www.linkedin.com/in/arya-kadi/', email:'pictarya11@gmail.com' },
     ];
 
     return (
@@ -47,7 +47,11 @@ const AboutUs = () => {
                             </div>
                             <div className="flex gap-2 mt-4">
                                 <a href={m.github} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-[#0F0F0F] text-[#FACC15] border-[2px] border-[#0F0F0F] flex items-center justify-center hover:bg-[#F97316] hover:text-white transition-colors"><Github size={16}/></a>
-                                <button className="w-9 h-9 bg-[#0F0F0F] text-[#FACC15] border-[2px] border-[#0F0F0F] flex items-center justify-center hover:bg-[#F97316] hover:text-white transition-colors"><Linkedin size={16}/></button>
+                                {m.linkedin !== '#' ? (
+                                    <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-[#0F0F0F] text-[#FACC15] border-[2px] border-[#0F0F0F] flex items-center justify-center hover:bg-[#F97316] hover:text-white transition-colors"><Linkedin size={16}/></a>
+                                ) : (
+                                    <button className="w-9 h-9 bg-[#0F0F0F] text-[#FACC15] border-[2px] border-[#0F0F0F] flex items-center justify-center opacity-50 cursor-not-allowed"><Linkedin size={16}/></button>
+                                )}
                                 <a href={`mailto:${m.email}`} className="w-9 h-9 bg-[#0F0F0F] text-[#FACC15] border-[2px] border-[#0F0F0F] flex items-center justify-center hover:bg-[#F97316] hover:text-white transition-colors"><Mail size={16}/></a>
                             </div>
                         </div>
