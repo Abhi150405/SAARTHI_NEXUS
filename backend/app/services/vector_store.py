@@ -1,48 +1,50 @@
 """
 vector_store.py
 ---------------
-ChromaDB-backed vector store for SAARTHI NEXUS RAG pipeline.
+MongoDB Atlas Vector Search-backed store for SAARTHI NEXUS RAG pipeline.
+
+Replaces ChromaDB entirely. Embeddings are stored as a field directly on
+each MongoDB document and searched via the $vectorSearch aggregation stage.
 
 Collections:
-  - placement_records     : one document per MongoDB placement record
-  - interview_experiences : one document per interview experience
-  - placement_stats       : synthesized yearly statistics summaries
+  - placement_records     : embedding stored on existing docs
+  - interview_experience  : embedding stored on existing docs
+  - placement_stats_vectors: synthesized yearly stat summaries (new collection)
+
+Atlas Vector Index Required (one-time setup in Atlas UI):
+  Create a Search Index on each collection with:
+    { "fields": [{ "type": "vector", "path": "embedding",
+                   "numDimensions": 768, "similarity": "cosine" }] }
 
 Usage:
   from app.services.vector_store import vector_store
 
-  # Index (run once or on startup if empty)
+  # Full index (run once after deploy or to refresh)
   await vector_store.index_all(db)
 
   # Search (called on every chat query)
-  results = vector_store.search("which companies visit PICT", n=10)
+  results = await vector_store.search_async("which companies visit PICT", n=10)
 """
 
-import os
 import logging
-from pathlib import Path
-from typing import Optional, Any
-
-# chromadb is imported lazily inside _ensure_client() so that this module
-# can be safely imported on cloud deployments where chromadb is not installed.
+from typing import Any
 
 from app.services.embedding_service import embedding_service
 from app.services.stats_service import stats_service
 
-# Persist ChromaDB next to the backend directory
-_CHROMA_PATH = str(Path(__file__).resolve().parents[3] / "chroma_db")
+_EMBED_DIMS = 768
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+# ── Text serialisers ───────────────────────────────────────────────────────────
 
 def _record_to_text(doc: dict) -> str:
     """Convert a placement_records MongoDB doc to a searchable text chunk."""
-    sel = doc.get("selections", {})
-    ce  = sel.get("CE", 0)
-    it  = sel.get("IT", 0)
-    etc = sel.get("E&TC", 0)
-    aids = sel.get("AI&DS", 0)
+    sel   = doc.get("selections", {})
+    ce    = sel.get("CE", 0)
+    it    = sel.get("IT", 0)
+    etc   = sel.get("E&TC", 0)
+    aids  = sel.get("AI&DS", 0)
     total = int(ce) + int(it) + int(etc) + int(aids)
-    cgpa = doc.get("criteria", {}).get("min_cgpa", "N/A")
+    cgpa  = doc.get("criteria", {}).get("min_cgpa", "N/A")
     return (
         f"PICT placement record: Company {doc.get('company_name', '')} visited in "
         f"academic year {doc.get('academic_year', '')}. "
@@ -82,187 +84,292 @@ def _stats_to_text(year: str, stats: dict) -> str:
     )
 
 
-# ── VectorStore class ─────────────────────────────────────────────────────────
+# ── VectorStore class ──────────────────────────────────────────────────────────
 
 class VectorStore:
-    def __init__(self):
-        self._client: Optional[Any] = None  # chromadb.PersistentClient, lazily imported
-        self._placements_col = None
-        self._experiences_col = None
-        self._stats_col = None
+    """
+    MongoDB Atlas Vector Search-backed RAG store.
 
-    def _ensure_client(self):
-        if self._client is None:
-            # Lazy import — only runs when ENABLE_VECTOR_SEARCH=true and chromadb is installed
-            import chromadb
-            from chromadb.config import Settings as ChromaSettings
-            os.makedirs(_CHROMA_PATH, exist_ok=True)
-            self._client = chromadb.PersistentClient(
-                path=_CHROMA_PATH,
-                settings=ChromaSettings(anonymized_telemetry=False)
-            )
-            self._placements_col  = self._client.get_or_create_collection("placement_records")
-            self._experiences_col = self._client.get_or_create_collection("interview_experiences")
-            self._stats_col       = self._client.get_or_create_collection("placement_stats")
-            logging.info(f"VectorStore: ChromaDB opened at {_CHROMA_PATH}")
+    Embeddings are stored as `embedding` field on MongoDB documents.
+    Search is performed via $vectorSearch aggregation (requires Atlas Search index).
+    """
 
-    # ── Indexing ──────────────────────────────────────────────────────────────
+    # ── Status ────────────────────────────────────────────────────────────────
 
-    def is_indexed(self) -> bool:
-        """Returns True if the vector store already has documents."""
-        # Short-circuit if embedding is disabled (cloud/low-RAM mode)
+    def is_indexed(self, db=None) -> bool:
+        """
+        Returns True if at least some placement_records docs have an embedding.
+        Sync version — used in startup checks.
+        """
+        if not embedding_service.is_available():
+            return False
+        # We can't easily do async here, so we just return True if the
+        # embedding service is available — the search will gracefully
+        # return empty results if no embeddings exist yet.
+        return True
+
+    async def is_indexed_async(self, db) -> bool:
+        """Async version: checks if any docs have embeddings stored."""
         if not embedding_service.is_available():
             return False
         try:
-            self._ensure_client()
-            return (
-                self._placements_col.count() > 0 or
-                self._experiences_col.count() > 0
+            count = await db["placement_records"].count_documents(
+                {"embedding": {"$exists": True, "$not": {"$size": 0}}}
             )
+            return count > 0
         except Exception:
             return False
 
+    # ── Indexing ──────────────────────────────────────────────────────────────
+
     async def index_all(self, db) -> dict:
         """
-        Full re-index: reads ALL docs from MongoDB and upserts into ChromaDB.
-        Safe to call multiple times (upsert is idempotent).
+        Full re-index: embed all docs and upsert the `embedding` field into MongoDB.
+        Safe to call multiple times (uses $set upsert — idempotent).
         Returns counts dict.
         """
-        # No-op when embedding is disabled (cloud/low-RAM mode)
         if not embedding_service.is_available():
-            logging.info("VectorStore.index_all: skipped (ENABLE_VECTOR_SEARCH=false)")
+            logging.info("VectorStore.index_all: skipped (GOOGLE_API_KEY not set)")
             return {"placements": 0, "experiences": 0, "stats": 0}
-        self._ensure_client()
+
         counts = {"placements": 0, "experiences": 0, "stats": 0}
 
-        # ── 1. Placement records ──────────────────────────────────────────
+        # ── 1. Placement records ───────────────────────────────────────────
         logging.info("VectorStore: indexing placement_records…")
         records = await db["placement_records"].find({}).to_list(None)
         if records:
-            ids   = [str(r["_id"]) for r in records]
-            texts = [_record_to_text(r) for r in records]
-            metas = [
-                {
-                    "type": "placement",
-                    "company": r.get("company_name", ""),
-                    "year": r.get("academic_year", ""),
-                    "salary": str(r.get("salary_lpa", "")),
-                    "mongo_id": str(r["_id"]),
-                }
-                for r in records
-            ]
+            texts      = [_record_to_text(r) for r in records]
             embeddings = await embedding_service.embed_batch_async(texts)
-            self._placements_col.upsert(ids=ids, embeddings=embeddings, documents=texts, metadatas=metas)
-            counts["placements"] = len(records)
-            logging.info(f"VectorStore: indexed {len(records)} placement records ✅")
+            for rec, emb in zip(records, embeddings):
+                if emb:
+                    await db["placement_records"].update_one(
+                        {"_id": rec["_id"]},
+                        {"$set": {"embedding": emb}},
+                    )
+                    counts["placements"] += 1
+            logging.info(f"VectorStore: indexed {counts['placements']} placement records ✅")
 
-        # ── 2. Interview experiences ──────────────────────────────────────
+        # ── 2. Interview experiences ───────────────────────────────────────
         logging.info("VectorStore: indexing interview_experience…")
         experiences = await db["interview_experience"].find({}).to_list(None)
         if experiences:
-            ids   = [str(e["_id"]) for e in experiences]
-            texts = [_experience_to_text(e) for e in experiences]
-            metas = [
-                {
-                    "type": "experience",
-                    "company": e.get("company_name", ""),
-                    "role": e.get("role", ""),
-                    "mongo_id": str(e["_id"]),
-                }
-                for e in experiences
-            ]
+            texts      = [_experience_to_text(e) for e in experiences]
             embeddings = await embedding_service.embed_batch_async(texts)
-            self._experiences_col.upsert(ids=ids, embeddings=embeddings, documents=texts, metadatas=metas)
-            counts["experiences"] = len(experiences)
-            logging.info(f"VectorStore: indexed {len(experiences)} interview experiences ✅")
+            for exp, emb in zip(experiences, embeddings):
+                if emb:
+                    await db["interview_experience"].update_one(
+                        {"_id": exp["_id"]},
+                        {"$set": {"embedding": emb}},
+                    )
+                    counts["experiences"] += 1
+            logging.info(f"VectorStore: indexed {counts['experiences']} interview experiences ✅")
 
-        # ── 3. Yearly stats (synthesized) ─────────────────────────────────
+        # ── 3. Yearly stats (placement_stats_vectors collection) ───────────
         logging.info("VectorStore: indexing yearly stats…")
         all_stats = await stats_service.get_all_years_stats()
         if all_stats:
-            ids, texts, metas, embeddings_list = [], [], [], []
-            for year, stats in all_stats.items():
-                doc_id = f"stats_{year}"
-                text   = _stats_to_text(year, stats)
-                ids.append(doc_id)
-                texts.append(text)
-                metas.append({"type": "stats", "year": year})
-            embeddings_list = await embedding_service.embed_batch_async(texts)
-            self._stats_col.upsert(ids=ids, embeddings=embeddings_list, documents=texts, metadatas=metas)
-            counts["stats"] = len(ids)
-            logging.info(f"VectorStore: indexed {len(ids)} stat summaries ✅")
+            years      = list(all_stats.keys())
+            texts      = [_stats_to_text(y, all_stats[y]) for y in years]
+            embeddings = await embedding_service.embed_batch_async(texts)
+            for year, emb, text in zip(years, embeddings, texts):
+                if emb:
+                    await db["placement_stats_vectors"].update_one(
+                        {"year": year},
+                        {"$set": {"year": year, "text": text, "embedding": emb}},
+                        upsert=True,
+                    )
+                    counts["stats"] += 1
+            logging.info(f"VectorStore: indexed {counts['stats']} stat summaries ✅")
 
         logging.info(f"VectorStore: indexing complete — {counts}")
         return counts
 
+    async def index_document(self, db, collection: str, doc: dict):
+        """
+        Embed + store the embedding for a single document.
+        Call this after inserting/updating a placement record or experience.
+        """
+        if not embedding_service.is_available():
+            return
+        try:
+            if collection == "placement_records":
+                text = _record_to_text(doc)
+            elif collection == "interview_experience":
+                text = _experience_to_text(doc)
+            else:
+                return
+            emb = await embedding_service.embed_async(text)
+            if emb:
+                await db[collection].update_one(
+                    {"_id": doc["_id"]},
+                    {"$set": {"embedding": emb}},
+                )
+        except Exception as e:
+            logging.warning(f"VectorStore.index_document error [{collection}]: {e}")
+
     # ── Search ────────────────────────────────────────────────────────────────
 
-    def search(self, query: str, n: int = 10) -> list[dict]:
+    async def search_async(self, query: str, n: int = 10) -> list[dict]:
         """
         Embed the query and retrieve the top-N most relevant documents
-        across all three collections.
+        across placement_records, interview_experience, and placement_stats_vectors
+        using MongoDB Atlas $vectorSearch.
 
         Returns a list of dicts with keys:
-          - type        : "placement" | "experience" | "stats"
-          - text        : the stored document text
-          - metadata    : original metadata dict
-          - distance    : cosine distance (lower = more similar)
+          - type     : "placement" | "experience" | "stats"
+          - text     : the serialised document text
+          - metadata : subset of original document fields
+          - distance : similarity score (higher = more similar; range 0-1 for cosine)
         """
-        self._ensure_client()
-        query_embedding = embedding_service.embed(query)
+        from app.db.mongodb import get_database
+        db = get_database()
+        if db is None:
+            return []
 
-        results = []
+        query_embedding = await embedding_service.embed_async(query)
+        if not query_embedding:
+            return []
 
-        for col, label in [
-            (self._placements_col,  "placement"),
-            (self._experiences_col, "experience"),
-            (self._stats_col,       "stats"),
-        ]:
-            if col.count() == 0:
-                continue
-            try:
-                k = min(n, col.count())
-                res = col.query(
-                    query_embeddings=[query_embedding],
-                    n_results=k,
-                    include=["documents", "metadatas", "distances"],
-                )
-                docs      = res["documents"][0]
-                metas     = res["metadatas"][0]
-                distances = res["distances"][0]
-                for doc, meta, dist in zip(docs, metas, distances):
-                    results.append({
-                        "type":     label,
-                        "text":     doc,
-                        "metadata": meta,
-                        "distance": dist,
-                    })
-            except Exception as e:
-                logging.warning(f"VectorStore.search [{label}] error: {e}")
+        results: list[dict] = []
+        k = max(n, 5)
 
-        # Sort all results globally by similarity (ascending distance)
+        # ── Placement records ──────────────────────────────────────────────
+        try:
+            pipeline = [
+                {
+                    "$vectorSearch": {
+                        "index": "placement_vector_index",
+                        "path": "embedding",
+                        "queryVector": query_embedding,
+                        "numCandidates": k * 10,
+                        "limit": k,
+                    }
+                },
+                {
+                    "$project": {
+                        "_id": 1,
+                        "company_name": 1,
+                        "academic_year": 1,
+                        "salary_lpa": 1,
+                        "selections": 1,
+                        "criteria": 1,
+                        "score": {"$meta": "vectorSearchScore"},
+                    }
+                },
+            ]
+            async for doc in db["placement_records"].aggregate(pipeline):
+                results.append({
+                    "type":     "placement",
+                    "text":     _record_to_text(doc),
+                    "metadata": {
+                        "mongo_id": str(doc["_id"]),
+                        "company":  doc.get("company_name", ""),
+                        "year":     doc.get("academic_year", ""),
+                        "salary":   str(doc.get("salary_lpa", "")),
+                        "type":     "placement",
+                    },
+                    "distance": 1.0 - doc.get("score", 0),  # convert to distance
+                })
+        except Exception as e:
+            logging.warning(f"VectorStore.search [placement_records]: {e}")
+
+        # ── Interview experiences ──────────────────────────────────────────
+        try:
+            pipeline = [
+                {
+                    "$vectorSearch": {
+                        "index": "experience_vector_index",
+                        "path": "embedding",
+                        "queryVector": query_embedding,
+                        "numCandidates": k * 10,
+                        "limit": k,
+                    }
+                },
+                {
+                    "$project": {
+                        "_id": 1,
+                        "company_name": 1,
+                        "role": 1,
+                        "rounds": 1,
+                        "experience": 1,
+                        "suggestions": 1,
+                        "score": {"$meta": "vectorSearchScore"},
+                    }
+                },
+            ]
+            async for doc in db["interview_experience"].aggregate(pipeline):
+                results.append({
+                    "type":     "experience",
+                    "text":     _experience_to_text(doc),
+                    "metadata": {
+                        "mongo_id": str(doc["_id"]),
+                        "company":  doc.get("company_name", ""),
+                        "role":     doc.get("role", ""),
+                        "type":     "experience",
+                    },
+                    "distance": 1.0 - doc.get("score", 0),
+                })
+        except Exception as e:
+            logging.warning(f"VectorStore.search [interview_experience]: {e}")
+
+        # ── Yearly stats ───────────────────────────────────────────────────
+        try:
+            pipeline = [
+                {
+                    "$vectorSearch": {
+                        "index": "stats_vector_index",
+                        "path": "embedding",
+                        "queryVector": query_embedding,
+                        "numCandidates": k * 10,
+                        "limit": min(k, 5),
+                    }
+                },
+                {
+                    "$project": {
+                        "_id": 0,
+                        "year": 1,
+                        "text": 1,
+                        "score": {"$meta": "vectorSearchScore"},
+                    }
+                },
+            ]
+            async for doc in db["placement_stats_vectors"].aggregate(pipeline):
+                results.append({
+                    "type":     "stats",
+                    "text":     doc.get("text", ""),
+                    "metadata": {
+                        "year": doc.get("year", ""),
+                        "type": "stats",
+                    },
+                    "distance": 1.0 - doc.get("score", 0),
+                })
+        except Exception as e:
+            logging.warning(f"VectorStore.search [placement_stats_vectors]: {e}")
+
+        # Sort by distance ascending (most similar first) and return top-N
         results.sort(key=lambda x: x["distance"])
-
-        # Return top-N overall
         return results[:n]
 
-    async def search_async(self, query: str, n: int = 10) -> list[dict]:
-        """Non-blocking async search wrapper."""
+    def search(self, query: str, n: int = 10) -> list[dict]:
+        """Sync wrapper — runs the async search in a new event loop thread."""
         import asyncio
-        return await asyncio.to_thread(self.search, query, n)
+        return asyncio.run(self.search_async(query, n))
 
     def clear(self):
-        """Delete and recreate all collections (full reset)."""
-        self._ensure_client()
-        for name in ["placement_records", "interview_experiences", "placement_stats"]:
-            try:
-                self._client.delete_collection(name)
-            except Exception:
-                pass
-        self._placements_col  = self._client.get_or_create_collection("placement_records")
-        self._experiences_col = self._client.get_or_create_collection("interview_experiences")
-        self._stats_col       = self._client.get_or_create_collection("placement_stats")
-        logging.info("VectorStore: all collections cleared")
+        """Remove all embedding fields from documents (full reset)."""
+        import asyncio
+        from app.db.mongodb import get_database
+
+        async def _clear():
+            db = get_database()
+            if db is None:
+                return
+            await db["placement_records"].update_many({}, {"$unset": {"embedding": ""}})
+            await db["interview_experience"].update_many({}, {"$unset": {"embedding": ""}})
+            await db["placement_stats_vectors"].drop()
+            logging.info("VectorStore: all embeddings cleared")
+
+        asyncio.run(_clear())
 
 
 # Module-level singleton

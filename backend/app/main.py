@@ -20,29 +20,28 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_db_client():
     await connect_to_mongo()
-    # Auto-index vector store only if explicitly enabled (requires enough RAM)
-    # On Render free tier, set ENABLE_VECTOR_SEARCH=false (the default) to avoid OOM crashes
-    import os
-    if os.getenv("ENABLE_VECTOR_SEARCH", "false").strip().lower() == "true":
-        try:
-            from app.services.vector_store import vector_store
-            db = __import__("app.db.mongodb", fromlist=["get_database"]).get_database()
-            if not vector_store.is_indexed():
-                import asyncio
-                logging.info("VectorStore is empty — auto-indexing in background…")
+    # Auto-index vector embeddings into MongoDB if any docs are missing them.
+    # Uses Google text-embedding-004 API — zero local RAM cost, safe on all tiers.
+    try:
+        from app.services.vector_store import vector_store
+        from app.db.mongodb import get_database
+        import asyncio
+        db = get_database()
+        if db is not None:
+            has_embeddings = await vector_store.is_indexed_async(db)
+            if not has_embeddings:
+                logging.info("VectorStore: no embeddings found — auto-indexing in background…")
                 asyncio.create_task(_run_indexing(db))
             else:
-                logging.info("VectorStore already indexed — skipping auto-index.")
-        except Exception as e:
-            logging.warning(f"VectorStore auto-index skipped: {e}")
-    else:
-        logging.info("VectorStore: skipped (ENABLE_VECTOR_SEARCH=false) — using direct MongoDB fallback.")
+                logging.info("VectorStore: embeddings already present — skipping auto-index.")
+    except Exception as e:
+        logging.warning(f"VectorStore startup check skipped: {e}")
 
 async def _run_indexing(db):
     try:
         from app.services.vector_store import vector_store
-        await vector_store.index_all(db)
-        logging.info("VectorStore: background auto-index complete ✅")
+        counts = await vector_store.index_all(db)
+        logging.info(f"VectorStore: background auto-index complete ✅ — {counts}")
     except Exception as e:
         logging.error(f"VectorStore: background auto-index failed — {e}")
 

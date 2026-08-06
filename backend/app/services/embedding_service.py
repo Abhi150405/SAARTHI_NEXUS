@@ -1,104 +1,126 @@
 """
 embedding_service.py
 --------------------
-Singleton wrapper around the sentence-transformers model.
-Lazy-loads the model on first use to avoid slow server startup.
+Singleton wrapper for Google text-embedding using the official
+google-genai SDK.
 
-Model: all-MiniLM-L6-v2
-  - 384-dimensional vectors
-  - ~90MB download (cached after first use)
-  - Fast inference, good semantic quality
-
-Cloud/Production Note:
-  Set ENABLE_VECTOR_SEARCH=false to completely skip loading PyTorch and
-  SentenceTransformers. This prevents OOM crashes on low-RAM cloud hosts
-  like Render free tier (512 MB). The chatbot will use fast MongoDB fallback.
+Model: gemini-embedding-001
+  - 3072-dimensional vectors
 """
 
 import os
+import asyncio
 import logging
-from typing import Optional
-import numpy as np
 
-# ── Cloud Safety Gate ──────────────────────────────────────────────────────────
-# On Render free tier (512MB RAM), loading PyTorch/SentenceTransformers causes
-# OOM kills. Default is DISABLED for cloud safety. Enable only on local/paid hosts.
-_VECTOR_ENABLED = os.getenv("ENABLE_VECTOR_SEARCH", "false").strip().lower() == "true"
-
-if _VECTOR_ENABLED:
-    logging.info("EmbeddingService: ENABLE_VECTOR_SEARCH=true — vector search active.")
-else:
-    logging.info(
-        "EmbeddingService: ENABLE_VECTOR_SEARCH=false — "
-        "vector search disabled (chatbot will use direct MongoDB fallback)."
-    )
-
-_model = None
+_GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+_EMBED_MODEL = "gemini-embedding-001"  # confirmed available for this project
+_EMBED_DIMS = 3072                             # gemini-embedding-001 produces 3072-dim vectors
+_CONCURRENCY = 10
 
 
-def _get_model():
-    """Lazy-load the embedding model on first call. Returns None if disabled."""
-    global _model
-    if not _VECTOR_ENABLED:
-        return None
-    if _model is None:
-        try:
-            from sentence_transformers import SentenceTransformer
-            logging.info("EmbeddingService: loading all-MiniLM-L6-v2 model…")
-            _model = SentenceTransformer("all-MiniLM-L6-v2")
-            logging.info("EmbeddingService: model loaded ✅")
-        except Exception as e:
-            logging.error(f"EmbeddingService: failed to load model — {e}")
-            raise
-    return _model
+def _get_client():
+    """Lazy-import and configure the new google.genai module."""
+    from google import genai
+    return genai.Client(api_key=_GOOGLE_API_KEY)
 
 
 class EmbeddingService:
     """
-    Thin wrapper that exposes encode/embed calls.
-    Always returns plain Python lists (ChromaDB-compatible).
-    Returns empty list when vector search is disabled (cloud mode).
+    Uses the new official google-genai SDK to call embeddings.
     """
 
     def is_available(self) -> bool:
-        """Returns True only if vector search is enabled and model loaded OK."""
-        if not _VECTOR_ENABLED:
-            return False
-        try:
-            _get_model()
-            return True
-        except Exception:
-            return False
+        """Returns True when a Google API key is configured."""
+        available = bool(_GOOGLE_API_KEY)
+        if not available:
+            logging.warning("EmbeddingService: GOOGLE_API_KEY not set — vector search unavailable.")
+        return available
 
-    def embed(self, text: str) -> list[float]:
-        """Embed a single text string → 384-dim float list. Returns [] if disabled."""
-        model = _get_model()
-        if model is None:
+    # ── Single embed ──────────────────────────────────────────────────────────
+
+    def embed(self, text: str, raise_errors: bool = False) -> list[float]:
+        """Embed a single text → 3072-dim float list. Returns [] on failure unless raise_errors is True."""
+        if not self.is_available():
             return []
-        vec: np.ndarray = model.encode(text, normalize_embeddings=True)
-        return vec.tolist()
+        try:
+            client = _get_client()
+            result = client.models.embed_content(
+                model=_EMBED_MODEL,
+                contents=text,
+                config={"task_type": "RETRIEVAL_DOCUMENT"}
+            )
+            return result.embeddings[0].values
+        except Exception as e:
+            if raise_errors:
+                raise e
+            logging.error(f"EmbeddingService.embed error: {e}")
+            return []
 
     async def embed_async(self, text: str) -> list[float]:
-        """Non-blocking async single text embed."""
-        import asyncio
+        """Non-blocking async single text embed (offloads to thread pool)."""
         return await asyncio.to_thread(self.embed, text)
 
+    # ── Batch embed ───────────────────────────────────────────────────────────
+
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
-        """Embed a batch of texts — much faster than calling embed() in a loop."""
+        """Embed a list of texts sequentially. Use embed_batch_async for speed."""
         if not texts:
             return []
-        model = _get_model()
-        if model is None:
+        if not self.is_available():
             return [[] for _ in texts]
-        vec: np.ndarray = model.encode(texts, normalize_embeddings=True, batch_size=32, show_progress_bar=False)
-        return vec.tolist()
+        return [self.embed(t) for t in texts]
 
     async def embed_batch_async(self, texts: list[str]) -> list[list[float]]:
-        """Non-blocking async version that offloads CPU encoding to thread pool."""
+        """
+        Embed a list of texts, chunking to avoid rate limits.
+        Google counts EACH document in a batch towards the 100 requests/min quota.
+        So we process 50 docs, then wait 35 seconds, ensuring we process ~85 docs/min.
+        """
         if not texts:
             return []
-        import asyncio
-        return await asyncio.to_thread(self.embed_batch, texts)
+        if not self.is_available():
+            return [[] for _ in texts]
+
+        all_embeddings = []
+        chunk_size = 50
+
+        for i in range(0, len(texts), chunk_size):
+            chunk = texts[i : i + chunk_size]
+            
+            for attempt in range(5):
+                try:
+                    def _do_batch_embed():
+                        client = _get_client()
+                        res = client.models.embed_content(
+                            model=_EMBED_MODEL,
+                            contents=chunk,
+                            config={"task_type": "RETRIEVAL_DOCUMENT"}
+                        )
+                        return [emb.values for emb in res.embeddings]
+                        
+                    chunk_embeddings = await asyncio.to_thread(_do_batch_embed)
+                    all_embeddings.extend(chunk_embeddings)
+                    break 
+                except Exception as e:
+                    error_msg = str(e).lower()
+                    if "429" in error_msg or "quota" in error_msg or "rate" in error_msg:
+                        delay = 30 + (attempt * 15)
+                        logging.warning(f"Batch hit 429. Waiting {delay}s... (Attempt {attempt+1}/5)")
+                        await asyncio.sleep(delay)
+                    else:
+                        logging.error(f"EmbeddingService.embed_batch error: {e}")
+                        all_embeddings.extend([[] for _ in chunk])
+                        break
+            else:
+                logging.error("Failed to embed batch after multiple retries.")
+                all_embeddings.extend([[] for _ in chunk])
+
+            # Wait 35s before the NEXT chunk to ensure we stay under 100 docs / minute
+            if i + chunk_size < len(texts):
+                logging.info(f"Processed {len(all_embeddings)}/{len(texts)} docs. Sleeping 35s to respect quota...")
+                await asyncio.sleep(35.0)
+
+        return all_embeddings
 
 
 # Module-level singleton

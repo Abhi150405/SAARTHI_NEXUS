@@ -1,7 +1,7 @@
 # requirements-cloud.txt
 # Lightweight requirements for cloud deployment (Render free tier).
-# Excludes sentence-transformers, chromadb, torch - no PyTorch = no OOM crashes.
-# Chatbot uses fast direct MongoDB queries instead of vector search.
+# Excludes sentence-transformers, chromadb, torch — no PyTorch = no OOM crashes.
+# RAG now uses Google text-embedding-004 API + MongoDB Atlas Vector Search.
 
 fastapi
 uvicorn[standard]
@@ -23,3 +23,5 @@ PyPDF2
 python-docx
 httpx
 google-auth
+google-genai
+

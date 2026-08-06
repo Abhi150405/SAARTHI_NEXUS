@@ -13,26 +13,21 @@ router = APIRouter()
 
 async def _build_context_from_rag(query: str, db) -> str:
     """
-    Perform fast semantic vector search or fallback instantly to MongoDB queries.
-    Never blocks or triggers heavy indexing during chat execution to prevent 
-    timeouts and OOM crashes on 512MB RAM cloud environments (Render).
+    Perform fast semantic vector search via MongoDB Atlas $vectorSearch,
+    or fallback instantly to direct MongoDB keyword queries.
+    Never blocks or triggers heavy indexing during chat execution.
     """
     results = []
 
-    # 1. Try vector store search with strict safety & fallback
+    # 1. MongoDB Atlas Vector Search (cosine similarity via $vectorSearch)
     try:
-        if vector_store.is_indexed():
-            import asyncio
-            # Limit vector search wait time to 1.5s max
-            raw_results = await asyncio.wait_for(
-                vector_store.search_async(query, n=8), 
-                timeout=1.5
-            )
-            results = [r for r in raw_results if r.get("distance", 2.0) < 1.35]
-            if not results and raw_results:
-                results = raw_results[:3]
+        raw_results = await vector_store.search_async(query, n=8)
+        # Filter to high-confidence results (distance < 0.35 → similarity > 0.65)
+        results = [r for r in raw_results if r.get("distance", 2.0) < 0.35]
+        if not results and raw_results:
+            results = raw_results[:3]
     except Exception as e:
-        logging.warning(f"Vector search skipped/timed out: {e}")
+        logging.warning(f"Vector search skipped: {e}")
 
     context_parts = []
     seen_mongo_ids = set()
@@ -130,13 +125,13 @@ async def _build_context_from_rag(query: str, db) -> str:
     if not context_parts:
         logging.info("Chatbot: Using Instant Direct MongoDB Search Fallback")
         words = [w for w in re.findall(r"\w+", query.lower()) if len(w) > 2]
-        
+
         if words:
             # Clean non-stopword terms
             stopwords = {"what", "which", "how", "many", "tell", "about", "pict", "the", "and", "for", "are", "were", "with", "does", "have", "company", "placement", "placements", "salary", "package", "hired", "students"}
             search_terms = [w for w in words if w not in stopwords]
             regex_pattern = "|".join(search_terms if search_terms else words)
-            
+
             # a) Query Placement Records
             fallback_records = await db["placement_records"].find(
                 {"company_name": {"$regex": regex_pattern, "$options": "i"}}
@@ -215,7 +210,7 @@ async def chat(request: Request):
     if db is None:
         raise HTTPException(status_code=500, detail="Database not initialized")
 
-    # ── RAG: Fast semantic vector search + robust MongoDB direct search fallback ──
+    # ── RAG: MongoDB Atlas vector search + keyword fallback ──
     context_string = await _build_context_from_rag(query, db)
     logging.info(f"Chatbot [RAG]: context built ({len(context_string)} chars)")
 
@@ -223,4 +218,3 @@ async def chat(request: Request):
         chatbot_service.get_chat_response_stream(query, context_string, is_first_message),
         media_type="text/plain",
     )
-

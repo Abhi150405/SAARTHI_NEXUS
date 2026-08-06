@@ -6,8 +6,6 @@ services:
     buildCommand: pip install -r requirements-cloud.txt
     startCommand: gunicorn -w 1 -k uvicorn.workers.UvicornWorker --timeout 120 --bind 0.0.0.0:$PORT app.main:app
     envVars:
-      - key: ENABLE_VECTOR_SEARCH
-        value: "false"
       - key: PYTHON_VERSION
         value: "3.11.0"
       - key: MONGO_URI
