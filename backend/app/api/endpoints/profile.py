@@ -22,7 +22,6 @@ async def get_profile(email: str = Query(...)):
             'resume_education': 1,
             'experience_years': 1,
             'key_achievements': 1,
-            'projects': 1,
             'ats_score': 1,
             'profile_picture': 1,
             'leetcode_url': 1,

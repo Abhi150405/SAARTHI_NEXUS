@@ -55,8 +55,7 @@ async def get_companies():
 @router.get("/company/{name}")
 async def get_company_details(name: str):
     db = get_database()
-    # Exclude embedding field to keep payload small
-    records = await db['placement_records'].find({"company_name": name}, {"embedding": 0}).sort("academic_year", -1).to_list(None)
+    records = await db['placement_records'].find({"company_name": name}).sort("academic_year", -1).to_list(None)
     
     if not records:
         raise HTTPException(status_code=404, detail="Company not found")

@@ -25,16 +25,6 @@ const Chatbot = () => {
         html = html.replace(/__(.*?)__/g, '<b>$1</b>');
         html = html.replace(/\*(.*?)\*/g, '<i>$1</i>');
         html = html.replace(/^\s*[-*]\s+/gm, '• ');
-        // Convert markdown links [text](url) → <a> tags
-        html = html.replace(
-            /\[([^\]]+)\]\(([^)]+)\)/g,
-            '<a href="$2" style="color:#F97316;font-weight:bold;text-decoration:underline;" target="_blank">$1</a>'
-        );
-        // Ensure existing HTML <a> tags with href starting with # navigate within the app
-        html = html.replace(
-            /<a\s+href='(#[^']+)'/g,
-            '<a href="$1"'
-        );
         return html;
     };
 
@@ -74,10 +64,10 @@ const Chatbot = () => {
                 let chunk = decoder.decode(value, { stream: true });
 
                 if (!sourceMarkerHandled) {
-                    const sourceMatch = chunk.match(/^\[SOURCE:(groq|gemini)\]/);
+                    const sourceMatch = chunk.match(/^\[SOURCE:(ollama|nvidia)\]/);
                     if (sourceMatch) {
                         detectedSource = sourceMatch[1];
-                        chunk = chunk.replace(/^\[SOURCE:(groq|gemini)\]/, '');
+                        chunk = chunk.replace(/^\[SOURCE:(ollama|nvidia)\]/, '');
                     }
                     sourceMarkerHandled = true;
                 }

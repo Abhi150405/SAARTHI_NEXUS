@@ -5,7 +5,7 @@ import {
     User, Lock, Mail, Hash, BookOpen, AlertCircle, CheckCircle2, LogOut,
     GraduationCap, Save, Award, FileText, UploadCloud, Link2, ExternalLink,
     Home, Shield, Target, Zap, ChevronRight, Calendar, Clock, TrendingUp,
-    BarChart3, ArrowUpRight, Check, Circle, FolderGit2
+    BarChart3, ArrowUpRight, Check, Circle
 } from 'lucide-react';
 import { API_URL } from '../config';
 import skillData from '../data/skillData.json';
@@ -197,7 +197,6 @@ const Profile = () => {
     const [resumeSummary, setResumeSummary] = useState('');
     const [atsScore, setAtsScore] = useState(0);
     const [experienceYears, setExperienceYears] = useState(0);
-    const [projects, setProjects] = useState([]);
     const [keyAchievements, setKeyAchievements] = useState([]);
 
     // ── Professional Links State ──
@@ -231,7 +230,6 @@ const Profile = () => {
                     setResumeSummary(data.resume_summary ?? '');
                     setAtsScore(data.ats_score ?? 0);
                     setExperienceYears(data.experience_years ?? 0);
-                    setProjects(data.projects ?? []);
                     setKeyAchievements(data.key_achievements ?? []);
                     setLeetcodeUrl(data.leetcode_url ?? '');
                     setCodechefUrl(data.codechef_url ?? '');
@@ -914,23 +912,6 @@ const Profile = () => {
                                         </div>
                                     )}
                                 </motion.div>
-
-                                {/* Key Projects */}
-                                {projects.length > 0 && (
-                                    <motion.div className="pf-card" whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
-                                        <div className="pf-card-title"><FolderGit2 size={14} /> Key Projects</div>
-                                        <ul className="pf-achievements">
-                                            {projects.map((proj, i) => (
-                                                <motion.li key={i}
-                                                    initial={{ opacity: 0, x: -6 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ delay: i * 0.06 }}>
-                                                    {proj}
-                                                </motion.li>
-                                            ))}
-                                        </ul>
-                                    </motion.div>
-                                )}
 
                                 {/* Key Achievements */}
                                 {keyAchievements.length > 0 && (

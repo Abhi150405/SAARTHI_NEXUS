@@ -18,10 +18,6 @@ build/
 .env.*
 backend/.env
 
-# Vector Database & Storage
-chroma_db/
-.chroma/
-
 # Workspace and Tooling
 .claude/
 .github/
@@ -83,9 +79,3 @@ backend/evaluation_metrics.png
 
 # Raw student data (if sensitive)
 student_experiences/
-
-MODULE_SPECIFICATIONS.md
-docs/
-
-AI_CONTEXT.md
-

@@ -21,6 +21,7 @@ import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import ExperienceTemplate from './pages/ExperienceTemplate';
 import ExperienceDetail from './pages/ExperienceDetail';
+import CalendarPage from './pages/CalendarPage';
 
 // -----------------------------------------------------------------
 // AuthGuard: Protects a single route. Redirects to /signup if not
@@ -92,7 +93,7 @@ function App() {
         {/* Every other route is wrapped in AuthGuard → redirects to /signup */}
         <Route path="/app" element={<Layout />}>
           <Route index element={<Navigate to="/app/dashboard" replace />} />
-          
+
           {/* 🌐 PUBLIC — accessible without login */}
           <Route path="dashboard" element={<Dashboard />} />
 
@@ -100,6 +101,7 @@ function App() {
           <Route path="skills"          element={<AuthGuard><SkillAnalysis /></AuthGuard>} />
           <Route path="eligibility"     element={<AuthGuard><Eligibility /></AuthGuard>} />
           <Route path="records"         element={<AuthGuard><CompanyRecords /></AuthGuard>} />
+          <Route path="calendar"        element={<AuthGuard><CalendarPage /></AuthGuard>} />
           <Route path="drives"          element={<AuthGuard><PlacementDrives /></AuthGuard>} />
           <Route path="internships"     element={<AuthGuard><Internships /></AuthGuard>} />
           <Route path="experiences"     element={<AuthGuard><Experiences /></AuthGuard>} />

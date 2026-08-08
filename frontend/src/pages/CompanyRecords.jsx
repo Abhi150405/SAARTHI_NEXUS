@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { API_URL } from '../config';
@@ -115,6 +116,16 @@ const CompanyRecords = () => {
   // ── Company X-Ray panel ──────────────────────────────────
   const [xrayCompany, setXrayCompany] = useState(null);
   const openXRay = (companyName) => setXrayCompany(companyName);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const company = params.get('company') || location.state?.xrayCompany;
+    if (company) {
+      setXrayCompany(company);
+    }
+  }, [location]);
 
   // ─────────────────────────────────────────────────────────────────
   // FETCH: Summary (hero stats)

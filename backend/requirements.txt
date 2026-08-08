@@ -6,7 +6,7 @@ pydantic-settings
 motor
 python-multipart
 email-validator
-# LLM APIs via httpx (Groq & Google Gemini + text-embedding-004)
+# google-genai (removed - using NVIDIA NIM via httpx)
 pymongo
 werkzeug
 joblib
@@ -21,6 +21,3 @@ httpx
 matplotlib
 seaborn
 google-auth
-google-genai
-# ChromaDB & sentence-transformers removed — using MongoDB Atlas Vector Search instead
-

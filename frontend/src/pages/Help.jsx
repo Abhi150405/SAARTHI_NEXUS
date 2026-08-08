@@ -85,24 +85,18 @@ const Help = () => {
                 let text = decoder.decode(chunk, { stream: true });
 
                 if (!sourceHandled) {
-                    const sourceMatch = text.match(/^\[SOURCE:(groq|gemini)\]/);
+                    const sourceMatch = text.match(/^\[SOURCE:(ollama|nvidia)\]/);
                     if (sourceMatch) {
-                        text = text.replace(/^\[SOURCE:(groq|gemini)\]/, '');
+                        text = text.replace(/^\[SOURCE:(ollama|nvidia)\]/, '');
                     }
                     sourceHandled = true;
                 }
 
                 accumulated += text;
 
-                // Convert markdown links [text](url) → <a> tags for rendering
-                const renderedAccumulated = accumulated.replace(
-                    /\[([^\]]+)\]\(([^)]+)\)/g,
-                    '<a href="$2" style="color:#F97316;font-weight:bold;text-decoration:underline;">$1</a>'
-                );
-
                 setHistory(prev => {
                     const updated = [...prev];
-                    updated[updated.length - 1] = { type: 'bot', text: renderedAccumulated };
+                    updated[updated.length - 1] = { type: 'bot', text: accumulated };
                     return updated;
                 });
             }

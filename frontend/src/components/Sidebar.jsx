@@ -17,6 +17,7 @@ import {
   Sparkles,
   GraduationCap,
   Newspaper,
+  Calendar,
   X
 } from 'lucide-react';
 
@@ -36,6 +37,7 @@ const sections = [
     color: '#FACC15',
     items: [
       { path: '/app/records', label: 'Records', icon: Building2, desc: 'Past Data' },
+      { path: '/app/calendar', label: 'Calendar', icon: Calendar, desc: 'Company Visits' },
       { path: '/app/drives', label: 'Drives', icon: Briefcase, desc: 'Active Drives' },
       { path: '/app/internships', label: 'Internships', icon: GraduationCap, desc: 'Opportunities' },
     ],
