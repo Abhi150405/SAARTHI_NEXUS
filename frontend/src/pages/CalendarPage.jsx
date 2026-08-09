@@ -39,7 +39,7 @@ const currentYearEvents = [
 
   // 3. ZS Associates
   { date: '2026-08-07', company: 'ZS Associates', branch: 'CE, IT, AI&DS, ECE, E&TC', role: 'R2 Communication Assessment (6PM - 10PM)', pkg: '₹13.65 LPA', details: 'Round 2 Communication Assessment (6:00 PM - 10:00 PM).' },
-  { date: '2026-08-08', company: 'ZS Associates', branch: 'CE, IT, AI&DS, ECE, E&TC', role: 'R3 Tech AI Assessment (6PM - 10PM)', pkg: '₹13.65 LPA', details: 'Round 3 Tech AI Assessment (6:00 PM - 10:00 PM).' },
+  { date: '2026-08-10', company: 'ZS Associates', branch: 'CE, IT, AI&DS, ECE, E&TC', role: 'R3 Tech AI Assessment (6PM - 10PM)', pkg: '₹13.65 LPA', details: 'Round 3 Tech AI Assessment (6:00 PM - 10:00 PM).' },
   { date: '2026-08-19', company: 'ZS Associates', branch: 'CE, IT, AI&DS, ECE, E&TC', role: 'Test & Interviews', pkg: '₹13.65 LPA', details: 'Final online test and technical interview rounds.' },
 
   // 4. Bloomberg
