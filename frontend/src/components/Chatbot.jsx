@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Bot } from 'lucide-react';
 import { API_URL } from '../config';
+import { apiFetch, getUser } from '../api';
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +25,7 @@ const Chatbot = () => {
         let html = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
         html = html.replace(/__(.*?)__/g, '<b>$1</b>');
         html = html.replace(/\*(.*?)\*/g, '<i>$1</i>');
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #F97316; font-weight: bold; text-decoration: underline;">$1</a>');
         html = html.replace(/^\s*[-*]\s+/gm, '• ');
         return html;
     };
@@ -32,17 +34,21 @@ const Chatbot = () => {
         if (!input.trim()) return;
 
         const userMsg = input;
-        const isFirst = messages.filter(m => m.type === 'user').length === 0;
-
         setMessages(prev => [...prev, { type: 'user', text: userMsg }]);
         setInput('');
         setLoading(true);
 
+        const user = getUser();
+        const userName = user?.fullName || 'Student';
+
         try {
-            const response = await fetch(`${API_URL}/api/chat`, {
+            const response = await apiFetch('/api/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: userMsg, is_first_message: isFirst })
+                body: JSON.stringify({ 
+                    query: userMsg, 
+                    history: messages.slice(-5),
+                    user_name: userName 
+                })
             });
 
             if (!response.body) throw new Error('No response body');
@@ -64,10 +70,10 @@ const Chatbot = () => {
                 let chunk = decoder.decode(value, { stream: true });
 
                 if (!sourceMarkerHandled) {
-                    const sourceMatch = chunk.match(/^\[SOURCE:(ollama|nvidia)\]/);
+                    const sourceMatch = chunk.match(/^\[SOURCE:(ollama|groq|nvidia)\]/);
                     if (sourceMatch) {
                         detectedSource = sourceMatch[1];
-                        chunk = chunk.replace(/^\[SOURCE:(ollama|nvidia)\]/, '');
+                        chunk = chunk.replace(/^\[SOURCE:(ollama|groq|nvidia)\]/, '');
                     }
                     sourceMarkerHandled = true;
                 }

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { API_URL } from './config';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { isLoggedIn, getUser } from './api';
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
@@ -28,8 +29,8 @@ import CalendarPage from './pages/CalendarPage';
 // logged in as a student. Dashboard is intentionally NOT wrapped.
 // -----------------------------------------------------------------
 const AuthGuard = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isAuthenticated = isLoggedIn();
+  const user = getUser() || {};
 
   if (!isAuthenticated) {
     return <Navigate to="/signup" replace />;
@@ -43,8 +44,8 @@ const AuthGuard = ({ children }) => {
 
 // Admin-only guard (keeps redirecting to /login for security)
 const AdminGuard = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isAuthenticated = isLoggedIn();
+  const user = getUser() || {};
   if (!isAuthenticated || user.role !== 'admin') {
     return <Navigate to="/login/admin" replace />;
   }

@@ -3,11 +3,13 @@ from app.db.mongodb import get_database
 from bson.objectid import ObjectId
 import pandas as pd
 from pymongo import ReturnDocument
+from app.core.security import get_current_user, require_admin
+from fastapi import Depends
 
 router = APIRouter()
 
 @router.post("/interview-experience", status_code=201)
-async def add_interview_experience(request: Request):
+async def add_interview_experience(request: Request, current_user: dict = Depends(get_current_user)):
     data = await request.json()
     db = get_database()
     experience_record = {
@@ -58,7 +60,7 @@ async def get_interview_experience_by_id(exp_id: str, increment: bool = False):
     return exp
 
 @router.post("/company-feedback", status_code=201)
-async def add_company_feedback(request: Request):
+async def add_company_feedback(request: Request, current_user: dict = Depends(require_admin)):
     data = await request.json()
     db = get_database()
     feedback_record = {

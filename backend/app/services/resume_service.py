@@ -1,8 +1,7 @@
 """
 resume_service.py  — reliable single-call approach
 ----------------------------------------------------
-Uses ONE well-crafted NVIDIA NIM call that extracts everything in one shot.
-Replaces Gemini to avoid "RESOURCE_EXHAUSTED" errors and quota limits.
+Uses ONE well-crafted Groq API (or Gemini API) call that extracts everything in one shot.
 """
 
 import io
@@ -14,7 +13,7 @@ from typing import Any, Dict, Optional
 
 import PyPDF2
 import docx
-from app.llm.api_llm import nvidia_llm
+from app.llm.api_llm import groq_llm
 
 
 # ── Prompt ────────────────────────────────────────────────────────────────────
@@ -29,7 +28,8 @@ IMPORTANT RULES:
 - "summary": 2-sentence professional summary of the candidate.
 - "education": Full degree + college name (e.g. "B.E. Electronics & Computer Engg, PICT Pune").
 - "experience_years": Count ONLY full-time work experience. For students with no jobs, return 0. Study years do NOT count.
-- "key_achievements": List 3-5 project names from resume, each as "Project Name: one-line description".
+- "key_achievements": List 2-4 major achievements, awards, hackathons, certifications, or milestones (e.g. "Winner of Smart India Hackathon 2024", "Scored 99% in GATE").
+- "projects": List 3-5 major project names from the resume, each formatted as "Project Name: brief description".
 
 Return this exact JSON structure:
 {
@@ -40,7 +40,8 @@ Return this exact JSON structure:
   "summary": "...",
   "education": "...",
   "experience_years": 0,
-  "key_achievements": ["Project: description", "..."]
+  "key_achievements": ["Achievement 1", "Achievement 2"],
+  "projects": ["Project 1: description", "Project 2: description"]
 }
 
 Resume Text:
@@ -49,7 +50,6 @@ Resume Text:
 
 class ResumeService:
     def __init__(self):
-        # We now use the global nvidia_llm singleton
         pass
 
     # ── File Parsing ──────────────────────────────────────────────────────────
@@ -98,33 +98,32 @@ class ResumeService:
         logging.error(f"ResumeService: No JSON object found in response:\n{clean[:500]}")
         return None
 
-    # ── Main Analysis (single NVIDIA NIM call) ────────────────────────────────
+    # ── Main Analysis (single Groq API call) ────────────────────────────────
 
     async def analyze_resume(self, text: str, max_retries: int = 2) -> Optional[Dict[str, Any]]:
         """
-        Analyze resume text using a single detailed NVIDIA NIM call.
+        Analyze resume text using a single detailed Groq API call.
         Retries on rate limit errors.
         """
-        if not nvidia_llm.available:
-            logging.error("ResumeService: NVIDIA NIM client not available")
+        if not groq_llm.available:
+            logging.error("ResumeService: Groq/Gemini API client not available")
             return None
 
         if not text or not text.strip():
             logging.error("ResumeService: empty resume text")
             return None
 
-        # Truncate to ~10,000 chars (NVIDIA NIM has larger context)
         truncated_text = text[:10000]
         prompt = _RESUME_PROMPT + truncated_text
 
         for attempt in range(max_retries + 1):
             try:
-                logging.info(f"ResumeService: calling NVIDIA NIM (attempt {attempt + 1})…")
+                logging.info(f"ResumeService: calling LLM API (attempt {attempt + 1})…")
 
-                response_text = await nvidia_llm.generate(prompt)
+                response_text = await groq_llm.generate(prompt)
 
                 if not response_text:
-                    logging.warning(f"ResumeService: empty NVIDIA response on attempt {attempt + 1}")
+                    logging.warning(f"ResumeService: empty LLM response on attempt {attempt + 1}")
                     if attempt < max_retries:
                         await asyncio.sleep(2)
                         continue
@@ -141,6 +140,8 @@ class ResumeService:
                     result.setdefault("education", "")
                     result.setdefault("experience_years", 0)
                     result.setdefault("key_achievements", [])
+                    result.setdefault("projects", [])
+                    result.setdefault("key_projects", result.get("projects", []))
 
                     logging.info(
                         f"ResumeService ✅ done — "
@@ -151,12 +152,12 @@ class ResumeService:
                     return result
 
                 if attempt < max_retries:
-                    logging.warning(f"ResumeService: parse failed, retrying…")
+                    logging.warning("ResumeService: parse failed, retrying…")
                     await asyncio.sleep(2)
 
             except Exception as e:
                 err = str(e).upper()
-                logging.error(f"ResumeService: NVIDIA error (attempt {attempt + 1}): {e}")
+                logging.error(f"ResumeService: LLM error (attempt {attempt + 1}): {e}")
                 if "429" in err and attempt < max_retries:
                     wait = (attempt + 1) * 5
                     logging.warning(f"ResumeService: rate limited, retrying in {wait}s…")

@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query, HTTPException, status, Depends
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from bson import ObjectId
 from app.db.mongodb import get_database
+from app.core.security import require_admin
 
 router = APIRouter()
 
 @router.get("/admin/students")
-async def get_all_students():
+async def get_all_students(current_user: dict = Depends(require_admin)):
     db = get_database()
     students = await db['students'].find({}, {'password': 0, '_id': 0}).sort('created_at', -1).to_list(None)
 
@@ -35,7 +36,7 @@ async def get_all_students():
     return formatted_students
 
 @router.get("/admin/student-detail")
-async def get_student_detail(email: str = Query(...)):
+async def get_student_detail(email: str = Query(...), current_user: dict = Depends(require_admin)):
     """Fetch full student profile on-demand when admin opens the detail modal."""
     db = get_database()
     s = await db['students'].find_one({'email': email}, {'password': 0, '_id': 0})
@@ -73,7 +74,7 @@ class PlacementRecordCreate(BaseModel):
     gender_distribution: Optional[Dict[str, Any]] = {}
 
 @router.post("/admin/placement")
-async def create_placement_record(record: PlacementRecordCreate):
+async def create_placement_record(record: PlacementRecordCreate, current_user: dict = Depends(require_admin)):
     db = get_database()
     record_dict = record.dict()
     # Add timestamps if needed, but simple insert for now
@@ -83,7 +84,7 @@ async def create_placement_record(record: PlacementRecordCreate):
     raise HTTPException(status_code=500, detail="Failed to create placement record")
 
 @router.get("/admin/placements")
-async def get_all_placements():
+async def get_all_placements(current_user: dict = Depends(require_admin)):
     """Fetch all placement records for the admin management table."""
     db = get_database()
     # Sort descending by visit_date implicitly, or academic_year
@@ -98,7 +99,7 @@ async def get_all_placements():
     return formatted
 
 @router.delete("/admin/placement/{record_id}")
-async def delete_placement_record(record_id: str):
+async def delete_placement_record(record_id: str, current_user: dict = Depends(require_admin)):
     db = get_database()
     try:
         obj_id = ObjectId(record_id)
@@ -109,3 +110,119 @@ async def delete_placement_record(record_id: str):
     if result.deleted_count == 1:
         return {"message": "Placement record deleted successfully"}
     raise HTTPException(status_code=404, detail="Placement record not found")
+
+
+# ── Vector Search Admin Endpoints ─────────────────────────────────────────────
+
+from fastapi import BackgroundTasks
+
+@router.post("/admin/reindex-vectors")
+async def reindex_vectors(background_tasks: BackgroundTasks, current_user: dict = Depends(require_admin)):
+    """
+    Trigger a full re-embedding of all placement records, interview experiences,
+    and yearly stats into MongoDB (stored as `embedding` field on each document).
+    Runs as a background task to prevent HTTP timeouts.
+    """
+    from app.services.vector_store import vector_store
+    db = get_database()
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not initialized")
+        
+    background_tasks.add_task(vector_store.index_all, db)
+    return {
+        "status": "started",
+        "message": "Indexing started in the background. Check /admin/vector-status for progress."
+    }
+
+
+@router.get("/admin/vector-status")
+async def vector_status(current_user: dict = Depends(require_admin)):
+    """
+    Show how many documents currently have embeddings stored in MongoDB.
+    Useful to verify the index is populated before testing the RAG chatbot.
+    """
+    from app.services.embedding_service import embedding_service
+    db = get_database()
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not initialized")
+
+    embedding_available = embedding_service.is_available()
+
+    try:
+        placements_total = await db["placement_records"].count_documents({})
+        placements_indexed = await db["placement_records"].count_documents(
+            {"embedding": {"$exists": True, "$not": {"$size": 0}}}
+        )
+        experiences_total = await db["interview_experience"].count_documents({})
+        experiences_indexed = await db["interview_experience"].count_documents(
+            {"embedding": {"$exists": True, "$not": {"$size": 0}}}
+        )
+        stats_indexed = await db["placement_stats_vectors"].count_documents({})
+
+        return {
+            "embedding_api_available": embedding_available,
+            "placement_records": {
+                "total": placements_total,
+                "indexed": placements_indexed,
+                "pending": placements_total - placements_indexed,
+            },
+            "interview_experiences": {
+                "total": experiences_total,
+                "indexed": experiences_indexed,
+                "pending": experiences_total - experiences_indexed,
+            },
+            "placement_stats_vectors": {
+                "indexed": stats_indexed,
+            },
+            "ready": placements_indexed > 0 or experiences_indexed > 0,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Status check failed: {e}")
+
+
+@router.get("/admin/test-embed")
+async def test_embed(current_user: dict = Depends(require_admin)):
+    """
+    Debug endpoint: lists available embedding models and tests one.
+    """
+    import os
+    key = os.getenv("GOOGLE_API_KEY", "")
+    key_preview = key[:8] + "..." if key else "(not set)"
+
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=key)
+
+        # List all models that support embedContent
+        available_embed_models = []
+        for m in genai.list_models():
+            if "embedContent" in m.supported_generation_methods:
+                available_embed_models.append(m.name)
+
+        # Try each available model until one works
+        test_result = None
+        working_model = None
+        for model_name in available_embed_models[:3]:
+            try:
+                result = genai.embed_content(
+                    model=model_name,
+                    content="PICT placement test",
+                    task_type="retrieval_document",
+                )
+                embedding = result.get("embedding", [])
+                if embedding:
+                    working_model = model_name
+                    test_result = {"dims": len(embedding), "sample": embedding[:3]}
+                    break
+            except Exception:
+                continue
+
+        return {
+            "key_preview": key_preview,
+            "available_embed_models": available_embed_models,
+            "working_model": working_model,
+            "test_result": test_result,
+        }
+    except Exception as e:
+        return {"status": "error", "key_preview": key_preview, "error": str(e)}
+

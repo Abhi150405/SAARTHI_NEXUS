@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, X } from 'lucide-react';
-import { API_URL } from '../config';
+import { apiFetch } from '../api';
 
 const NotificationBar = () => {
     const [notifications, setNotifications] = useState([]);
@@ -11,7 +11,7 @@ const NotificationBar = () => {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/notifications`);
+                const response = await apiFetch('/api/notifications');
                 if (response.ok) {
                     const data = await response.json();
                     const closedIds = JSON.parse(localStorage.getItem('closed_notifications') || '[]');

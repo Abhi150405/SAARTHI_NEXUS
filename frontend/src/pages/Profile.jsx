@@ -5,9 +5,10 @@ import {
     User, Lock, Mail, Hash, BookOpen, AlertCircle, CheckCircle2, LogOut,
     GraduationCap, Save, Award, FileText, UploadCloud, Link2, ExternalLink,
     Home, Shield, Target, Zap, ChevronRight, Calendar, Clock, TrendingUp,
-    BarChart3, ArrowUpRight, Check, Circle
+    BarChart3, ArrowUpRight, Check, Circle, FolderGit2
 } from 'lucide-react';
 import { API_URL } from '../config';
+import { apiFetch, logout as apiLogout, setUser } from '../api';
 import skillData from '../data/skillData.json';
 import '../styles/Profile.css';
 
@@ -198,6 +199,7 @@ const Profile = () => {
     const [atsScore, setAtsScore] = useState(0);
     const [experienceYears, setExperienceYears] = useState(0);
     const [keyAchievements, setKeyAchievements] = useState([]);
+    const [projects, setProjects] = useState([]);
 
     // ── Professional Links State ──
     const [leetcodeUrl, setLeetcodeUrl] = useState('');
@@ -216,7 +218,7 @@ const Profile = () => {
         const fetchProfile = async () => {
             if (!user.email) { setFetching(false); return; }
             try {
-                const res = await fetch(`${API_URL}/api/profile?email=${encodeURIComponent(user.email)}`);
+                const res = await apiFetch(`/api/profile?email=${encodeURIComponent(user.email)}`);
                 const data = await res.json();
                 if (res.ok) {
                     setFullName(data.full_name ?? user.fullName);
@@ -231,6 +233,7 @@ const Profile = () => {
                     setAtsScore(data.ats_score ?? 0);
                     setExperienceYears(data.experience_years ?? 0);
                     setKeyAchievements(data.key_achievements ?? []);
+                    setProjects(data.projects ?? data.key_projects ?? []);
                     setLeetcodeUrl(data.leetcode_url ?? '');
                     setCodechefUrl(data.codechef_url ?? '');
                     setCodeforcesUrl(data.codeforces_url ?? '');
@@ -308,8 +311,7 @@ const Profile = () => {
     /* ═══ HANDLERS ═══ */
 
     const handleLogout = () => {
-        localStorage.clear();
-        navigate('/');
+        apiLogout();
     };
 
     const handleImageUpload = (e) => {
@@ -330,9 +332,8 @@ const Profile = () => {
         setInfoLoading(true);
         setInfoMessage({ type: '', text: '' });
         try {
-            const response = await fetch(`${API_URL}/api/profile`, {
+            const response = await apiFetch('/api/profile', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: user.email, full_name: fullName,
                     department, profile_picture: profilePicture
@@ -340,7 +341,7 @@ const Profile = () => {
             });
             const data = await response.json();
             if (response.ok) {
-                const updatedUser = { ...user, fullName, department, profilePicture };
+                const updatedUser = { ...user, fullName: data.full_name, department: data.department };
                 localStorage.setItem('user', JSON.stringify(updatedUser));
                 setInfoMessage({ type: 'success', text: 'Profile updated!' });
             } else {
@@ -371,9 +372,8 @@ const Profile = () => {
         }
         setAcademicLoading(true);
         try {
-            const response = await fetch(`${API_URL}/api/profile`, {
+            const response = await apiFetch('/api/profile', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: user.email,
                     tenth_percentage: tenthPercentage === '' ? null : parseFloat(tenthPercentage),
@@ -415,9 +415,8 @@ const Profile = () => {
         }
         setLinksLoading(true);
         try {
-            const response = await fetch(`${API_URL}/api/profile`, {
+            const response = await apiFetch('/api/profile', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: user.email,
                     leetcode_url: leetcodeUrl || null,
@@ -912,6 +911,23 @@ const Profile = () => {
                                         </div>
                                     )}
                                 </motion.div>
+
+                                {/* Key Projects */}
+                                {projects.length > 0 && (
+                                    <motion.div className="pf-card" whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
+                                        <div className="pf-card-title"><FolderGit2 size={14} /> Key Projects</div>
+                                        <ul className="pf-achievements">
+                                            {projects.map((proj, i) => (
+                                                <motion.li key={i}
+                                                    initial={{ opacity: 0, x: -6 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: i * 0.06 }}>
+                                                    {proj}
+                                                </motion.li>
+                                            ))}
+                                        </ul>
+                                    </motion.div>
+                                )}
 
                                 {/* Key Achievements */}
                                 {keyAchievements.length > 0 && (

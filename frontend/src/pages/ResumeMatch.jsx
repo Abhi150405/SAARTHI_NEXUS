@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { UploadCloud, FileText, CheckCheck, AlertCircle, Briefcase, Zap, Star, Layout, BookOpen, Clock } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle2, AlertCircle, RefreshCcw, Sparkles, Briefcase, Zap, Star, Layout, BookOpen, Clock, FolderGit2, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { API_URL } from '../config';
+import { apiFetch, getUser } from '../api';
+import '../styles/ResumeMatch.css';
 
 const pageAnim = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] } };
 
@@ -10,7 +12,6 @@ const ResumeMatch = () => {
     const [analyzing, setAnalyzing] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     const handleDrop = (e) => {
         e.preventDefault();
@@ -19,7 +20,13 @@ const ResumeMatch = () => {
     };
 
     const handleFileUpload = async () => {
-        if (!file || !user.email) return;
+        const user = getUser();
+        if (!user || !user.email) {
+            setError('User session not found.');
+            return;
+        }
+
+        if (!file) return;
 
         setAnalyzing(true);
         setError(null);
@@ -30,9 +37,9 @@ const ResumeMatch = () => {
         formData.append('email', user.email);
 
         try {
-            const response = await fetch(`${API_URL}/api/upload-resume`, {
+            const response = await apiFetch('/api/upload-resume', {
                 method: 'POST',
-                body: formData,
+                body: formData
             });
 
             const data = await response.json();
@@ -195,21 +202,41 @@ const ResumeMatch = () => {
                                 </div>
                             </div>
 
+                            {/* Key Projects */}
+                            {((result.projects && result.projects.length > 0) || (result.key_projects && result.key_projects.length > 0)) && (
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <FolderGit2 size={16} className="text-[#A3E635]" />
+                                        <span className="font-black uppercase tracking-widest text-[12px] text-[#A3E635]">Key Projects</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {(result.projects || result.key_projects || []).map((item, i) => (
+                                            <div key={i} className="flex items-start gap-2">
+                                                <div className="w-2 h-2 bg-[#A3E635] border border-[#0F0F0F] mt-1.5 flex-shrink-0" />
+                                                <span className="font-mono text-[13px] text-[#D4D4D4]">{item}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Key Achievements */}
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Briefcase size={16} className="text-[#FACC15]" />
-                                    <span className="font-black uppercase tracking-widest text-[12px] text-[#F97316]">Key Achievements</span>
+                            {result.key_achievements && result.key_achievements.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Trophy size={16} className="text-[#FACC15]" />
+                                        <span className="font-black uppercase tracking-widest text-[12px] text-[#F97316]">Key Achievements</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {result.key_achievements.map((item, i) => (
+                                            <div key={i} className="flex items-start gap-2">
+                                                <div className="w-2 h-2 bg-[#F97316] border border-[#0F0F0F] mt-1.5 flex-shrink-0" />
+                                                <span className="font-mono text-[13px] text-[#A3A3A3]">{item}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    {result.key_achievements.map((item, i) => (
-                                        <div key={i} className="flex items-start gap-2">
-                                            <div className="w-2 h-2 bg-[#F97316] border border-[#0F0F0F] mt-1.5 flex-shrink-0" />
-                                            <span className="font-mono text-[13px] text-[#A3A3A3]">{item}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            )}
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-full min-h-[350px]">

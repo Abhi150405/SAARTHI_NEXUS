@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Building, Award, Calendar, Send, PlusCircle } from 'lucide-react';
+import { Send, Building, Award, Calendar, PlusCircle, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
 import { Editor } from '@toast-ui/react-editor';
-import { API_URL } from '../config';
+import { apiFetch, getUser } from '../api';
 
 const pageAnim = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] } };
 
@@ -35,8 +35,7 @@ const AddExperience = () => {
 
     const fetchInitialData = async () => {
         try {
-            const compRes = await fetch(`${API_URL}/api/companies`);
-            const compData = await compRes.json();
+            const compData = await apiFetch('/api/companies');
             setCompanies(compData);
         } catch (error) {
             console.error('Error fetching companies:', error);
@@ -54,12 +53,11 @@ const AddExperience = () => {
                     day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
                 }).format(new Date())
             };
-            const response = await fetch(`${API_URL}/api/interview-experience`, {
+            const response = await apiFetch('/api/interview-experience', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (response.ok) {
+            if (response) {
                 setSuccessMessage('Your experience was shared successfully!');
                 setInterviewForm({
                     student_name: '', company_name: '', role: '',

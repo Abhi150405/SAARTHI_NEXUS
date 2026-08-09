@@ -69,7 +69,7 @@ const getSimilarity = (a, b) => {
 
 // 2. Common Synonym Dictionary
 const skillSynonyms = {
-    'dsa': ['data structures', 'algorithms', 'data structures and algorithms', 'dsa'],
+    'dsa': ['data structures', 'algorithms', 'data structures and algorithms', 'dsa', 'data structure', 'algorithm', 'data structure and algorithm', 'data structures & algorithms'],
     'cpp': ['c++', 'c plus plus', 'cpp'],
     'js': ['javascript', 'js', 'vanilla js'],
     'react': ['react.js', 'reactjs', 'react js', 'frontend'],

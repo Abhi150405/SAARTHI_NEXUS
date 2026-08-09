@@ -25,6 +25,16 @@ const useAutoResize = (minHeight = 56, maxHeight = 200) => {
     return { ref, adjust };
 };
 
+const formatMarkdown = (text) => {
+    if (!text) return "";
+    let html = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+    html = html.replace(/__(.*?)__/g, '<b>$1</b>');
+    html = html.replace(/\*(.*?)\*/g, '<i>$1</i>');
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color: #F97316; font-weight: bold; text-decoration: underline;">$1</a>');
+    html = html.replace(/^\s*[-*]\s+/gm, '• ');
+    return html;
+};
+
 /* ═══ PREDEFINED QUESTIONS ═══ */
 const SUGGESTIONS = [
     { text: "Which companies require DSA?", icon: Code },
@@ -85,9 +95,9 @@ const Help = () => {
                 let text = decoder.decode(chunk, { stream: true });
 
                 if (!sourceHandled) {
-                    const sourceMatch = text.match(/^\[SOURCE:(ollama|nvidia)\]/);
+                    const sourceMatch = text.match(/^\[SOURCE:(ollama|groq|nvidia)\]/);
                     if (sourceMatch) {
-                        text = text.replace(/^\[SOURCE:(ollama|nvidia)\]/, '');
+                        text = text.replace(/^\[SOURCE:(ollama|groq|nvidia)\]/, '');
                     }
                     sourceHandled = true;
                 }
@@ -186,7 +196,7 @@ const Help = () => {
                                         : 'bg-[#FFFBF0] border-[3px] border-[#0F0F0F] shadow-[4px_4px_0px_#F97316] text-[#0F0F0F]'
                                 }`}>
                                     {msg.type === 'bot' ? (
-                                        <div dangerouslySetInnerHTML={{ __html: msg.text }} />
+                                        <div dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.text) }} />
                                     ) : (
                                         msg.text
                                     )}

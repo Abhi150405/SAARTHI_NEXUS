@@ -167,7 +167,7 @@ class PerformanceEvaluator:
         res_acc = self.results["resume_extraction"].get("entity_f1_score", 0)
         
         print(f"1. NLP Skill Matcher:     {nlp_acc:.1f}% Accuracy")
-        print(f"2. Resume Parser (NVIDIA): {res_acc:.1f}% F1-Score")
+        print(f"2. Resume Parser (Groq): {res_acc:.1f}% F1-Score")
         print("="*50 + "\n")
         
         try:

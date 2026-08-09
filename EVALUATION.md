@@ -18,7 +18,7 @@ Create a unit test suite in `backend/tests/test_skill_match.py` with edge cases:
 ---
 
 ## 3. Generative AI: Agents & Chatbot
-These are powered by NVIDIA NIM (Mistral/Small) and Gemini API.
+These are powered by Groq API (Llama 3.1) and Gemini API.
 
 ### Evaluation Strategy: LLM-as-a-Judge
 Since these models produce free-form text, we use a "Reviewer LLM" (like Gemini 1.5 Pro or Claude 3.5 Sonnet) to score them.

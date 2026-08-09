@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Depends
 from typing import List
 from app.db.mongodb import get_database
 from app.schemas.drive import PlacementDriveCreate, PlacementDriveUpdate, DriveRegistrationCreate
@@ -6,11 +6,12 @@ from bson.objectid import ObjectId
 from datetime import datetime
 import csv
 import io
+from app.core.security import get_current_user, require_admin
 
 router = APIRouter()
 
 @router.post("/")
-async def create_drive(drive: PlacementDriveCreate):
+async def create_drive(drive: PlacementDriveCreate, current_user: dict = Depends(require_admin)):
     db = get_database()
     drive_dict = drive.dict()
     drive_dict['createdAt'] = datetime.utcnow()
@@ -26,7 +27,7 @@ async def list_drives():
     return drives
 
 @router.put("/{drive_id}")
-async def update_drive(drive_id: str, drive_update: PlacementDriveUpdate):
+async def update_drive(drive_id: str, drive_update: PlacementDriveUpdate, current_user: dict = Depends(require_admin)):
     db = get_database()
     update_data = {k: v for k, v in drive_update.dict(exclude_unset=True).items() if v is not None}
     if not update_data:
@@ -40,7 +41,7 @@ async def update_drive(drive_id: str, drive_update: PlacementDriveUpdate):
     return {"message": "Drive updated successfully"}
 
 @router.delete("/{drive_id}")
-async def delete_drive(drive_id: str):
+async def delete_drive(drive_id: str, current_user: dict = Depends(require_admin)):
     db = get_database()
     result = await db['placement_drives'].delete_one({"_id": ObjectId(drive_id)})
     if result.deleted_count == 0:
@@ -50,7 +51,7 @@ async def delete_drive(drive_id: str):
     return {"message": "Drive deleted successfully"}
 
 @router.post("/{drive_id}/register")
-async def register_student(drive_id: str, reg: DriveRegistrationCreate):
+async def register_student(drive_id: str, reg: DriveRegistrationCreate, current_user: dict = Depends(get_current_user)):
     db = get_database()
     # Check if drive exists
     drive = await db['placement_drives'].find_one({"_id": ObjectId(drive_id)})
@@ -83,7 +84,7 @@ async def register_student(drive_id: str, reg: DriveRegistrationCreate):
     return {"message": "Registered successfully"}
 
 @router.get("/{drive_id}/registrations")
-async def list_registrations(drive_id: str):
+async def list_registrations(drive_id: str, current_user: dict = Depends(require_admin)):
     db = get_database()
     regs = await db['drive_registrations'].find({"driveId": drive_id}).to_list(1000)
     for r in regs:
@@ -91,7 +92,7 @@ async def list_registrations(drive_id: str):
     return regs
 
 @router.get("/{drive_id}/export")
-async def export_registrations(drive_id: str):
+async def export_registrations(drive_id: str, current_user: dict = Depends(require_admin)):
     db = get_database()
     regs = await db['drive_registrations'].find({"driveId": drive_id}).to_list(10000)
     
@@ -116,7 +117,7 @@ async def export_registrations(drive_id: str):
     })
 
 @router.get("/registrations/student/{email}")
-async def list_student_registrations(email: str):
+async def list_student_registrations(email: str, current_user: dict = Depends(get_current_user)):
     db = get_database()
     regs = await db['drive_registrations'].find({"studentEmail": email}).to_list(1000)
     # returns list of drive IDs student has registered for

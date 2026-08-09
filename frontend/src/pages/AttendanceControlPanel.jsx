@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Target, Users, Clock, Send, ShieldCheck, Upload, FileText, X, CheckCircle, Download } from 'lucide-react';
 import { API_URL } from '../config';
+import { apiFetch, getUser } from '../api';
 import '../styles/AdminDashboard.css';
 
 const AttendanceControlPanel = () => {
@@ -17,12 +18,12 @@ const AttendanceControlPanel = () => {
     const [csvError, setCsvError] = useState('');
     const fileInputRef = useRef(null);
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = getUser() || {};
 
     useEffect(() => {
         const fetchCompanies = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/companies`);
+                const res = await apiFetch('/api/companies');
                 if (res.ok) {
                     const data = await res.json();
                     setCompanies(data);
@@ -37,7 +38,7 @@ const AttendanceControlPanel = () => {
 
     const fetchActiveSessions = async () => {
         try {
-            const res = await fetch(`${API_URL}/api/attendance/sessions`);
+            const res = await apiFetch('/api/attendance/sessions');
             if (res.ok) {
                 const data = await res.json();
                 setSessions(data);
@@ -124,15 +125,14 @@ const AttendanceControlPanel = () => {
                 formData.append('admin_name', user.fullName || 'Admin');
                 formData.append('csv_file', csvFile);
 
-                res = await fetch(`${API_URL}/api/attendance/sessions/upload-csv`, {
+                res = await apiFetch('/api/attendance/sessions/upload-csv', {
                     method: 'POST',
                     body: formData   // No Content-Type header — browser sets multipart boundary
                 });
             } else {
                 // No CSV — broadcast to all
-                res = await fetch(`${API_URL}/api/attendance/sessions`, {
+                res = await apiFetch('/api/attendance/sessions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         company_id: selectedCompanyId,
                         company_name: compName,
@@ -170,7 +170,7 @@ const AttendanceControlPanel = () => {
     const handleViewRecords = async (sessionId) => {
         setSelectedSessionId(sessionId);
         try {
-            const res = await fetch(`${API_URL}/api/attendance/sessions/${sessionId}/records`);
+            const res = await apiFetch(`/api/attendance/sessions/${sessionId}/records`);
             if (res.ok) {
                 const data = await res.json();
                 setRecords(data);

@@ -7,6 +7,7 @@ import math
 import csv
 import io
 from app.db.mongodb import get_database
+from app.core.security import require_admin
 
 router = APIRouter()
 
@@ -45,7 +46,7 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * c
 
 @router.post("/sessions")
-async def create_attendance_session(session: AttendanceSessionCreate):
+async def create_session(session: AttendanceSessionCreate, current_user: dict = Depends(require_admin)):
     db = get_database()
     
     new_session = {
@@ -80,13 +81,14 @@ async def create_attendance_session(session: AttendanceSessionCreate):
     return {"message": "Session created and broadcasted", "session_id": session_id, "eligible_count": eligible_count}
 
 @router.post("/sessions/upload-csv")
-async def create_session_with_csv(
+async def upload_students_csv(
     company_id: str = Form(...),
     company_name: str = Form(...),
     start_time: str = Form(...),
     end_time: str = Form(...),
     admin_name: str = Form(...),
-    csv_file: UploadFile = File(...)
+    csv_file: UploadFile = File(...),
+    current_user: dict = Depends(require_admin)
 ):
     """Create attendance session with a CSV file of eligible student emails."""
     db = get_database()
@@ -157,7 +159,7 @@ async def create_session_with_csv(
 
 
 @router.get("/sessions")
-async def get_active_sessions():
+async def get_all_sessions(current_user: dict = Depends(require_admin)):
     db = get_database()
     sessions = await db.attendance_sessions.find({"status": "active"}).to_list(length=100)
     for s in sessions:
@@ -165,7 +167,7 @@ async def get_active_sessions():
     return sessions
 
 @router.get("/sessions/{session_id}/records")
-async def get_session_records(session_id: str):
+async def get_session_records(session_id: str, current_user: dict = Depends(require_admin)):
     db = get_database()
     records = await db.attendance_records.find({"session_id": session_id}).to_list(length=1000)
     for r in records:

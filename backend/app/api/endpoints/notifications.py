@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from app.db.mongodb import get_database
 from bson.objectid import ObjectId
 import datetime
+from app.core.security import require_admin
 
 router = APIRouter()
 
 @router.post("/admin/broadcast", status_code=201)
-async def broadcast_notification(request: Request):
+async def broadcast_notification(request: Request, current_user: dict = Depends(require_admin)):
     data = await request.json()
     message = data.get('message')
     admin_name = data.get('adminName', 'TNP Admin')
@@ -41,7 +42,7 @@ async def get_all_notifications():
     return notifications
 
 @router.put("/notifications/{id}")
-async def update_notification(id: str, request: Request):
+async def update_notification(id: str, request: Request, current_user: dict = Depends(require_admin)):
     data = await request.json()
     message = data.get('message')
     if not message:
@@ -53,7 +54,7 @@ async def update_notification(id: str, request: Request):
     return {"message": "Notification updated successfully"}
 
 @router.delete("/notifications/{id}")
-async def delete_notification(id: str):
+async def delete_notification(id: str, current_user: dict = Depends(require_admin)):
     db = get_database()
     result = await db['notifications'].delete_one({'_id': ObjectId(id)})
     if result.deleted_count == 0:

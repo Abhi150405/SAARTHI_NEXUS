@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Calendar, User, ArrowLeft, RefreshCw, Volume2, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { API_URL } from '../config';
+import { apiFetch, getUser } from '../api';
 
 const pageAnim = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] } };
 
@@ -16,9 +16,9 @@ const Notifications = () => {
 
     const fetchNotifications = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/notifications/all`);
-            if (response.ok) {
-                const data = await response.json();
+            const res = await apiFetch('/api/notifications/all');
+            if (res.ok) {
+                const data = await res.json();
                 setNotifications(data);
             }
         } catch (err) {
@@ -44,7 +44,7 @@ const Notifications = () => {
     };
 
     const handleMarkAttendance = (notif) => {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const user = getUser() || {};
         if (!user.email) {
             alert("Student details not found. Please log in.");
             return;
@@ -62,9 +62,8 @@ const Notifications = () => {
             async (position) => {
                 const { latitude, longitude } = position.coords;
                 try {
-                    const res = await fetch(`${API_URL}/api/attendance/mark`, {
+                    const data = await apiFetch('/api/attendance/mark', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             session_id: notif.session_id,
                             student_id: user.studentId || user.email,
@@ -73,7 +72,6 @@ const Notifications = () => {
                             latitude, longitude
                         })
                     });
-                    const data = await res.json();
                     setAttendanceStatus(prev => ({
                         ...prev,
                         [notif._id]: { status: data.status, success: data.success }

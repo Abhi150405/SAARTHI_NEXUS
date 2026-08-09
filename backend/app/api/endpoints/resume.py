@@ -2,14 +2,19 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from app.services.resume_service import resume_service
 from app.db.mongodb import get_database
 import json
+from app.core.security import get_current_user
+from fastapi import Depends
 
 router = APIRouter()
 
 @router.post("/upload-resume")
 async def upload_resume(
     file: UploadFile = File(...),
-    email: str = Form(...)
+    email: str = Form(...),
+    current_user: dict = Depends(get_current_user)
 ):
+    if current_user["email"] != email:
+        raise HTTPException(status_code=403, detail="You may only upload your own resume")
     if not file.filename.endswith(('.pdf', '.docx', '.txt')):
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDF, DOCX, and TXT are supported.")
 
@@ -41,8 +46,10 @@ async def upload_resume(
             "resume_education": analysis.get("education", ""),
             "experience_years": analysis.get("experience_years", 0),
             "key_achievements": analysis.get("key_achievements", []),
+            "projects": analysis.get("projects", analysis.get("key_projects", [])),
+            "key_projects": analysis.get("key_projects", analysis.get("projects", [])),
             "ats_score": analysis.get("ats_score", 0),
-            "last_resume_update": True # Flag or timestamp
+            "last_resume_update": True
         }
         
         await db['students'].update_one(

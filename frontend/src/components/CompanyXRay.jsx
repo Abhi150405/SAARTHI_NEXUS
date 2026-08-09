@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { API_URL } from '../config';
+import { apiFetch } from '../api';
 import '../styles/XRayPanel.css';
 
 const BR_COLS = ['#FFE135', '#1A6EFF', '#00C86F', '#FF6B00', '#9B59B6', '#FF4444'];
@@ -23,10 +23,21 @@ export default function CompanyXRay({ companyName, onClose }) {
       { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(1.4)' }
     );
 
-    fetch(`${API_URL}/api/placements/company-xray/${encodeURIComponent(companyName)}`)
-      .then(r => { if (!r.ok) throw new Error('Not found'); return r.json(); })
-      .then(d => { setData(d); setLoading(false); })
-      .catch(e => { setError(e.message); setLoading(false); });
+    const fetchData = async () => {
+      try {
+        const res = await apiFetch(`/api/placements/company-xray/${encodeURIComponent(companyName)}`);
+        if (!res.ok) {
+          throw new Error(`HTTP error ${res.status}`);
+        }
+        const d = await res.json();
+        setData(d);
+        setLoading(false);
+      } catch (e) {
+        setError(e.message);
+        setLoading(false);
+      }
+    };
+    fetchData();
 
     return () => { document.body.style.overflow = ''; };
   }, [companyName]);

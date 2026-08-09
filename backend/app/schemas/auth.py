@@ -44,3 +44,23 @@ class ProfileUpdate(BaseModel):
         if not URL_REGEX.match(v):
             raise ValueError('Must be a valid URL starting with http:// or https://')
         return v
+
+
+# ─── Auth response schemas ────────────────────────────────────────────────────
+
+class UserOut(BaseModel):
+    """User object returned inside TokenResponse — matches the shape the
+    frontend reads from login/signup responses (email, fullName, role,
+    department, idNumber)."""
+    email: str
+    fullName: Optional[str] = None
+    role: str
+    department: Optional[str] = None
+    idNumber: Optional[str] = None
+
+
+class TokenResponse(BaseModel):
+    """Returned by login / signup / google-auth / refresh."""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut

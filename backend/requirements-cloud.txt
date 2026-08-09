@@ -6,6 +6,8 @@
 fastapi
 uvicorn[standard]
 gunicorn
+PyJWT
+slowapi
 pydantic
 pydantic-settings
 motor

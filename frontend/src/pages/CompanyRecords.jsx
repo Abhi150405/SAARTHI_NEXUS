@@ -120,7 +120,8 @@ const CompanyRecords = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
+    const hashQuery = window.location.hash.includes('?') ? '?' + window.location.hash.split('?')[1] : '';
+    const params = new URLSearchParams(location.search || hashQuery || window.location.search);
     const company = params.get('company') || location.state?.xrayCompany;
     if (company) {
       setXrayCompany(company);

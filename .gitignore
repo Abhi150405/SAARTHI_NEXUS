@@ -1,37 +1,74 @@
-# Dependency directories
+# ==========================================
+# SAARTHI NEXUS — Comprehensive .gitignore
+# ==========================================
+
+# ── Dependencies & Virtual Environments ──
 node_modules/
+**/node_modules/
 jspm_packages/
 venv/
 .venv/
 env/
 .env/
-.vite
-Vibe_coding
-# Build outputs
+backend/venv/
+backend/.venv/
+frontend/node_modules/
+
+# ── Build & Distribution Outputs ──
 dist/
+**/dist/
 dist-ssr/
 build/
+out/
+.vite/
 *.local
 
-# Environment variables (Secrets)
+# ── Environment Variables & Secrets ──
 .env
 .env.*
+*.env
 backend/.env
+frontend/.env
+!.env.example
 
-# Workspace and Tooling
-.claude/
-.github/
+# ── Python Bytecode & Caches ──
+__pycache__/
+/**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.egg-info/
+*.egg
+eggs/
+parts/
+sdist/
+var/
+
+# ── IDE, Editor & System Files ──
 .vscode/
 !.vscode/extensions.json
 .idea/
+.claude/
+.zed/
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.tmp
 
-# Logs and Debug outputs
+# ── AI Agent & Tool Scratch Folders ──
+.agents/
+.gemini/
+.antigravity/
+
+# ── Logs & Debug Outputs ──
 logs/
 *.log
 npm-debug.log*
@@ -47,35 +84,31 @@ backend/backend_log.txt
 backend/gemini_debug_response.txt
 backend/results.txt
 
-# Testing and Coverage
-.pytest_cache/
-.coverage
-htmlcov/
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Temporary and Data Dumps
+# ── Temporary & Local Data Dumps ──
+tmp/
+**/tmp/
 tmp_*.json
+temp.json
 backend/tmp_*.json
 backend/evaluation_results.json
-temp.json
+evaluation_results.json
 pict_interview_experiences.json
 placement_data_*.json
 skill_data.json
+student_experiences/
+Vibe_coding/
 
-# Personal / Project Assets (Not needed for deployment)
-*.png
-*.jpg
-*.jpeg
-*.svg
-*.docx
-*.pdf
+# ── Generated Evaluation Dashboards & Assets ──
 evaluation_dashboard_master.png
 saarthi_final_evaluation_dashboard.png
 backend/evaluation_dashboard_comprehensive.png
 backend/evaluation_dashboard_master_v3.png
 backend/evaluation_metrics.png
 
-# Raw student data (if sensitive)
-student_experiences/
+# ── Internal Documentation, Markdown Files, Research Papers & Scripts ──
+docs/
+*.docx
+*.pdf
+*.md
+!README.md
+fetch_students.py

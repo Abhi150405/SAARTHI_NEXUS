@@ -37,6 +37,8 @@ import {
 import { Pie, Bar, Line } from 'react-chartjs-2';
 import '../styles/AdminDashboard.css';
 import { API_URL } from '../config';
+import { apiFetch, logout as apiLogout } from '../api';
+
 
 // Import the new Placement Management Components
 import AddPlacementRecord from './AddPlacementRecord';
@@ -120,7 +122,7 @@ const AdminDashboard = () => {
         setSelectedStudent(s);
         setModalLoading(true);
         try {
-            const res = await fetch(`${API_URL}/api/admin/student-detail?email=${encodeURIComponent(s.email)}`);
+            const res = await apiFetch(`/api/admin/student-detail?email=${encodeURIComponent(s.email)}`);
             if (res.ok) {
                 const full = await res.json();
                 setSelectedStudent(full);
@@ -183,7 +185,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/placement-stats`);
+                const response = await apiFetch('/api/placement-stats');
                 if (response.ok) {
                     const data = await response.json();
                     setYearlyData(data);
@@ -213,21 +215,21 @@ const AdminDashboard = () => {
 
         const fetchStudents = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/admin/students`);
+                const response = await apiFetch('/api/admin/students');
                 if (response.ok) { setRecentUsers(await response.json()); }
             } catch (err) { console.error('Failed to fetch students', err); }
         };
 
         const fetchCompanies = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/companies`);
+                const response = await apiFetch('/api/companies');
                 if (response.ok) { setCompanies(await response.json()); }
             } catch (err) { console.error('Failed to fetch companies', err); }
         };
 
         const fetchFeedbacks = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/company-feedback`);
+                const response = await apiFetch('/api/company-feedback');
                 if (response.ok) {
                     setExistingFeedbacks(await response.json());
                 }
@@ -236,7 +238,7 @@ const AdminDashboard = () => {
 
         const fetchBroadcasts = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/notifications/all`);
+                const response = await apiFetch('/api/notifications/all');
                 if (response.ok) {
                     setBroadcastedNotifications(await response.json());
                 }
@@ -297,14 +299,13 @@ const AdminDashboard = () => {
             };
 
             const url = editingFeedbackId
-                ? `${API_URL}/api/company-feedback/${editingFeedbackId}`
-                : `${API_URL}/api/company-feedback`;
+                ? `/api/company-feedback/${editingFeedbackId}`
+                : `/api/company-feedback`;
 
             const method = editingFeedbackId ? 'PUT' : 'POST';
 
-            const response = await fetch(url, {
+            const response = await apiFetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
@@ -322,7 +323,7 @@ const AdminDashboard = () => {
                 setEditingFeedbackId(null);
 
                 // Refresh feedbacks
-                const fbRes = await fetch(`${API_URL}/api/company-feedback`);
+                const fbRes = await apiFetch('/api/company-feedback');
                 if (fbRes.ok) setExistingFeedbacks(await fbRes.json());
 
                 setTimeout(() => setFeedbackSuccess(''), 4000);
@@ -374,7 +375,7 @@ const AdminDashboard = () => {
         if (!window.confirm('Are you sure you want to delete this feedback report?')) return;
 
         try {
-            const response = await fetch(`${API_URL}/api/company-feedback/${id}`, {
+            const response = await apiFetch(`/api/company-feedback/${id}`, {
                 method: 'DELETE'
             });
             if (response.ok) {
@@ -386,6 +387,10 @@ const AdminDashboard = () => {
         } catch (err) {
             console.error('Delete error:', err);
         }
+    };
+
+    const handleLogout = () => {
+        apiLogout();
     };
 
     const cancelEdit = () => {
@@ -406,9 +411,8 @@ const AdminDashboard = () => {
         if (!message) return;
 
         try {
-            const response = await fetch(`${API_URL}/api/admin/broadcast`, {
+            const response = await apiFetch('/api/admin/broadcast', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message,
                     adminName: user.fullName || 'TNP Admin'
@@ -418,7 +422,7 @@ const AdminDashboard = () => {
             if (response.ok) {
                 alert("Notification broadcasted successfully!");
                 // Refresh broadcasts list
-                const bcRes = await fetch(`${API_URL}/api/notifications/all`);
+                const bcRes = await apiFetch('/api/notifications/all');
                 if (bcRes.ok) setBroadcastedNotifications(await bcRes.json());
             } else {
                 alert("Failed to broadcast notification.");
@@ -432,7 +436,7 @@ const AdminDashboard = () => {
     const handleDeleteNotification = async (id) => {
         if (!window.confirm('Are you sure you want to delete this notification?')) return;
         try {
-            const response = await fetch(`${API_URL}/api/notifications/${id}`, {
+            const response = await apiFetch(`/api/notifications/${id}`, {
                 method: 'DELETE'
             });
             if (response.ok) {
@@ -450,9 +454,8 @@ const AdminDashboard = () => {
         if (!newMessage || newMessage === notif.message) return;
 
         try {
-            const response = await fetch(`${API_URL}/api/notifications/${notif._id}`, {
+            const response = await apiFetch(`/api/notifications/${notif._id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: newMessage })
             });
 
@@ -545,20 +548,16 @@ const AdminDashboard = () => {
                 </nav>
 
                 <div className="admin-sidebar-footer">
-                    <div className="admin-nav-item settings">
-                        <Settings size={20} />
-                        <span>Settings</span>
-                    </div>
                     <button
-                        className="admin-nav-item logout-red"
+                        className="admin-nav-item"
                         onClick={() => {
                             localStorage.clear();
                             window.location.href = '/';
                         }}
-                        style={{ marginTop: '0.5rem', color: 'var(--admin-accent)' }}
+                        style={{ background: '#EF4444', color: '#000', border: '3px solid #000' }}
                     >
                         <LogOut size={20} />
-                        <span>Sign Out</span>
+                        <span>Logout</span>
                     </button>
                 </div>
             </aside>

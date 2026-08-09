@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, CheckCircle, AlertTriangle, Loader2, Briefcase, Building2, ChevronDown, BookOpen, PlayCircle, GraduationCap, CheckCircle2, Sparkles, Clock, Trophy, Search, X, ExternalLink, Zap } from 'lucide-react';
 import { API_URL } from '../config';
+import { apiFetch, getUser } from '../api';
 import { analyzeSkillGap, buildYouTubeSearchUrl, isSkillSatisfied } from '../services/skillAnalysisService';
 import skillData from '../data/skillData.json';
 
@@ -12,7 +13,7 @@ const SkillAnalysis = () => {
     const [selectedTarget, setSelectedTarget] = useState('');
 
     // ── Derive companies and roles from skill_data.json ──
-    const { companies, companyMap, companySkills, roles, roleMap, roleSkills } = useMemo(() => {
+    const { companies, companyMap, companySkills, companySalaries, roles, roleMap, roleSkills, roleSalaries } = useMemo(() => {
         // Deduplicate companies by display_name, keep the first entry
         const companyMap = {};
         skillData.forEach(c => {
@@ -23,30 +24,40 @@ const SkillAnalysis = () => {
 
         // Build companySkills: display_name -> combined must_have + good_to_have
         const companySkills = {};
+        const companySalaries = {};
         companies.forEach(name => {
             const c = companyMap[name];
             const allSkills = new Set();
+            let maxCtc = 0;
             (c.roles_offered || []).forEach(r => {
                 (r.must_have_skills || []).forEach(s => allSkills.add(s));
                 (r.good_to_have_skills || []).forEach(s => allSkills.add(s));
+                const ctc = parseFloat(r.ctc_lpa);
+                if (!isNaN(ctc) && ctc > maxCtc) maxCtc = ctc;
             });
             companySkills[name] = [...allSkills];
+            companySalaries[name] = maxCtc;
         });
 
         // Build roles: unique role_titles aggregated across all companies
         const roleMap = {};
+        const roleSalaries = {};
         skillData.forEach(c => {
             (c.roles_offered || []).forEach(r => {
                 if (!roleMap[r.role_title]) roleMap[r.role_title] = new Set();
                 (r.must_have_skills || []).forEach(s => roleMap[r.role_title].add(s));
                 (r.good_to_have_skills || []).forEach(s => roleMap[r.role_title].add(s));
+                const ctc = parseFloat(r.ctc_lpa);
+                if (!isNaN(ctc)) {
+                    roleSalaries[r.role_title] = Math.max(roleSalaries[r.role_title] || 0, ctc);
+                }
             });
         });
         const roles = Object.keys(roleMap);
         const roleSkills = {};
         roles.forEach(r => { roleSkills[r] = [...roleMap[r]]; });
 
-        return { companies, companyMap, companySkills, roles, roleMap, roleSkills };
+        return { companies, companyMap, companySkills, companySalaries, roles, roleMap, roleSkills, roleSalaries };
     }, []);
 
     // Set initial target once data is derived
@@ -69,6 +80,7 @@ const SkillAnalysis = () => {
     const [resourceTabs, setResourceTabs] = useState({});
     const [loadingStep, setLoadingStep] = useState(0);
     const [targetSearch, setTargetSearch] = useState('');
+    const [sortBy, setSortBy] = useState('name');
 
     const loadingMessages = [
         'Fetching your skill profile...',
@@ -79,18 +91,16 @@ const SkillAnalysis = () => {
 
     useEffect(() => {
         const fetchSkills = async () => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (!user.email) {
+            const user = getUser();
+            if (!user || !user.email) {
                 setLoading(false);
                 return;
             }
             try {
-                const res = await fetch(`${API_URL}/api/profile?email=${encodeURIComponent(user.email)}`);
+                const res = await apiFetch(`/api/profile?email=${encodeURIComponent(user.email)}`);
                 const data = await res.json();
-                if (res.ok) {
-                    setStudentProfile(data);
-                    setStudentSkills(data.skills ?? []);
-                }
+                setStudentProfile(data);
+                setStudentSkills(data.skills ?? []);
             } catch (err) {
                 console.error('Failed to fetch skills:', err);
             } finally {
@@ -296,35 +306,59 @@ const SkillAnalysis = () => {
                     </div>
 
                     {/* Target Selector */}
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search size={16} className="text-gray-500" />
+                    <div className="relative flex gap-2">
+                        <div className="relative flex-1">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Search size={16} className="text-gray-500" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder={`Search ${analysisMode === 'role' ? 'roles' : 'companies'}...`}
+                                value={targetSearch}
+                                onChange={(e) => setTargetSearch(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 bg-white border-[3px] border-[#0F0F0F] text-[#0F0F0F] font-bold focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#F97316] focus:border-[#F97316] transition-all"
+                            />
                         </div>
-                        <input
-                            type="text"
-                            placeholder={`Search ${analysisMode === 'role' ? 'roles' : 'companies'}...`}
-                            value={targetSearch}
-                            onChange={(e) => setTargetSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-white border-[3px] border-[#0F0F0F] text-[#0F0F0F] font-bold focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#F97316] focus:border-[#F97316] transition-all"
-                        />
+                        <button 
+                            onClick={() => setSortBy(prev => prev === 'name' ? 'salary' : 'name')}
+                            className="bg-white border-[3px] border-[#0F0F0F] px-3 font-black text-xs hover:bg-[#FFFBF0] transition-all flex flex-col items-center justify-center shrink-0 min-w-[70px]"
+                        >
+                            <span className="text-gray-500 text-[10px] uppercase">Sort</span>
+                            <span className="text-[#F97316]">{sortBy === 'name' ? 'A-Z' : 'LPA ↑'}</span>
+                        </button>
                     </div>
                     
                     {/* Target Grid (Compact) */}
                     <div className="grid grid-cols-2 gap-3 max-h-[180px] overflow-y-auto pr-3 custom-scrollbar">
                         <AnimatePresence>
-                            {currentTargets.filter(item => item.toLowerCase().includes(targetSearch.toLowerCase())).slice(0, 20).map((item, idx) => (
-                                <motion.button
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    key={item}
-                                    onClick={() => setSelectedTarget(item)}
-                                    className={`text-left px-3 py-2 border-[2px] border-[#0F0F0F] text-sm font-bold truncate transition-all flex items-center h-full ${selectedTarget === item ? 'bg-[#A3E635] shadow-[2px_2px_0px_#0F0F0F] translate-x-[-1px] translate-y-[-1px]' : 'bg-white hover:bg-[#FFFBF0]'}`}
-                                >
-                                    {item}
-                                </motion.button>
-                            ))}
+                            {currentTargets
+                                .filter(item => item.toLowerCase().includes(targetSearch.toLowerCase()))
+                                .sort((a, b) => {
+                                    if (sortBy === 'salary') {
+                                        const salaryMap = analysisMode === 'role' ? roleSalaries : companySalaries;
+                                        return (salaryMap[b] || 0) - (salaryMap[a] || 0);
+                                    }
+                                    return a.localeCompare(b);
+                                })
+                                .slice(0, 20)
+                                .map((item, idx) => {
+                                    const salaryMap = analysisMode === 'role' ? roleSalaries : companySalaries;
+                                    const salary = salaryMap[item];
+                                    return (
+                                        <motion.button
+                                            layout
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            key={item}
+                                            onClick={() => setSelectedTarget(item)}
+                                            className={`text-left px-3 py-2 border-[2px] border-[#0F0F0F] font-bold truncate transition-all flex justify-between items-center h-full group ${selectedTarget === item ? 'bg-[#A3E635] shadow-[2px_2px_0px_#0F0F0F] translate-x-[-1px] translate-y-[-1px]' : 'bg-white hover:bg-[#FFFBF0]'}`}
+                                        >
+                                            <span className="text-sm truncate mr-2">{item}</span>
+                                            {salary > 0 && <span className={`text-[10px] whitespace-nowrap px-1 border border-current ${selectedTarget === item ? 'opacity-100 text-[#0F0F0F]' : 'opacity-60 text-gray-500 group-hover:opacity-100'}`}>{salary} LPA</span>}
+                                        </motion.button>
+                                    );
+                                })}
                         </AnimatePresence>
                     </div>
 
@@ -371,7 +405,7 @@ const SkillAnalysis = () => {
 
                 {/* Right: Quick Match Status */}
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className="flex flex-col gap-4">
-                    <div className="bg-[#A3E635] border-[3px] border-[#0F0F0F] p-5 shadow-[4px_4px_0px_#0F0F0F] h-full flex flex-col justify-center min-h-[300px]">
+                    <div className="bg-[#A3E635] border-[3px] border-[#0F0F0F] p-5 shadow-[4px_4px_0px_#0F0F0F] flex flex-col justify-center">
                         <div className="flex justify-between items-end mb-4">
                             <h3 className="font-black text-[#0F0F0F] uppercase text-sm">Quick Match</h3>
                             <div className="text-right">
@@ -396,6 +430,30 @@ const SkillAnalysis = () => {
                             {requiredSkills.length > 8 && <span className="text-[10px] font-black px-2 py-1 bg-transparent">+{requiredSkills.length - 8} more</span>}
                         </div>
                     </div>
+
+                    {/* Top Matches */}
+                    {topMatches.length > 0 && (
+                        <div className="bg-[#60A5FA] border-[3px] border-[#0F0F0F] p-4 shadow-[4px_4px_0px_#0F0F0F] flex flex-col flex-1">
+                            <h3 className="font-black text-[#0F0F0F] uppercase text-sm mb-3">Top Matches For You</h3>
+                            <div className="flex flex-col gap-2 overflow-y-auto max-h-[160px] custom-scrollbar pr-1">
+                                {topMatches.map((match, idx) => (
+                                    <button 
+                                        key={idx}
+                                        onClick={() => { setAnalysisMode('company'); setSelectedTarget(match.target_id); }} 
+                                        className="flex justify-between items-center bg-white border-2 border-[#0F0F0F] px-3 py-2 hover:bg-[#FFFBF0] transition-all text-left group"
+                                    >
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="font-black text-xs text-[#0F0F0F] truncate group-hover:underline">{match.company_name}</span>
+                                            <span className="text-[10px] font-bold text-gray-500 truncate">{match.sector} • {match.ctc_lpa} LPA</span>
+                                        </div>
+                                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                                            <span className="font-black text-[#F97316] text-sm">{match.match_percentage}%</span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </motion.div>
             </div>
 
@@ -481,16 +539,31 @@ const SkillAnalysis = () => {
                                                         ))}
                                                     </div>
 
-                                                    {/* Single top resource */}
-                                                    {ms.resources?.youtube?.[0] && (
-                                                        <a href={buildYouTubeSearchUrl(ms.resources.youtube[0].search_query)} target="_blank" rel="noopener noreferrer" className="mt-auto flex items-center gap-2 bg-[#FFFBF0] border-2 border-[#0F0F0F] p-2 hover:bg-[#FACC15] transition-colors group">
-                                                            <PlayCircle size={16} className="text-[#EF4444]" />
-                                                            <div className="flex flex-col min-w-0">
-                                                                <span className="text-xs font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.youtube[0].title}</span>
-                                                                <span className="text-[10px] font-bold text-gray-500">{ms.resources.youtube[0].channel}</span>
-                                                            </div>
-                                                        </a>
-                                                    )}
+                                                    {/* Resources */}
+                                                    <div className="mt-auto flex flex-col gap-1 border-t-[2px] border-dashed border-[#0F0F0F] pt-2">
+                                                        <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Recommended Resources</div>
+                                                        
+                                                        {ms.resources?.youtube?.[0] && (
+                                                            <a href={buildYouTubeSearchUrl(ms.resources.youtube[0].search_query)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#EF4444] transition-colors group">
+                                                                <PlayCircle size={14} className="text-[#EF4444] shrink-0" />
+                                                                <span className="text-[11px] font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.youtube[0].title}</span>
+                                                            </a>
+                                                        )}
+                                                        
+                                                        {ms.resources?.courses?.[0] && (
+                                                            <a href={ms.resources.courses[0].url || `https://www.google.com/search?q=${encodeURIComponent(ms.resources.courses[0].title + ' ' + ms.resources.courses[0].platform)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#3B82F6] transition-colors group">
+                                                                <BookOpen size={14} className="text-[#3B82F6] shrink-0" />
+                                                                <span className="text-[11px] font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.courses[0].title}</span>
+                                                            </a>
+                                                        )}
+
+                                                        {ms.resources?.practice?.[0] && (
+                                                            <a href={ms.resources.practice[0].url || `https://www.google.com/search?q=${encodeURIComponent(ms.resources.practice[0].platform + ' practice ' + ms.skill)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#10B981] transition-colors group">
+                                                                <ExternalLink size={14} className="text-[#10B981] shrink-0" />
+                                                                <span className="text-[11px] font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.practice[0].suggestion || `${ms.resources.practice[0].platform} Practice`}</span>
+                                                            </a>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </motion.div>
                                         ))}

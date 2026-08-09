@@ -2,6 +2,7 @@ from fastapi import APIRouter, Query, Path
 from app.db.mongodb import get_database
 from typing import Optional
 import math
+import re
 
 router = APIRouter()
 
@@ -585,12 +586,23 @@ async def company_xray(
     """
     db = get_database()
 
-    # ── 1. Fetch all docs for this company, sorted by year ──
+    # ── 1. Fetch all docs for this company (case-insensitive & prefix-fallback), sorted by year ──
+    clean_name = company_name.strip()
+    pattern = f"^{re.escape(clean_name)}$"
     cursor = db[COLLECTION].find(
-        {"company_name": company_name},
+        {"company_name": {"$regex": pattern, "$options": "i"}},
         {"_id": 0}
     ).sort("academic_year", 1)
     docs = await cursor.to_list(None)
+
+    # If exact case-insensitive match yielded nothing, attempt prefix match (e.g. Siemens -> Siemens Regular)
+    if not docs:
+        prefix_pattern = f"^{re.escape(clean_name)}"
+        cursor = db[COLLECTION].find(
+            {"company_name": {"$regex": prefix_pattern, "$options": "i"}},
+            {"_id": 0}
+        ).sort("academic_year", 1)
+        docs = await cursor.to_list(None)
 
     if not docs:
         from fastapi import HTTPException

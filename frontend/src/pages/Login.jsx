@@ -13,6 +13,7 @@ import {
 import { useGoogleLogin } from '@react-oauth/google';
 import '../styles/Login.css';
 import { API_URL } from '../config';
+import { apiFetch, login as apiLogin, setAccessToken, setUser } from '../api';
 
 // ─── Inline SVG Components ────────────────────────────────────────────────────
 
@@ -202,8 +203,8 @@ const LogoSVG = ({ className = "" }) => (
             <circle cx="30" cy="16" r="2.8"/>
             <circle cx="40" cy="32" r="2.8"/>
         </g>
-        <text x="56" y="26" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#F5F5F5" letter-spacing="1">SAARTHI</text>
-        <text x="56" y="40" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="300" fill="#A3A3A3" letter-spacing="0.5">Nexus</text>
+        <text x="56" y="26" fontFamily="Inter, Segoe UI, Arial, sans-serif" fontSize="16" fontWeight="700" fill="#F5F5F5" letterSpacing="1">SAARTHI</text>
+        <text x="56" y="40" fontFamily="Inter, Segoe UI, Arial, sans-serif" fontSize="12" fontWeight="300" fill="#A3A3A3" letterSpacing="0.5">Nexus</text>
     </svg>
 );
 
@@ -261,9 +262,8 @@ const GoogleSignInButton = ({ setLoading, setError, setSuccess, navigate, loadin
                 const userInfo = await userInfoRes.json();
 
                 // Send to our backend for verification/account creation
-                const res = await fetch(`${API_URL}/api/google-auth`, {
+                const res = await apiFetch('/api/google-auth', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         credential: tokenResponse.access_token,
                         email: userInfo.email,
@@ -274,7 +274,8 @@ const GoogleSignInButton = ({ setLoading, setError, setSuccess, navigate, loadin
                 const data = await res.json();
 
                 if (res.ok) {
-                    localStorage.setItem('user', JSON.stringify(data.user));
+                    setAccessToken(data.access_token);
+                    setUser(data.user);
                     localStorage.setItem('isAuthenticated', 'true');
                     setSuccess(true);
                     await new Promise(r => setTimeout(r, 1400));
@@ -348,16 +349,9 @@ const Login = ({ defaultRole = 'student' }) => {
         setFieldErrors({});
 
         try {
-            const res  = await fetch(`${API_URL}/api/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, role }),
-            });
-            const data = await res.json();
+            const { res, data } = await apiLogin(email, password, role);
 
             if (res.ok) {
-                localStorage.setItem('user', JSON.stringify(data.user));
-                localStorage.setItem('isAuthenticated', 'true');
                 if (rememberMe) localStorage.setItem('rememberedEmail', email);
                 else            localStorage.removeItem('rememberedEmail');
 
@@ -389,7 +383,13 @@ const Login = ({ defaultRole = 'student' }) => {
     return (
         <div
             className="min-h-screen flex overflow-hidden relative"
-            style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)', fontFamily: 'var(--font-sans)' }}
+            style={{ 
+                '--bg-body': '#050505', 
+                '--text-main': '#F5F5F5',
+                backgroundColor: 'var(--bg-body)', 
+                color: 'var(--text-main)', 
+                fontFamily: 'var(--font-sans)' 
+            }}
         >
             {/* ── Full-page background (right panel grid) ─────────────────── */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -444,9 +444,9 @@ const Login = ({ defaultRole = 'student' }) => {
                     {/* Stats strip */}
                     <div className="flex-shrink-0 flex items-center pt-6 border-t" style={{ borderColor: '#1A1A1A' }}>
                         {[
-                            { num: '1,200+', label: 'Students enrolled' },
-                            { num: '58',     label: 'Companies visited' },
-                            { num: '78%',    label: 'Placement rate'    },
+                            { num: '1000+', label: 'Students Placed/yr' },
+                            { num: '150+',  label: 'Companies Visited' },
+                            { num: '90%+',  label: 'Placement Rate'    },
                         ].map((s, i) => (
                             <div
                                 key={i}

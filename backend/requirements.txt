@@ -1,12 +1,14 @@
 fastapi
 uvicorn
 gunicorn
+PyJWT
+slowapi
 pydantic
 pydantic-settings
 motor
 python-multipart
 email-validator
-# google-genai (removed - using NVIDIA NIM via httpx)
+# Groq & Gemini APIs accessed via httpx
 pymongo
 werkzeug
 joblib

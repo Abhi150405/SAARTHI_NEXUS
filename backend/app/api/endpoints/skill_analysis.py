@@ -6,6 +6,7 @@ import httpx
 import os
 import json
 import re
+import asyncio
 from app.db.mongodb import get_database
 
 router = APIRouter()
@@ -110,7 +111,7 @@ Return EXACTLY this JSON structure:
           {
             "title": "<course name>",
             "platform": "<Udemy | Coursera | freeCodeCamp | GeeksForGeeks | NPTEL | LeetCode>",
-            "url": "<direct URL if well-known, else null>",
+            "url": null,
             "is_free": <true | false>
           }
         ],
@@ -118,7 +119,7 @@ Return EXACTLY this JSON structure:
           {
             "platform": "<LeetCode | HackerRank | CodeChef | Kaggle | GitHub>",
             "suggestion": "<specific what to practice, e.g. 'Solve 20 medium DP problems on LeetCode'>",
-            "url": "<direct URL if applicable>"
+            "url": null
           }
         ]
       }
@@ -154,11 +155,11 @@ Return EXACTLY this JSON structure:
 
 @router.post("/")
 async def analyze_skill_gap(request: AnalysisRequest):
-    nvidia_api_key = os.getenv("NVIDIA_API_KEY")
+    groq_api_key = os.getenv("GROQ_API_KEY")
     google_api_key = os.getenv("GOOGLE_API_KEY")
     
-    if not nvidia_api_key and not google_api_key:
-        raise HTTPException(status_code=500, detail="Neither NVIDIA_API_KEY nor GOOGLE_API_KEY is set in backend environment.")
+    if not groq_api_key and not google_api_key:
+        raise HTTPException(status_code=500, detail="Neither GROQ_API_KEY nor GOOGLE_API_KEY is set in backend environment.")
 
     # --- Fetch Interview Experiences ---
     db = get_database()
@@ -222,75 +223,98 @@ async def analyze_skill_gap(request: AnalysisRequest):
                     f"Raw (first 500 chars): {text[:500]}"
                 )
 
-            # --- NVIDIA Try First (Primary for Skill Analysis) ---
-            if nvidia_api_key:
-                nvidia_url = "https://integrate.api.nvidia.com/v1/chat/completions"
+            # --- Groq Try First with Model Cascade & Rate Limit Retry ---
+            if groq_api_key:
+                groq_url = "https://api.groq.com/openai/v1/chat/completions"
                 headers = {
-                    "Authorization": f"Bearer {nvidia_api_key}",
-                    "Accept": "application/json",
+                    "Authorization": f"Bearer {groq_api_key}",
+                    "Content-Type": "application/json",
                 }
-                payload = {
-                    "model": "meta/llama-3.1-8b-instruct",
-                    "messages": [{"role": "user", "content": input_text}],
-                    "max_tokens": 4096,
-                    "temperature": 0.3,
-                    "top_p": 0.8
-                }
-                try:
-                    response = await client.post(nvidia_url, headers=headers, json=payload, timeout=120.0)
-                    response.raise_for_status()
-                    data = response.json()
-                    raw_text = data["choices"][0]["message"]["content"]
-                    result_json = parse_llm_json(raw_text)
-                    print("✅ Skill Analysis: NVIDIA API responded successfully")
-                except Exception as e:
-                    err_msg = ""
-                    if isinstance(e, httpx.HTTPError):
-                        if getattr(e, "response", None) is not None and e.response.text:
-                            err_msg = f"HTTP {e.response.status_code}: {e.response.text}"
-                        else:
-                            err_msg = f"Network Error: {repr(e)}"
-                    else:
-                        err_msg = f"Error: {repr(e)}"
-                    print(f"NVIDIA API Error or Parse Error: {err_msg}")
-                    error_details.append(f"NVIDIA Error: {err_msg}")
-
-            # --- Gemini Fallback attempt ---
-            if result_json is None and google_api_key:
-                gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={google_api_key}"
-                payload = {
-                    "contents": [
-                        {
-                            "parts": [
-                                {"text": input_text}
-                            ]
-                        }
-                    ],
-                    "generationConfig": {
+                groq_models = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "mixtral-8x7b-32768", "gemma2-9b-it"]
+                
+                for model_name in groq_models:
+                    if result_json is not None:
+                        break
+                    
+                    payload = {
+                        "model": model_name,
+                        "messages": [{"role": "user", "content": input_text}],
+                        "max_tokens": 4096,
                         "temperature": 0.3,
-                        "topP": 0.8,
-                        "maxOutputTokens": 8192,
-                        "responseMimeType": "application/json"
                     }
-                }
-                try:
-                    response = await client.post(gemini_url, json=payload, timeout=60.0)
-                    response.raise_for_status()
-                    data = response.json()
-                    raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
-                    result_json = parse_llm_json(raw_text)
-                    print("✅ Skill Analysis: Gemini fallback responded successfully")
-                except Exception as e:
-                    err_msg = ""
-                    if isinstance(e, httpx.HTTPError):
-                        if getattr(e, "response", None) is not None and e.response.text:
-                            err_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+                    
+                    # Try up to 2 attempts per model if 429 rate limit occurs
+                    for attempt in range(2):
+                        try:
+                            response = await client.post(groq_url, headers=headers, json=payload, timeout=60.0)
+                            if response.status_code == 429:
+                                print(f"⚠️ Groq API 429 Rate Limit on '{model_name}'. Waiting 2s before retry/fallback...")
+                                error_details.append(f"Groq ({model_name}) 429 Rate Limit")
+                                await asyncio.sleep(2.0)
+                                continue
+                            
+                            response.raise_for_status()
+                            data = response.json()
+                            raw_text = data["choices"][0]["message"]["content"]
+                            result_json = parse_llm_json(raw_text)
+                            print(f"✅ Skill Analysis: Groq API ({model_name}) responded successfully")
+                            break
+                        except Exception as e:
+                            err_msg = ""
+                            if isinstance(e, httpx.HTTPError):
+                                if getattr(e, "response", None) is not None and e.response.text:
+                                    err_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+                                else:
+                                    err_msg = f"Network Error: {repr(e)}"
+                            else:
+                                err_msg = f"Error: {repr(e)}"
+                            print(f"Groq API Error ({model_name}): {err_msg}")
+                            error_details.append(f"Groq ({model_name}) Error: {err_msg}")
+                            break
+
+            # --- Gemini Fallback attempt with model cascade ---
+            if result_json is None and google_api_key:
+                gemini_models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"]
+                for g_model in gemini_models:
+                    if result_json is not None:
+                        break
+                    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{g_model}:generateContent?key={google_api_key}"
+                    payload = {
+                        "contents": [
+                            {
+                                "parts": [
+                                    {"text": input_text}
+                                ]
+                            }
+                        ],
+                        "generationConfig": {
+                            "temperature": 0.3,
+                            "topP": 0.8,
+                            "maxOutputTokens": 8192,
+                            "responseMimeType": "application/json"
+                        }
+                    }
+                    try:
+                        response = await client.post(gemini_url, json=payload, timeout=60.0)
+                        if response.status_code == 429:
+                            await asyncio.sleep(2.0)
+                        response.raise_for_status()
+                        data = response.json()
+                        raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
+                        result_json = parse_llm_json(raw_text)
+                        print(f"✅ Skill Analysis: Gemini fallback ({g_model}) responded successfully")
+                        break
+                    except Exception as e:
+                        err_msg = ""
+                        if isinstance(e, httpx.HTTPError):
+                            if getattr(e, "response", None) is not None and e.response.text:
+                                err_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+                            else:
+                                err_msg = f"Network Error: {repr(e)}"
                         else:
-                            err_msg = f"Network Error: {repr(e)}"
-                    else:
-                        err_msg = f"Error: {repr(e)}"
-                    print(f"Gemini API Error or Parse Error: {err_msg}")
-                    error_details.append(f"Gemini Error: {err_msg}")
+                            err_msg = f"Error: {repr(e)}"
+                        print(f"Gemini API Error ({g_model}): {err_msg}")
+                        error_details.append(f"Gemini ({g_model}) Error: {err_msg}")
 
             if result_json is None:
                 raise HTTPException(status_code=502, detail=f"LLM API Errors: {' | '.join(error_details)}")

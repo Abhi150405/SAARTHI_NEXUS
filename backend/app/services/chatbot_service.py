@@ -113,7 +113,8 @@ def _build_reasoner_prompt(query: str, context: str, is_first: bool = False) -> 
         "4. **STRICT NEGATIVE CONSTRAINT**: NEVER mention companies like HCL, Wipro, or any others if they are NOT in the DATABASE CONTEXT. Do not say 'Companies like HCL/Wipro also visit' if they aren't listed.\n"
         "5. If a company is not in the context, state that you don't have records for it instead of guessing.\n"
         f"{greeting_rule}"
-        "7. Maintain a professional, direct, and encouraging tone.\n\n"
+        "7. Maintain a professional, direct, and encouraging tone.\n"
+        "8. INTERVIEW LINKS: Whenever the context includes an 'EXPERIENCE_LINK: <url>' for an interview experience, YOU MUST INCLUDE A CLICKABLE LINK at the end of that experience summary in markdown format: [Read Full Interview Experience](<url>).\n\n"
         "Formatting: Wrap numbers, company names, and salary values in <b>...</b> HTML bold tags. "
         "Use bullet points (•) for lists. Do NOT use markdown **bold** — use HTML <b> tags only."
     )

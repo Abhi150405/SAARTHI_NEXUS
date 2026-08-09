@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import gsap from 'gsap';
 import { API_URL } from '../config';
+import { apiFetch, getUser } from '../api';
 import PageMasthead from '../components/drives/PageMasthead';
 import ControlStrip from '../components/drives/ControlStrip';
 import BoardView from '../components/drives/BoardView';
@@ -129,7 +129,7 @@ const PlacementDrives = () => {
     name: '', collegeEmail: '', personalEmail: '', mobile: '',
     ssc: '', hsc: '', cgpa: '', amcat: '',
   });
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = getUser();
 
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -146,11 +146,12 @@ const PlacementDrives = () => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // Data fetching (preserved)
+  // Data fetching
   useEffect(() => {
     (async () => {
+      if (!user || !user.email) return;
       try {
-        const pR = await fetch(`${API_URL}/api/profile?email=${encodeURIComponent(user.email)}`);
+        const pR = await apiFetch(`/api/profile?email=${encodeURIComponent(user.email)}`);
         if (pR.ok) {
           const p = await pR.json();
           setProfile(p);
@@ -164,26 +165,33 @@ const PlacementDrives = () => {
         }
         const dR = await fetch(`${API_URL}/api/drives/`);
         if (dR.ok) setDrives(await dR.json());
-        const rR = await fetch(`${API_URL}/api/drives/registrations/student/${user.email}`);
+        const rR = await apiFetch(`/api/drives/registrations/student/${user.email}`);
         if (rR.ok) setApplied(await rR.json());
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     })();
   }, []);
 
-  // Registration (preserved)
+  // Registration
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_URL}/api/drives/${selDrive._id}/register`, {
+      const res = await apiFetch(`/api/drives/${selDrive._id}/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          driveId: selDrive._id, studentEmail: user.email,
-          name: regForm.name, ssc: parseFloat(regForm.ssc) || 0,
-          hsc: parseFloat(regForm.hsc) || 0, cgpa: parseFloat(regForm.cgpa) || 0,
-          amcat: parseInt(regForm.amcat) || 0, collegeEmail: regForm.collegeEmail,
-          personalEmail: regForm.personalEmail, mobile: regForm.mobile,
+          driveId: selDrive._id, 
+          studentEmail: user.email,
+          studentName: profile.full_name || user.fullName || 'Unknown',
+          department: profile.department || 'Unknown',
+          cgpa: profile.college_cgpa || 0,
+          status: 'applied',
+          name: regForm.name, 
+          ssc: parseFloat(regForm.ssc) || 0,
+          hsc: parseFloat(regForm.hsc) || 0, 
+          amcat: parseInt(regForm.amcat) || 0, 
+          collegeEmail: regForm.collegeEmail,
+          personalEmail: regForm.personalEmail, 
+          mobile: regForm.mobile,
         }),
       });
       if (res.ok) { alert('Registered!'); setShowModal(false); setApplied((p) => [...p, selDrive._id]); }

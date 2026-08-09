@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Database, Plus, Trash2, Edit2, Users, Download, X } from 'lucide-react';
 import { API_URL } from '../config';
+import { apiFetch } from '../api';
 
 const BRANCH_OPTIONS = ["CE", "IT", "AI&DS", "E&CE", "E&TC"];
 
@@ -29,7 +30,7 @@ const ManagePlacementDrives = () => {
     const fetchDrives = async () => {
         try {
             setLoading(true);
-            const res = await fetch(`${API_URL}/api/drives/`);
+            const res = await apiFetch('/api/drives/');
             if (res.ok) setDrives(await res.json());
         } catch (err) {
             console.error(err);
@@ -41,7 +42,7 @@ const ManagePlacementDrives = () => {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         try {
-            const url = selectedDrive ? `${API_URL}/api/drives/${selectedDrive._id}` : `${API_URL}/api/drives/`;
+            const url = selectedDrive ? `/api/drives/${selectedDrive._id}` : `/api/drives/`;
             const method = selectedDrive ? 'PUT' : 'POST';
 
             const payload = {
@@ -58,9 +59,8 @@ const ManagePlacementDrives = () => {
                 allowedBranches: formData.allowedBranches
             };
 
-            const res = await fetch(url, {
+            const res = await apiFetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
@@ -79,7 +79,7 @@ const ManagePlacementDrives = () => {
     const handleDelete = async (id, name) => {
         if (!window.confirm(`Delete drive for ${name}?`)) return;
         try {
-            const res = await fetch(`${API_URL}/api/drives/${id}`, { method: 'DELETE' });
+            const res = await apiFetch(`/api/drives/${id}`, { method: 'DELETE' });
             if (res.ok) fetchDrives();
         } catch (err) {
             console.error(err);
@@ -146,7 +146,7 @@ const ManagePlacementDrives = () => {
 
     const fetchRegistrations = async (driveId) => {
         try {
-            const res = await fetch(`${API_URL}/api/drives/${driveId}/registrations`);
+            const res = await apiFetch(`/api/drives/${driveId}/registrations`);
             if (res.ok) setRegistrations(await res.json());
         } catch (err) {
             console.error(err);
