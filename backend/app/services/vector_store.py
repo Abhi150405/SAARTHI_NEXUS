@@ -14,7 +14,7 @@ Collections:
 Atlas Vector Index Required (one-time setup in Atlas UI):
   Create a Search Index on each collection with:
     { "fields": [{ "type": "vector", "path": "embedding",
-                   "numDimensions": 768, "similarity": "cosine" }] }
+                   "numDimensions": 3072, "similarity": "cosine" }] }
 
 Usage:
   from app.services.vector_store import vector_store
@@ -32,7 +32,7 @@ from typing import Any
 from app.services.embedding_service import embedding_service
 from app.services.stats_service import stats_service
 
-_EMBED_DIMS = 768
+_EMBED_DIMS = 3072
 
 # ── Text serialisers ───────────────────────────────────────────────────────────
 
