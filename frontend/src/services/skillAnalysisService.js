@@ -67,49 +67,67 @@ const getSimilarity = (a, b) => {
     return (longer.length - costs[b.length]) / longer.length;
 };
 
-// 2. Common Synonym Dictionary
+// 2. Common Synonym Dictionary with normalized keys and aliases
 const skillSynonyms = {
-    'dsa': ['data structures', 'algorithms', 'data structures and algorithms', 'dsa', 'data structure', 'algorithm', 'data structure and algorithm', 'data structures & algorithms'],
-    'cpp': ['c++', 'c plus plus', 'cpp'],
+    'dsa': ['data structures', 'algorithms', 'data structures and algorithms', 'data structures & algorithms', 'dsa', 'data structure', 'algorithm', 'data structure and algorithm'],
+    'cpp': ['c++', 'c plus plus', 'cpp', 'c/c++'],
+    'c': ['c', 'c programming', 'c language'],
     'js': ['javascript', 'js', 'vanilla js'],
-    'react': ['react.js', 'reactjs', 'react js', 'frontend'],
-    'ml': ['machine learning', 'ml', 'ai', 'artificial intelligence'],
+    'ts': ['typescript', 'ts'],
+    'react': ['react', 'react.js', 'reactjs', 'react js', 'frontend'],
+    'ml': ['machine learning', 'ml', 'ai', 'artificial intelligence', 'deep learning'],
     'sql': ['dbms', 'databases', 'database', 'rdbms', 'mysql', 'postgresql', 'oracle', 'sql', 'sql server', 'database management', 'database management system'],
-    'networking': ['cn', 'computer networks', 'networking'],
+    'networking': ['cn', 'computer networks', 'computer networking', 'networking'],
     'os': ['operating systems', 'os', 'operating system'],
-    'oop': ['object oriented programming', 'oop', 'oops'],
+    'oop': ['object oriented programming', 'object oriented', 'oop', 'oops', 'object-oriented programming'],
+    'system design': ['system design', 'system architecture', 'hld', 'lld', 'high level design', 'low level design'],
+    'cloud': ['cloud', 'cloud computing', 'aws', 'azure', 'gcp', 'google cloud'],
+    'linux': ['linux', 'unix', 'shell scripting', 'bash'],
+};
+
+const normalizeSkill = (str) => {
+    if (!str) return '';
+    return str
+        .toLowerCase()
+        .replace(/[-_./\\]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 };
 
 /**
  * Smartly checks if a required skill is satisfied by a student's profile.
- * This is 100% local and consumes 0 Gemini tokens.
+ * Normalized and robust against hyphens, acronyms, and synonyms.
  */
 export function isSkillSatisfied(studentSkills, requiredSkill) {
     if (!studentSkills || !requiredSkill) return false;
 
-    // 1. Normalization
-    const req = requiredSkill.toLowerCase().trim();
+    const reqRaw = requiredSkill.toLowerCase().trim();
+    const reqNorm = normalizeSkill(requiredSkill);
 
     return studentSkills.some(studentSkill => {
-        const stud = studentSkill.toLowerCase().trim();
+        const studRaw = studentSkill.toLowerCase().trim();
+        const studNorm = normalizeSkill(studentSkill);
         
-        // Match 1: Precise Match
-        if (stud === req) return true;
+        // Match 1: Exact Match (raw or normalized)
+        if (studRaw === reqRaw || studNorm === reqNorm) return true;
         
-        // Match 2: Substring Match (e.g. "Full Stack Web Dev" satisfies "Web Dev")
-        if (stud.includes(req) || req.includes(stud)) {
-            if (stud.length > 2 && req.length > 2) return true;
+        // Match 2: Substring Match
+        if (studNorm.length > 2 && reqNorm.length > 2) {
+            if (studNorm.includes(reqNorm) || reqNorm.includes(studNorm)) return true;
         }
 
-        // Match 3: NLP Fuzzy Match (Similarity > 80%)
-        if (getSimilarity(stud, req) > 0.8) return true;
-
-        // Match 4: Synonym Groups
+        // Match 3: Synonym Groups (checks raw, normalized, and alias matches)
         for (const key in skillSynonyms) {
             const group = skillSynonyms[key];
-            if (group.includes(stud) && group.includes(req)) return true;
+            const hasStud = group.some(item => studNorm === normalizeSkill(item) || studRaw === item);
+            const hasReq = group.some(item => reqNorm === normalizeSkill(item) || reqRaw === item);
+            if (hasStud && hasReq) return true;
         }
+
+        // Match 4: NLP Fuzzy Match (Similarity > 80%)
+        if (getSimilarity(studNorm, reqNorm) > 0.8) return true;
 
         return false;
     });
 }
+

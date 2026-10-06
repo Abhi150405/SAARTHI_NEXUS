@@ -13,7 +13,7 @@ const SkillAnalysis = () => {
     const [selectedTarget, setSelectedTarget] = useState('');
 
     // ── Derive companies and roles from skill_data.json ──
-    const { companies, companyMap, companySkills, companySalaries, roles, roleMap, roleSkills, roleSalaries } = useMemo(() => {
+    const { companies, companyMap, companySkills, companyGoodToHave, companySalaries, roles, roleMap, roleSkills, roleGoodToHave, roleSalaries } = useMemo(() => {
         // Deduplicate companies by display_name, keep the first entry
         const companyMap = {};
         skillData.forEach(c => {
@@ -22,7 +22,7 @@ const SkillAnalysis = () => {
         });
         const companies = Object.keys(companyMap);
 
-        // Build companySkills: display_name -> combined must_have + good_to_have
+        // Build companySkills: display_name -> all expected skills (treated strictly as should-have / required)
         const companySkills = {};
         const companySalaries = {};
         companies.forEach(name => {
@@ -55,7 +55,9 @@ const SkillAnalysis = () => {
         });
         const roles = Object.keys(roleMap);
         const roleSkills = {};
-        roles.forEach(r => { roleSkills[r] = [...roleMap[r]]; });
+        roles.forEach(r => {
+            roleSkills[r] = [...roleMap[r]];
+        });
 
         return { companies, companyMap, companySkills, companySalaries, roles, roleMap, roleSkills, roleSalaries };
     }, []);
@@ -119,7 +121,8 @@ const SkillAnalysis = () => {
             const targetData = {
                 type: analysisMode,
                 name: selectedTarget,
-                required_skills: requiredSkills || []
+                required_skills: requiredSkills || [],
+                good_to_have_skills: []
             };
 
             const studentData = {
@@ -153,7 +156,7 @@ const SkillAnalysis = () => {
         return modelMatchPercentage;
     };
 
-    // 100% Real-time NLP Matching: Calculate match percentage locally
+    // Real-time NLP Match: uses must_have skills only for the quick match % in the header
     useEffect(() => {
         const required = getRequiredSkills();
         if (!selectedTarget || required.length === 0 || studentSkills.length === 0) {

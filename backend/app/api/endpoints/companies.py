@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from app.db.mongodb import get_database
+from app.core.cache import cache_response
 import datetime
 
 router = APIRouter()
@@ -18,6 +19,7 @@ def parse_date(ds):
     return None
 
 @router.get("/companies")
+@cache_response(ttl=300, namespace="companies")
 async def get_companies():
     db = get_database()
     pipeline = [
@@ -53,6 +55,7 @@ async def get_companies():
     return formatted_results
 
 @router.get("/company/{name}")
+@cache_response(ttl=300, namespace="companies")
 async def get_company_details(name: str):
     db = get_database()
     records = await db['placement_records'].find({"company_name": name}).sort("academic_year", -1).to_list(None)
@@ -84,6 +87,7 @@ async def get_company_details(name: str):
     }
 
 @router.get("/company/{name}/feedback")
+@cache_response(ttl=300, namespace="companies")
 async def get_company_feedback(name: str):
     db = get_database()
     feedbacks = await db['company_feedback'].find({"company_name": name}).sort("date", -1).to_list(1000)

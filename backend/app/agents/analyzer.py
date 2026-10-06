@@ -54,16 +54,15 @@ _RESUME_KEYWORDS = [
 ]
 
 # Known companies in PICT placement data (lower-case for matching)
-_KNOWN_COMPANIES = [
-    "amazon","adobe","phonepe", "tcs", "infosys", "cognizant", "accenture",
-    "capgemini", "amazon", "microsoft", "oracle",
-    "palo alto", "persistent", "zensar", "bloomberg", "zensar",
-    "ittiam", "arista networks", "deloitte", "ibm", "barclays",
-    "uptiq", "goldman sachs", "jp morgan", "hsbc",
-    "dell technologies", "BNY Mellon", "Druva", "Alpha Sense", "Deutsche Bank",
-    "Pubmatic", "Ion Group", "Cadence", "Qualcomm", "BMC Software",
-    "eQ Technologies", "ZS Associates", "Mastercard",
-]
+_KNOWN_COMPANIES = list(set([
+    "amazon", "adobe", "phonepe", "tcs", "infosys", "cognizant", "accenture",
+    "capgemini", "microsoft", "oracle", "palo alto", "persistent", "zensar",
+    "bloomberg", "ittiam", "arista networks", "deloitte", "ibm", "barclays",
+    "uptiq", "goldman sachs", "jp morgan", "hsbc", "dell technologies",
+    "bny mellon", "druva", "alpha sense", "deutsche bank", "pubmatic",
+    "ion group", "cadence", "qualcomm", "bmc software", "eq technologies",
+    "zs associates", "mastercard", "nvidia", "google", "uber", "atlassian",
+]))
 
 _YEAR_PATTERN = re.compile(
     r"\b(?:20)?(\d{2})[- /](\d{2})\b"          # 23-24 or 2023-24
@@ -77,25 +76,41 @@ _SKILL_KEYWORDS = [
     "azure", "docker", "kubernetes", "flutter", "django", "fastapi",
 ]
 
+_INTERVIEW_KEYWORDS = [
+    "interview", "experience", "rounds", "questions asked", "asked in interview",
+    "process", "technical round", "hr round",
+]
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _detect_intent(text: str) -> str:
-    lower = text.lower()
-    # Check resume first (subset of career)
-    if any(k in lower for k in _RESUME_KEYWORDS):
-        return "resume_help"
-    # Placement stats if company/year/salary mentioned
-    if any(k in lower for k in _PLACEMENT_KEYWORDS):
-        return "placement_stats"
-    # Career advice
-    if any(k in lower for k in _CAREER_KEYWORDS):
-        return "career_advice"
-    return "general"
-
 
 def _extract_companies(text: str) -> list:
     lower = text.lower()
-    return [c for c in _KNOWN_COMPANIES if c in lower]
+    matched = []
+    for c in _KNOWN_COMPANIES:
+        if re.search(rf"\b{re.escape(c)}\b", lower):
+            matched.append(c)
+    return matched
+
+
+def _has_keyword(text: str, keywords: list) -> bool:
+    return any(re.search(rf"\b{re.escape(k)}\b", text) for k in keywords)
+
+
+def _detect_intent(text: str, companies: list = None, years: list = None) -> str:
+    lower = text.lower()
+    # Check resume first
+    if _has_keyword(lower, _RESUME_KEYWORDS):
+        return "resume_help"
+    # Interview experiences
+    if _has_keyword(lower, _INTERVIEW_KEYWORDS):
+        return "interview_experience"
+    # Placement stats if company/year/salary/stats mentioned
+    if _has_keyword(lower, _PLACEMENT_KEYWORDS) or bool(companies) or bool(years):
+        return "placement_stats"
+    # Career advice
+    if _has_keyword(lower, _CAREER_KEYWORDS):
+        return "career_advice"
+    return "general"
 
 
 def _extract_years(text: str) -> list:
@@ -138,13 +153,13 @@ async def analyze(query: str) -> Dict[str, Any]:
         return _FALLBACK.copy()
 
     try:
-        intent    = _detect_intent(query)
         companies = _extract_companies(query)
         years     = _extract_years(query)
         skills    = _extract_skills(query)
+        intent    = _detect_intent(query, companies, years)
 
-        # DB context is useful only when asking about placements
-        needs_context = intent == "placement_stats" or bool(companies) or bool(years)
+        # DB context is useful when asking about placement stats, interview experiences, or specific entities
+        needs_context = intent in ("placement_stats", "interview_experience") or bool(companies) or bool(years)
 
         result = {
             "intent": intent,
@@ -165,3 +180,4 @@ async def analyze(query: str) -> Dict[str, Any]:
     except Exception as e:
         logging.error(f"Analyzer error: {e}")
         return _FALLBACK.copy()
+

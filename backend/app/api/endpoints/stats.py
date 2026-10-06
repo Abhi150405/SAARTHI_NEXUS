@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.db.mongodb import get_database
+from app.core.cache import cache_response
 
 router = APIRouter()
 
@@ -16,6 +17,7 @@ def get_stats(sal_list):
     return {"avg": f"₹ {avg:.2f} LPA", "median": f"₹ {median:.2f} LPA", "highest": f"₹ {highest} LPA"}
 
 @router.get("/placement-stats")
+@cache_response(ttl=600, namespace="stats")
 async def get_placement_stats():
     db = get_database()
     results = await db['placement_records'].find().to_list(None)

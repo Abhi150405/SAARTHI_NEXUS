@@ -7,6 +7,7 @@ from datetime import datetime
 import csv
 import io
 from app.core.security import get_current_user, require_admin
+from app.core.cache import cache, cache_response
 
 router = APIRouter()
 
@@ -16,9 +17,11 @@ async def create_drive(drive: PlacementDriveCreate, current_user: dict = Depends
     drive_dict = drive.dict()
     drive_dict['createdAt'] = datetime.utcnow()
     result = await db['placement_drives'].insert_one(drive_dict)
+    cache.invalidate_namespace("drives")
     return {"message": "Drive created successfully", "id": str(result.inserted_id)}
 
 @router.get("/")
+@cache_response(ttl=300, namespace="drives")
 async def list_drives():
     db = get_database()
     drives = await db['placement_drives'].find().to_list(1000)
@@ -38,6 +41,7 @@ async def update_drive(drive_id: str, drive_update: PlacementDriveUpdate, curren
     )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Drive not found")
+    cache.invalidate_namespace("drives")
     return {"message": "Drive updated successfully"}
 
 @router.delete("/{drive_id}")
@@ -48,6 +52,7 @@ async def delete_drive(drive_id: str, current_user: dict = Depends(require_admin
         raise HTTPException(status_code=404, detail="Drive not found")
     # also delete registrations
     await db['drive_registrations'].delete_many({"driveId": drive_id})
+    cache.invalidate_namespace("drives")
     return {"message": "Drive deleted successfully"}
 
 @router.post("/{drive_id}/register")

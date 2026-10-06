@@ -26,38 +26,47 @@ class MLService:
             # --- HYBRID SCORER ---
             # 1. Direct/Synonym Overlap Ratio (The "Intuitive" Score)
             skillSynonyms = {
-                'dsa': ['data structures', 'algorithms', 'data structures and algorithms', 'dsa', 'data structure', 'algorithm', 'data structure and algorithm', 'data structures & algorithms'],
-                'cpp': ['c++', 'c plus plus', 'cpp'],
+                'dsa': ['data structures', 'algorithms', 'data structures and algorithms', 'data structures & algorithms', 'dsa', 'data structure', 'algorithm', 'data structure and algorithm'],
+                'cpp': ['c++', 'c plus plus', 'cpp', 'c/c++'],
+                'c': ['c', 'c programming', 'c language'],
                 'js': ['javascript', 'js', 'vanilla js'],
-                'react': ['react.js', 'reactjs', 'react js', 'frontend'],
-                'ml': ['machine learning', 'ml', 'ai', 'artificial intelligence'],
+                'ts': ['typescript', 'ts'],
+                'react': ['react', 'react.js', 'reactjs', 'react js', 'frontend'],
+                'ml': ['machine learning', 'ml', 'ai', 'artificial intelligence', 'deep learning'],
                 'sql': ['dbms', 'databases', 'database', 'rdbms', 'mysql', 'postgresql', 'oracle', 'sql', 'sql server', 'database management', 'database management system'],
-                'networking': ['cn', 'computer networks', 'networking'],
+                'networking': ['cn', 'computer networks', 'computer networking', 'networking'],
                 'os': ['operating systems', 'os', 'operating system'],
-                'oop': ['object oriented programming', 'oop', 'oops']
+                'oop': ['object oriented programming', 'object oriented', 'oop', 'oops', 'object-oriented programming'],
+                'system design': ['system design', 'system architecture', 'hld', 'lld'],
+                'linux': ['linux', 'unix', 'shell scripting', 'bash'],
+                'cloud': ['cloud', 'cloud computing', 'aws', 'azure', 'gcp'],
             }
 
-            student_text = " ".join(student_skills).lower()
-            required_text = " ".join(required_skills).lower()
+            def _clean(s: str) -> str:
+                return s.lower().replace('-', ' ').replace('_', ' ').replace('/', ' ').strip()
+
+            student_text = " ".join([_clean(s) for s in student_skills])
+            required_text = " ".join([_clean(s) for s in required_skills])
 
             satisfied_count = 0
             for req in required_skills:
-                req_low = req.lower().strip()
+                req_clean = _clean(req)
                 match_found = False
                 for student_skill in student_skills:
-                    std_low = student_skill.lower().strip()
+                    std_clean = _clean(student_skill)
                     
-                    if std_low == req_low:
+                    if std_clean == req_clean:
                         match_found = True
                         break
                         
-                    if len(std_low) > 2 and len(req_low) > 2:
-                        if std_low in req_low or req_low in std_low:
+                    if len(std_clean) > 2 and len(req_clean) > 2:
+                        if std_clean in req_clean or req_clean in std_clean:
                             match_found = True
                             break
                             
                     for key, group in skillSynonyms.items():
-                        if std_low in group and req_low in group:
+                        group_clean = [_clean(g) for g in group]
+                        if std_clean in group_clean and req_clean in group_clean:
                             match_found = True
                             break
                             

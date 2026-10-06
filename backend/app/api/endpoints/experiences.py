@@ -5,6 +5,7 @@ import pandas as pd
 from pymongo import ReturnDocument
 from app.core.security import get_current_user, require_admin
 from fastapi import Depends
+from app.core.cache import cache, cache_response
 
 router = APIRouter()
 
@@ -29,9 +30,11 @@ async def add_interview_experience(request: Request, current_user: dict = Depend
         "reads": 0
     }
     result = await db['interview_experience'].insert_one(experience_record)
+    cache.invalidate_namespace("experiences")
     return {"message": "Experience added successfully", "id": str(result.inserted_id)}
 
 @router.get("/interview-experience")
+@cache_response(ttl=300, namespace="experiences")
 async def get_interview_experiences(company: str = Query(None)):
     db = get_database()
     query = {"company_name": company} if company else {}
@@ -50,6 +53,8 @@ async def get_interview_experience_by_id(exp_id: str, increment: bool = False):
                 {"$inc": {"reads": 1}},
                 return_document=ReturnDocument.AFTER
             )
+            # invalidate specific experience entry if read count changed
+            cache.invalidate_pattern(exp_id)
         else:
             exp = await db['interview_experience'].find_one({"_id": ObjectId(exp_id)})
     except Exception:
@@ -73,12 +78,16 @@ async def add_company_feedback(request: Request, current_user: dict = Depends(re
         "date": data.get('date') or pd.Timestamp.now().isoformat()
     }
     result = await db['company_feedback'].insert_one(feedback_record)
+    cache.invalidate_namespace("experiences")
+    cache.invalidate_namespace("companies")
     return {"message": "Feedback published successfully", "id": str(result.inserted_id)}
 
 @router.get("/company-feedback")
+@cache_response(ttl=300, namespace="experiences")
 async def get_all_company_feedback():
     db = get_database()
     feedbacks = await db['company_feedback'].find().sort("date", -1).to_list(None)
     for fb in feedbacks:
         fb['_id'] = str(fb['_id'])
     return feedbacks
+

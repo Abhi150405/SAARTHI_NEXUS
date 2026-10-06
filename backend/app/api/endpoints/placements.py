@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query, Path
 from app.db.mongodb import get_database
+from app.core.cache import cache_response
 from typing import Optional
 import math
 import re
@@ -30,6 +31,7 @@ def derive_tier(category: str) -> str:
 # A) GET /placements/visit-frequency
 # ─────────────────────────────────────────────────────────────────
 @router.get("/visit-frequency")
+@cache_response(ttl=300, namespace="placements")
 async def visit_frequency():
     """
     Returns heatmap data: for every company, how many were hired each year.
@@ -81,6 +83,7 @@ async def visit_frequency():
 # B) GET /placements/hall-of-offers
 # ─────────────────────────────────────────────────────────────────
 @router.get("/hall-of-offers")
+@cache_response(ttl=300, namespace="placements")
 async def hall_of_offers(
     year: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
@@ -179,6 +182,7 @@ async def hall_of_offers(
 # C) GET /placements/filters-meta
 # ─────────────────────────────────────────────────────────────────
 @router.get("/filters-meta")
+@cache_response(ttl=600, namespace="placements")
 async def filters_meta():
     """
     Powers dropdowns and salary slider.
@@ -277,6 +281,7 @@ async def filters_meta():
 # D) GET /placements/summary  (hero stats — all derived)
 # ─────────────────────────────────────────────────────────────────
 @router.get("/summary")
+@cache_response(ttl=300, namespace="placements")
 async def placement_summary():
     """
     Overall hero stats. Every number comes from aggregation — none hardcoded.
@@ -314,6 +319,7 @@ async def placement_summary():
 # E) GET /placements/by-year  (year selector mini-stats bar)
 # ─────────────────────────────────────────────────────────────────
 @router.get("/by-year")
+@cache_response(ttl=300, namespace="placements")
 async def by_year():
     """Per-year summary: total_placed, highest_lpa, total_companies, avg_lpa."""
     db = get_database()
@@ -355,6 +361,7 @@ async def by_year():
 # F) GET /placements/package-distribution?year=2024-25
 # ─────────────────────────────────────────────────────────────────
 @router.get("/package-distribution")
+@cache_response(ttl=300, namespace="placements")
 async def package_distribution(year: str = Query(...)):
     """Salary bracket counts for a given year."""
     db = get_database()
@@ -384,6 +391,7 @@ async def package_distribution(year: str = Query(...)):
 # G) GET /placements/top-recruiters?year=2024-25&limit=8
 # ─────────────────────────────────────────────────────────────────
 @router.get("/top-recruiters")
+@cache_response(ttl=300, namespace="placements")
 async def top_recruiters(year: str = Query(...), limit: int = Query(8)):
     """Top companies by hires for a given year, with bar_pct for animation."""
     db = get_database()
@@ -421,6 +429,7 @@ async def top_recruiters(year: str = Query(...), limit: int = Query(8)):
 # H) GET /placements/loyalty-spectrum
 # ─────────────────────────────────────────────────────────────────
 @router.get("/loyalty-spectrum")
+@cache_response(ttl=600, namespace="placements")
 async def loyalty_spectrum():
     """
     Classifies every company into one of 5 behavioural segments based on
@@ -576,6 +585,7 @@ async def loyalty_spectrum():
 # I) GET /placements/company-xray/{company_name}
 # ─────────────────────────────────────────────────────────────────
 @router.get("/company-xray/{company_name}")
+@cache_response(ttl=300, namespace="placements")
 async def company_xray(
     company_name: str = Path(..., description="Company name (URL-decoded)")
 ):

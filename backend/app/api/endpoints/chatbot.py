@@ -4,6 +4,7 @@ from app.services.chatbot_service import chatbot_service
 from app.services.stats_service import stats_service
 from app.services.vector_store import vector_store
 from app.db.mongodb import get_database
+from app.agents.analyzer import analyze
 from bson import ObjectId
 import re
 import logging
@@ -205,105 +206,127 @@ async def chat(request: Request):
     if db is None:
         raise HTTPException(status_code=500, detail="Database not initialized")
     collection = db['placement_records']
-    
-    query_lower = query.lower()
-    
-    # ── Detect Statistical Intent ───────────────────────────────────
-    is_stats_query = any(word in query_lower for word in ["average", "median", "highest", "stats", "placement report", "total", "statistic", "package"])
-    
+
+    # ── Step 1: Run Intent & Entity Analysis ─────────────────────────
+    analysis = await analyze(query)
+    intent = analysis.get("intent", "general")
+    entities = analysis.get("entities", {})
+    needs_context = analysis.get("needs_context", False)
+
+    logging.info(
+        f"Chat Endpoint: Intent={intent}, Entities={entities}, NeedsContext={needs_context}"
+    )
+
     context_parts = []
-    
-    # ── Handle Statistics Queries specifically ─────────────────────
-    if is_stats_query:
-        found_years = re.findall(r"(?:20)?\d{2}-\d{2}|20\d{2}", query)
-        logging.info(f"Chatbot: detected stats query. Found years: {found_years}")
-        
+
+    # ── Step 2: Skip DB retrieval if context is not needed ───────────
+    if not needs_context:
+        logging.info("Chat Endpoint: Skipping DB retrieval (needs_context=False)")
+        context_string = "No database context required."
+        return StreamingResponse(
+            chatbot_service.get_chat_response_stream(query, context_string, analysis, is_first_message),
+            media_type="text/plain"
+        )
+
+    # ── Step 3: Targeted Retrieval using Analyzed Intent & Entities ──
+    found_companies = entities.get("companies", [])
+    found_years = entities.get("years", [])
+
+    # Also augment company search with database distinct company names if query mentions them
+    if not found_companies:
+        db_companies = await collection.distinct("company_name")
+        found_companies = [c for c in db_companies if re.search(rf"\b{re.escape(c.lower())}\b", query.lower())]
+
+    # Handle Statistical Intent specifically
+    if intent == "placement_stats":
         if found_years:
             for yr in found_years:
                 stats = await stats_service.get_stats_for_year(yr)
                 if stats:
                     context_parts.append(
                         f"📊 STATS for Academic Year {yr}:\n"
-                        f"- Highest Package: {stats['highestPackage']}\n"
-                        f"- Average Package: {stats['avgPackage']}\n"
-                        f"- Median Package: {stats['medianPackage']}\n"
-                        f"- Total Companies visited: {stats['totalCompanies']}\n"
-                        f"- Total Students Placed: {stats['totalPlaced']}\n"
+                        f"- Highest Package: {stats.get('highestPackage')}\n"
+                        f"- Average Package: {stats.get('avgPackage')}\n"
+                        f"- Median Package: {stats.get('medianPackage')}\n"
+                        f"- Total Companies visited: {stats.get('totalCompanies')}\n"
+                        f"- Total Students Placed: {stats.get('totalPlaced')}\n"
                         f"- Branch-wise stats (Placed | Avg | Highest):\n"
-                        + "\n".join([f"  • {b}: {s['totalPlaced']} placed, {s['highestPackage']} highest, {s['avgPackage']} avg" 
-                                   for b, s in stats['branchStats'].items() if int(s['totalPlaced']) > 0])
+                        + "\n".join([f"  • {b}: {s.get('totalPlaced')} placed, {s.get('highestPackage')} highest, {s.get('avgPackage')} avg" 
+                                   for b, s in stats.get('branchStats', {}).items() if int(s.get('totalPlaced', 0)) > 0])
                     )
         else:
-            # Overall stats
             stats = await stats_service.get_stats_for_year(None)
             if stats:
                 context_parts.append(
                     f"📊 OVERALL PLACEMENT STATS (Across all years):\n"
-                    f"- Highest Package: {stats['highestPackage']}\n"
-                    f"- Average Package: {stats['avgPackage']}\n"
-                    f"- Median Package: {stats['medianPackage']}\n"
-                    f"- Total Companies visited: {stats['totalCompanies']}\n"
-                    f"- Total Students Placed: {stats['totalPlaced']}\n"
+                    f"- Highest Package: {stats.get('highestPackage')}\n"
+                    f"- Average Package: {stats.get('avgPackage')}\n"
+                    f"- Median Package: {stats.get('medianPackage')}\n"
+                    f"- Total Companies visited: {stats.get('totalCompanies')}\n"
+                    f"- Total Students Placed: {stats.get('totalPlaced')}\n"
                 )
 
-    # ── Conventional Company/Year Retrieval ──────────────────────────
-    companies = await collection.distinct("company_name")
-    found_companies = [c for c in companies if re.search(rf"\b{re.escape(c.lower())}\b", query_lower)]
-    found_years = re.findall(r"(?:20)?\d{2}-\d{2}|20\d{2}", query)
-    
+    # Query Placement Records
     query_filter = {}
     if found_companies and found_years:
-        query_filter = {"company_name": {"$in": found_companies}, "academic_year": {"$in": found_years}}
+        query_filter = {"company_name": {"$in": [re.compile(f"^{re.escape(c)}$", re.I) for c in found_companies]}, "academic_year": {"$in": found_years}}
     elif found_companies:
-        query_filter = {"company_name": {"$in": found_companies}}
-    elif not is_stats_query and found_years: # Only do basic year search if we didn't already get stats
+        query_filter = {"company_name": {"$in": [re.compile(f"^{re.escape(c)}$", re.I) for c in found_companies]}}
+    elif intent != "placement_stats" and found_years:
         query_filter = {"academic_year": {"$in": found_years}}
-    
+
     if query_filter:
         docs = await collection.find(query_filter).sort([("academic_year", -1), ("salary_lpa", -1)]).to_list(15)
         for d in docs:
-            hires = d['selections']['CE'] + d['selections']['IT'] + d['selections']['E&TC']
+            sel = d.get('selections', {})
+            ce, it, etc = sel.get('CE', 0), sel.get('IT', 0), sel.get('E&TC', 0)
+            hires = ce + it + etc
             context_parts.append(
-                f"Record for {d['academic_year']} | Company: {d['company_name']} | Salary: {d['salary_lpa']} LPA | "
-                f"Hired: {hires} (CE: {d['selections']['CE']}, IT: {d['selections']['IT']}, E&TC: {d['selections']['E&TC']}) | "
+                f"Record for {d.get('academic_year', 'N/A')} | Company: {d.get('company_name', 'N/A')} | Salary: {d.get('salary_lpa', 'N/A')} LPA | "
+                f"Hired: {hires} (CE: {ce}, IT: {it}, E&TC: {etc}) | "
                 f"Criteria: {d.get('criteria', {}).get('min_cgpa', 'N/A')} CGPA"
             )
 
-    # ── Inject Interview Experiences ────────────────────────────────
+    # Query Interview Experiences
     exp_collection = db['interview_experience']
-    is_interview_query = any(word in query_lower for word in ["interview", "experience", "rounds", "questions", "asked", "process"])
-    
     if found_companies:
-        exps = await exp_collection.find({"company_name": {"$in": found_companies}}).sort("date", -1).to_list(5)
+        exps = await exp_collection.find({"company_name": {"$in": [re.compile(f"^{re.escape(c)}$", re.I) for c in found_companies]}}).sort("date", -1).to_list(5)
         if exps:
             context_parts.append("--- RECENT INTERVIEW EXPERIENCES ---")
             for exp in exps:
                 exp_id = str(exp.get("_id", ""))
                 link_text = f"\n  EXPERIENCE_LINK: /#/app/experience/{exp_id}" if exp_id else ""
                 context_parts.append(
-                    f"Company: {exp['company_name']} | Role: {exp.get('role', 'N/A')} | "
+                    f"Company: {exp.get('company_name', 'N/A')} | Role: {exp.get('role', 'N/A')} | "
                     f"Rounds: {exp.get('rounds', 'N/A')} | "
                     f"Experience: {exp.get('experience', '')[:600]}... | "
                     f"Suggestions: {exp.get('suggestions', '')[:200]}"
                     f"{link_text}"
                 )
-    elif is_interview_query:
+    elif intent == "interview_experience":
         exps = await exp_collection.find().sort("date", -1).to_list(3)
         if exps:
-            context_parts.append("--- SOME RECENT INTERVIEW EXPERIENCES ---")
+            context_parts.append("--- RECENT INTERVIEW EXPERIENCES ---")
             for exp in exps:
                 exp_id = str(exp.get("_id", ""))
                 link_text = f"\n  EXPERIENCE_LINK: /#/app/experience/{exp_id}" if exp_id else ""
                 context_parts.append(
-                    f"Company: {exp['company_name']} | Role: {exp.get('role', 'N/A')} | "
+                    f"Company: {exp.get('company_name', 'N/A')} | Role: {exp.get('role', 'N/A')} | "
                     f"Rounds: {exp.get('rounds', 'N/A')} | "
                     f"Experience: {exp.get('experience', '')[:300]}..."
                     f"{link_text}"
                 )
 
+    # Vector search RAG fallback if context is still sparse
+    if not context_parts:
+        rag_context = await _build_context_from_rag(query, db)
+        if rag_context and "No specific database records" not in rag_context:
+            context_parts.append(rag_context)
+
     context_string = "\n\n".join(context_parts) if context_parts else "No specific database records found for this query."
     
     return StreamingResponse(
-        chatbot_service.get_chat_response_stream(query, context_string, is_first_message),
+        chatbot_service.get_chat_response_stream(query, context_string, analysis, is_first_message),
         media_type="text/plain"
     )
+

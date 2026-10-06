@@ -4,8 +4,23 @@ from typing import Optional, Dict, Any
 from bson import ObjectId
 from app.db.mongodb import get_database
 from app.core.security import require_admin
+from app.core.cache import cache
 
 router = APIRouter()
+
+@router.get("/admin/cache/stats")
+async def get_cache_stats(current_user: dict = Depends(require_admin)):
+    """Fetch current cache metrics (hits, misses, hit rate %, key count)."""
+    return cache.get_stats()
+
+@router.delete("/admin/cache")
+async def clear_cache(namespace: Optional[str] = Query(None), current_user: dict = Depends(require_admin)):
+    """Flush all cached responses or a specific namespace."""
+    if namespace:
+        count = cache.invalidate_namespace(namespace)
+        return {"message": f"Cleared {count} cached entries for namespace '{namespace}'"}
+    count = cache.clear_all()
+    return {"message": f"Cleared all {count} cached entries"}
 
 @router.get("/admin/students")
 async def get_all_students(current_user: dict = Depends(require_admin)):
@@ -80,6 +95,9 @@ async def create_placement_record(record: PlacementRecordCreate, current_user: d
     # Add timestamps if needed, but simple insert for now
     result = await db['placement_records'].insert_one(record_dict)
     if result.inserted_id:
+        cache.invalidate_namespace("placements")
+        cache.invalidate_namespace("stats")
+        cache.invalidate_namespace("companies")
         return {"message": "Placement record created successfully", "id": str(result.inserted_id)}
     raise HTTPException(status_code=500, detail="Failed to create placement record")
 
@@ -108,6 +126,9 @@ async def delete_placement_record(record_id: str, current_user: dict = Depends(r
         
     result = await db['placement_records'].delete_one({"_id": obj_id})
     if result.deleted_count == 1:
+        cache.invalidate_namespace("placements")
+        cache.invalidate_namespace("stats")
+        cache.invalidate_namespace("companies")
         return {"message": "Placement record deleted successfully"}
     raise HTTPException(status_code=404, detail="Placement record not found")
 

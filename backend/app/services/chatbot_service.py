@@ -34,7 +34,11 @@ class ChatbotService:
     """
 
     async def get_chat_response_stream(
-        self, query: str, context_string: str, is_first: bool = False
+        self,
+        query: str,
+        context_string: str,
+        analysis: dict = None,
+        is_first: bool = False
     ) -> AsyncGenerator[str, None]:
         """
         Entry point called by the /api/chatbot/chat endpoint.
@@ -43,6 +47,7 @@ class ChatbotService:
         Args:
             query          : Raw user message.
             context_string : Pre-fetched DB records (formatted string).
+            analysis       : Pre-computed intent & entity analysis dict.
             is_first       : True if this is the very first user message in the current session.
 
         Yields:
@@ -53,32 +58,31 @@ class ChatbotService:
             return
 
         try:
-            # ── Step 1: Analyze intent (side effect only right now, can be used later) ──
-            analysis = await analyze(query)
+            # ── Step 1: Ensure analysis is present ───────────────────────────
+            if not analysis:
+                analysis = await analyze(query)
+
+            intent = analysis.get("intent", "general")
+            needs_context = analysis.get("needs_context", False)
             logging.info(
-                f"ChatbotService: intent={analysis.get('intent')} "
-                f"needs_context={analysis.get('needs_context')}"
+                f"ChatbotService pipeline: intent={intent} "
+                f"needs_context={needs_context} entities={analysis.get('entities')}"
             )
 
-            # ── Step 2: Build the Reasoner prompt with context ─────────────────
-            # We pass the context_string exactly as received from the endpoint
-            # (already filtered and formatted by the DB retrieval logic there).
+            # ── Step 2: Build Reasoner prompt with context & intent guidance ─
+            prompt = _build_reasoner_prompt(query, context_string, analysis, is_first)
 
             # ── Step 3: Stream from Reasoner via LLM router ───────────────────
-            # generate_response_stream handles local→Gemini fallback transparently.
             full_response_parts = []
-            async for chunk in generate_response_stream(
-                _build_reasoner_prompt(query, context_string, is_first)
-            ):
-                # Hardcoded safety replacement — absolutely no dollars allowed
+            async for chunk in generate_response_stream(prompt):
+                # Safety replacement — absolutely no dollars allowed
                 chunk = chunk.replace("$", "₹")
                 chunk = chunk.replace("dollars", "Rupees")
                 chunk = chunk.replace("USD", "INR")
-                
+
                 full_response_parts.append(chunk)
                 yield chunk
 
-            # ── Step 4: Format (side effect only) ────────────────────────────
             full_text = "".join(full_response_parts)
             logging.debug(f"ChatbotService: response length = {len(full_text)} chars")
 
@@ -87,21 +91,38 @@ class ChatbotService:
             yield "Sorry, I encountered an error while processing your request."
 
 
-def _build_reasoner_prompt(query: str, context: str, is_first: bool = False) -> str:
+def _build_reasoner_prompt(
+    query: str, context: str, analysis: dict = None, is_first: bool = False
+) -> str:
     """
-    Constructs the full prompt that will be passed to llm_router for streaming.
+    Constructs the full prompt that will be passed to llm_router for streaming,
+    customized by detected intent.
     """
+    analysis = analysis or {}
+    intent = analysis.get("intent", "general")
+
     greeting_rule = (
         "6. This is the user's FIRST message. Start your response with a warm, welcoming greeting to introduce yourself.\n"
         if is_first else
         "6. DO NOT start your response with greetings or conversational filler like 'Hi there, how can I assist you today?'. Jump straight into answering the exact query.\n"
     )
 
+    intent_guidance = ""
+    if intent == "placement_stats":
+        intent_guidance = "INTENT: PLACEMENT STATS QUERY. Focus on clear package numbers (₹ LPA), company names, and recruitment figures."
+    elif intent == "interview_experience":
+        intent_guidance = "INTENT: INTERVIEW EXPERIENCE QUERY. Highlight interview rounds, questions asked, difficulty, and preparation suggestions."
+    elif intent == "resume_help":
+        intent_guidance = "INTENT: RESUME HELP QUERY. Give targeted ATS and formatting tips."
+    elif intent == "career_advice":
+        intent_guidance = "INTENT: CAREER ADVICE QUERY. Give structured guidance and roadmap recommendations."
+
     return (
         "You are Saarthi, the Official AI Placement Assistant for PICT "
         "(Pune Institute of Computer Technology).\n"
         "Your goal is to provide 100% ACCURATE information about PICT placements "
         "using the provided Database Context when available.\n\n"
+        f"{intent_guidance}\n\n"
         f"--- DATABASE CONTEXT ---\n{context}\n--- END CONTEXT ---\n\n"
         f"USER QUERY: {query}\n\n"
         "RULES:\n"

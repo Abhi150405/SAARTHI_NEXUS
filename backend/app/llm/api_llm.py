@@ -1,7 +1,7 @@
 """
 api_llm.py
 ----------
-High-performance async LLM wrapper using the Groq API (Llama 3.1 model)
+High-performance async LLM wrapper using the Groq API
 with dual-engine support and Google Gemini API fallback.
 Uses httpx for high-performance async requests.
 """
@@ -15,11 +15,13 @@ from typing import Optional, AsyncGenerator
 import httpx
 from app.core.config import settings
 
-GROQ_MODELS = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "mixtral-8x7b-32768", "gemma2-9b-it"]
+# Live Groq models (verified Oct 2026 via GET /openai/v1/models)
+GROQ_MODELS = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
 GROQ_MODEL = GROQ_MODELS[0]
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"]
+# Live Gemini models (verified Oct 2026 via ListModels API)
+GEMINI_MODELS = ["gemini-3.8-flash", "gemini-2.5-flash", "gemini-3.6-flash"]
 GEMINI_MODEL = GEMINI_MODELS[0]
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 

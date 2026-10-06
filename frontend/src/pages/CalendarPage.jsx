@@ -1,15 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Search, 
-  Calendar as CalendarIcon, 
-  Building2, 
-  Briefcase, 
-  Award, 
-  Users, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Calendar as CalendarIcon,
+  Building2,
+  Briefcase,
+  Award,
+  Users,
   X,
   Info,
   Pin,
@@ -96,7 +96,7 @@ const lastYearEvents = [
   { date: '2025-08-24', company: 'Accordion D&A', branch: 'CE, E&TC, IT', role: 'Data Analyst', pkg: '₹8.50 LPA', details: 'Financial consulting and data analytics.' },
   { date: '2025-08-28', company: 'Arista Networks', branch: 'CE, E&TC, IT', role: 'Software Engineer', pkg: '₹29.44 LPA', details: 'High-performance cloud networking developer role.' },
   { date: '2025-08-30', company: 'Pattern Technologies', branch: 'CE', role: 'Software Engineering Intern', pkg: '₹50K/month', details: 'Computer Engineering only. Summer/semester internship.' },
-  
+
   // September 2025
   { date: '2025-09-01', company: 'FlexTrade', branch: 'CE, E&TC, IT', role: 'C++ Developer (₹9.96 LPA) / Tech Analyst (₹9 LPA) / FIX Analyst (₹8 LPA)', pkg: '₹8.00 - ₹9.96 LPA', details: 'Multi-role hiring for trading software developer.' },
   { date: '2025-09-08', company: 'UPTIQ', branch: 'CE, E&TC, IT', role: 'Software Developer', pkg: '₹22 LPA', details: 'Product engineering role.' },
@@ -108,7 +108,7 @@ const lastYearEvents = [
   { date: '2025-09-23', company: 'ARAI', branch: 'CE, E&TC, IT (2025 Batch)', role: 'Graduate Trainee Engineer', pkg: '₹5.6 LPA', details: 'Automotive research & development association.' },
   { date: '2025-09-24', company: 'Concentric AI', branch: 'CE, IT (UG & PG)', role: 'SDE', pkg: '₹17.50 LPA', details: 'Data security posture management developer.' },
   { date: '2025-09-29', company: 'NCS Technologies', branch: 'CE, IT', role: 'Software Engineer', pkg: '₹6.82 LPA', details: 'Global IT services company.' },
-  
+
   // October 2025
   { date: '2025-10-10', company: 'Kylas / BeyondWalls', branch: 'CE, E&TC, IT', role: 'Product Engineer (₹9 LPA) / Account Exec (₹7 LPA) / Tech Sales (₹6 LPA)', pkg: '₹6.00 - ₹9.00 LPA', details: 'Technical development and sales profiles.' },
   { date: '2025-10-13', company: 'IBM', branch: 'CE, E&TC, IT', role: 'Software Developer', pkg: '₹11 LPA', details: 'Global hybrid cloud and AI technology company.' },
@@ -117,7 +117,7 @@ const lastYearEvents = [
   { date: '2025-10-28', company: 'Aspect Ratio', branch: 'CE, E&TC, IT', role: 'Analyst', pkg: '₹12 LPA', details: 'Life sciences management consulting and analytics.' },
   { date: '2025-10-29', company: 'ACI Worldwide', branch: 'CE, E&TC, IT', role: 'Software Engineer', pkg: '₹12.50 LPA', details: 'Real-time electronic payments solutions.' },
   { date: '2025-10-31', company: 'Iaura', branch: 'CE, IT', role: 'Entry Level Fresher', pkg: '₹5 - ₹8 LPA', details: 'Software engineer and system trainee.' },
-  
+
   // November 2025
   { date: '2025-11-03', company: 'Rahi Technologies', branch: 'CE, IT', role: 'Software Engineer', pkg: '₹8.50 LPA', details: 'Enterprise IT solutions and global systems.' },
   { date: '2025-11-04', company: 'ION Group', branch: 'CE, E&TC, IT', role: 'Software Developer / Technical Analyst', pkg: '₹17.30 LPA', details: 'Fintech capital markets software developers.' },
@@ -126,7 +126,7 @@ const lastYearEvents = [
   { date: '2025-11-13', company: 'Fractal', branch: 'CE, E&TC, IT', role: 'Decision Science / Data Science / Data Engineer', pkg: '₹10 LPA', details: 'Analytics & cognitive science solutions provider.' },
   { date: '2025-11-19', company: 'NVIDIA', branch: 'CE, E&TC, IT', role: 'QA Tools & Test Development Intern', pkg: '₹40K/month', details: 'Graphics processing units and high-performance computing chipmaker.' },
   { date: '2025-11-28', company: 'Western Union', branch: 'CE, E&TC, IT', role: 'Trainee Associate', pkg: '₹7.25 LPA', details: 'Global money transfer platform engineering.' },
-  
+
   // December 2025
   { date: '2025-12-02', company: 'Emcure', branch: 'CE, IT', role: 'Graduate Trainee Engineer', pkg: '₹5 LPA', details: 'Pharmaceutical technology systems development.' },
   { date: '2025-12-03', company: 'GEP', branch: 'CE, E&TC, IT', role: 'Software Engineer / Associate Data Scientist', pkg: '₹20 LPA', details: 'Procurement and supply chain cloud software.' },
@@ -209,10 +209,10 @@ const pgAnim = {
 
 const CalendarPage = () => {
   const navigate = useNavigate();
-  
+
   // Section toggle: 'current' (2026-27) or 'last' (2025-26)
   const [activeYearCycle, setActiveYearCycle] = useState('current');
-  const [currentMonthIndex, setCurrentMonthIndex] = useState(0); 
+  const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedDayEvents, setSelectedDayEvents] = useState(null);
@@ -263,9 +263,9 @@ const CalendarPage = () => {
     if (!searchQuery.trim()) return allEvents;
     const query = searchQuery.toLowerCase();
     return allEvents.filter(
-      e => e.company.toLowerCase().includes(query) || 
-           e.role.toLowerCase().includes(query) ||
-           e.branch.toLowerCase().includes(query)
+      e => e.company.toLowerCase().includes(query) ||
+        e.role.toLowerCase().includes(query) ||
+        e.branch.toLowerCase().includes(query)
     );
   }, [allEvents, searchQuery]);
 
@@ -335,7 +335,7 @@ const CalendarPage = () => {
     for (let day = 1; day <= currentMonth.days; day++) {
       const events = monthEventsMap[day] || [];
       const isSearched = dayHasSearchResult(day);
-      
+
       // Real-time Today Cell Pointer check (matches live date: 2026-08-09)
       const isToday = (
         activeYearCycle === 'current' &&
@@ -351,7 +351,7 @@ const CalendarPage = () => {
 
   return (
     <motion.div {...pgAnim} className="pb-16">
-      
+
       {/* ── Page Header + Realtime Pointer Badge ── */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div>
@@ -395,27 +395,25 @@ const CalendarPage = () => {
           SECTION TOGGLE: Current Year (2026-27) vs Last Year (2025-26)
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6 bg-white border-[3px] border-[#0F0F0F] p-3 shadow-[5px_5px_0px_#0F0F0F]">
-        
+
         {/* Section Tabs */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleSwitchCycle('current')}
-            className={`flex items-center gap-2 px-4 py-2.5 font-black text-[13px] uppercase border-[2.5px] border-[#0F0F0F] transition-all ${
-              activeYearCycle === 'current'
+            className={`flex items-center gap-2 px-4 py-2.5 font-black text-[13px] uppercase border-[2.5px] border-[#0F0F0F] transition-all ${activeYearCycle === 'current'
                 ? 'bg-[#F97316] text-white shadow-[3px_3px_0px_#0F0F0F] translate-x-[-1px] translate-y-[-1px]'
                 : 'bg-[#FAF9F6] text-[#0F0F0F] hover:bg-[#FFF3CD] shadow-[1px_1px_0px_#0F0F0F]'
-            }`}
+              }`}
           >
             <Flame size={16} /> Current Year Calendar (2026-27)
           </button>
-          
+
           <button
             onClick={() => handleSwitchCycle('last')}
-            className={`flex items-center gap-2 px-4 py-2.5 font-black text-[13px] uppercase border-[2.5px] border-[#0F0F0F] transition-all ${
-              activeYearCycle === 'last'
+            className={`flex items-center gap-2 px-4 py-2.5 font-black text-[13px] uppercase border-[2.5px] border-[#0F0F0F] transition-all ${activeYearCycle === 'last'
                 ? 'bg-[#1A6EFF] text-white shadow-[3px_3px_0px_#0F0F0F] translate-x-[-1px] translate-y-[-1px]'
                 : 'bg-[#FAF9F6] text-[#0F0F0F] hover:bg-[#FFF3CD] shadow-[1px_1px_0px_#0F0F0F]'
-            }`}
+              }`}
           >
             <Clock size={16} /> Last Year Calendar (2025-26)
           </button>
@@ -507,10 +505,10 @@ const CalendarPage = () => {
 
       {/* ── Main Layout Grid ── */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-        
+
         {/* ── Left: Calendar Grid (8 Cols) ── */}
         <div className="xl:col-span-8 bg-white border-[3px] border-[#0F0F0F] shadow-[6px_6px_0px_#0F0F0F] p-4 md:p-6">
-          
+
           {/* Calendar Header with Navigation */}
           <div className="flex items-center justify-between border-b-[3px] border-[#0F0F0F] pb-4 mb-6">
             <h2 className="font-black text-[22px] text-[#0F0F0F] tracking-tight flex items-center gap-2">
@@ -540,9 +538,8 @@ const CalendarPage = () => {
             {weekdayNames.map((name, i) => (
               <span
                 key={name}
-                className={`font-black text-[11px] uppercase py-1 border-[2px] border-transparent tracking-wider ${
-                  i === 0 || i === 6 ? 'text-[#EF4444]' : 'text-[#888888]'
-                }`}
+                className={`font-black text-[11px] uppercase py-1 border-[2px] border-transparent tracking-wider ${i === 0 || i === 6 ? 'text-[#EF4444]' : 'text-[#888888]'
+                  }`}
               >
                 {name}
               </span>
@@ -564,10 +561,10 @@ const CalendarPage = () => {
               const { day, events, isSearched, isToday } = cell;
               const hasEvents = events.length > 0;
               const isSelectedDay = selectedDay === day;
-              
+
               // Custom Styling classes for calendar cells with Real-Time Today Pointer & Selected Day Highlight
               let cellClass = "aspect-[1/1] p-1 md:p-2 border-[3px] border-[#0F0F0F] rounded-lg relative flex flex-col justify-between transition-all duration-75 cursor-pointer ";
-              
+
               if (isSelectedDay) {
                 cellClass += "bg-[#FACC15] ring-4 ring-[#0F0F0F] ring-offset-2 z-20 shadow-[4px_4px_0px_#0F0F0F] scale-[1.03] ";
               } else if (isToday) {
@@ -604,7 +601,7 @@ const CalendarPage = () => {
                       </span>
                     )}
                   </div>
-                  
+
                   {/* Event indicator inside the cell */}
                   {hasEvents && (
                     <div className="mt-1 flex flex-col gap-0.5 max-h-[80%] overflow-hidden">
@@ -630,7 +627,7 @@ const CalendarPage = () => {
 
         {/* ── Right: List of Company Visits this Month (4 Cols) ── */}
         <div className="xl:col-span-4 flex flex-col gap-6">
-          
+
           <div className="bg-[#FFFBF0] border-[3px] border-[#0F0F0F] shadow-[6px_6px_0px_#0F0F0F] p-5">
             <h3 className="font-black text-[16px] text-[#0F0F0F] uppercase tracking-tight mb-4 flex items-center gap-2">
               <Info size={16} className="text-[#F97316]" />
@@ -648,7 +645,7 @@ const CalendarPage = () => {
                 {Object.keys(monthEventsMap).length} Drives
               </span>
             </h3>
-            
+
             <div className="overflow-y-auto pr-1 flex-1 space-y-3 scrollbar-thin">
               {Object.keys(monthEventsMap).length === 0 ? (
                 <div className="text-center py-8">
