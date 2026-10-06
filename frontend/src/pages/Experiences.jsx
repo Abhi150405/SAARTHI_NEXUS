@@ -12,7 +12,6 @@ const pageAnim = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }
 const Experiences = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('interview');
-    const [companies, setCompanies] = useState([]);
     const [experiences, setExperiences] = useState([]);
     const [feedbacks, setFeedbacks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,15 +26,16 @@ const Experiences = () => {
 
     const fetchInitialData = async () => {
         try {
-            const compRes = await fetch(`${API_URL}/api/companies`);
-            const compData = await compRes.json();
-            setCompanies(compData);
-            const expRes = await fetch(`${API_URL}/api/interview-experience`);
-            const expData = await expRes.json();
-            setExperiences(expData);
-            const fbRes = await fetch(`${API_URL}/api/company-feedback`);
-            const fbData = await fbRes.json();
-            setFeedbacks(fbData);
+            const [expRes, fbRes] = await Promise.all([
+                fetch(`${API_URL}/api/interview-experience`),
+                fetch(`${API_URL}/api/company-feedback`)
+            ]);
+            const [expData, fbData] = await Promise.all([
+                expRes.json(),
+                fbRes.json()
+            ]);
+            setExperiences(expData || []);
+            setFeedbacks(fbData || []);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);

@@ -38,7 +38,7 @@ async def add_interview_experience(request: Request, current_user: dict = Depend
 async def get_interview_experiences(company: str = Query(None)):
     db = get_database()
     query = {"company_name": company} if company else {}
-    experiences = await db['interview_experience'].find(query).sort("date", -1).to_list(None)
+    experiences = await db['interview_experience'].find(query, {"embedding": 0}).sort("date", -1).to_list(None)
     for exp in experiences:
         exp['_id'] = str(exp['_id'])
     return experiences
@@ -51,12 +51,13 @@ async def get_interview_experience_by_id(exp_id: str, increment: bool = False):
             exp = await db['interview_experience'].find_one_and_update(
                 {"_id": ObjectId(exp_id)},
                 {"$inc": {"reads": 1}},
+                projection={"embedding": 0},
                 return_document=ReturnDocument.AFTER
             )
             # invalidate specific experience entry if read count changed
             cache.invalidate_pattern(exp_id)
         else:
-            exp = await db['interview_experience'].find_one({"_id": ObjectId(exp_id)})
+            exp = await db['interview_experience'].find_one({"_id": ObjectId(exp_id)}, {"embedding": 0})
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid ID format")
     if not exp:
