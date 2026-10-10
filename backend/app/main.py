@@ -28,12 +28,16 @@ app.add_middleware(
 )
 
 
+from app.services.skill_queue_service import skill_queue_service
+
 @app.on_event("startup")
 async def startup_db_client():
     await connect_to_mongo()
+    await skill_queue_service.start_worker()
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    await skill_queue_service.stop_worker()
     await close_mongo_connection()
 
 # Include API router

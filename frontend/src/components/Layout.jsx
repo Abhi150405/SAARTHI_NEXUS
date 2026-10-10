@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import Chatbot from './Chatbot';
 import NotificationBar from './NotificationBar';
 import Topbar from './Topbar';
+import SkillAnalysisQueueWidget from './SkillAnalysisQueueWidget';
 
 const Layout = () => {
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -65,6 +66,7 @@ const Layout = () => {
             </main>
 
             <Chatbot />
+            <SkillAnalysisQueueWidget />
         </div>
     );
 };

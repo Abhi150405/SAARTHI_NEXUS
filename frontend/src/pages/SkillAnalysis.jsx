@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, CheckCircle, AlertTriangle, Loader2, Briefcase, Building2, ChevronDown, BookOpen, PlayCircle, GraduationCap, CheckCircle2, Sparkles, Clock, Trophy, Search, X, ExternalLink, Zap } from 'lucide-react';
+import { Target, CheckCircle, AlertTriangle, Loader2, Briefcase, Building2, ChevronDown, BookOpen, PlayCircle, GraduationCap, CheckCircle2, Sparkles, Clock, Trophy, Search, X, ExternalLink, Zap, RotateCw } from 'lucide-react';
 import { API_URL } from '../config';
 import { apiFetch, getUser } from '../api';
 import { analyzeSkillGap, buildYouTubeSearchUrl, isSkillSatisfied } from '../services/skillAnalysisService';
+import { useSkillAnalysisQueue } from '../context/SkillAnalysisQueueContext';
 import skillData from '../data/skillData.json';
 
 const ACCENT = ['bg-[#F97316]','bg-[#FACC15]','bg-[#A3E635]','bg-[#60A5FA]','bg-[#C084FC]','bg-[#14b8a6]'];
@@ -67,15 +69,28 @@ const SkillAnalysis = () => {
         // Will be set on first render via the effect below
     }
 
+    const [searchParams] = useSearchParams();
+
+    const {
+        enqueueAnalysis,
+        getTargetState,
+        fetchLatestForTarget,
+        clearTargetAnalysis
+    } = useSkillAnalysisQueue();
+
     const [studentProfile, setStudentProfile] = useState({});
     const [studentSkills, setStudentSkills] = useState([]);
     const [modelMatchPercentage, setModelMatchPercentage] = useState(0);
     const [topMatches, setTopMatches] = useState([]);
     const [isLoadingTopMatches, setIsLoadingTopMatches] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [aiAnalysis, setAiAnalysis] = useState(null);
     const [aiError, setAiError] = useState(null);
+
+    // Dynamic state derived from global background queue
+    const targetState = getTargetState(selectedTarget, analysisMode);
+    const isAnalyzing = targetState.isAnalyzing;
+    const activeTask = targetState.activeTask;
+    const aiAnalysis = targetState.result;
 
     // New state for redesigned UI
     const [activeAccordionIndex, setActiveAccordionIndex] = useState(null);
@@ -90,6 +105,25 @@ const SkillAnalysis = () => {
         'Generating your learning roadmap...',
         'Preparing YouTube & course links...',
     ];
+
+    // Read target and type from URL parameters if redirected from widget or notification
+    useEffect(() => {
+        const targetParam = searchParams.get('target');
+        const typeParam = searchParams.get('type');
+        if (typeParam && (typeParam === 'company' || typeParam === 'role')) {
+            setAnalysisMode(typeParam);
+        }
+        if (targetParam) {
+            setSelectedTarget(targetParam);
+        }
+    }, [searchParams]);
+
+    // Check DB for latest saved analysis when selecting a target if not already cached
+    useEffect(() => {
+        if (selectedTarget && !aiAnalysis && !isAnalyzing) {
+            fetchLatestForTarget(selectedTarget, analysisMode);
+        }
+    }, [selectedTarget, analysisMode, aiAnalysis, isAnalyzing, fetchLatestForTarget]);
 
     useEffect(() => {
         const fetchSkills = async () => {
@@ -112,9 +146,11 @@ const SkillAnalysis = () => {
         fetchSkills();
     }, []);
 
-    const handleAnalyze = async () => {
-        setIsAnalyzing(true);
+    const handleAnalyze = async (forceRefresh = false) => {
         setAiError(null);
+        if (forceRefresh) {
+            clearTargetAnalysis(selectedTarget, analysisMode);
+        }
         try {
             const requiredSkills = analysisMode === 'role' ? roleSkills[selectedTarget] : companySkills[selectedTarget];
 
@@ -129,16 +165,14 @@ const SkillAnalysis = () => {
                 fullName: studentProfile.firstName ? `${studentProfile.firstName} ${studentProfile.lastName}` : 'Student',
                 department: studentProfile.department || 'CE',
                 cgpa: studentProfile.cgpa || 8.0,
-                skills: studentSkills
+                skills: studentSkills,
+                email: studentProfile.email || getUser()?.email || ''
             };
 
-            const result = await analyzeSkillGap(studentData, targetData);
-            setAiAnalysis(result);
+            await enqueueAnalysis(studentData, targetData);
         } catch (error) {
-            console.error(error);
+            console.error('Skill analysis enqueue error:', error);
             setAiError(error.message);
-        } finally {
-            setIsAnalyzing(false);
         }
     };
 
@@ -167,9 +201,8 @@ const SkillAnalysis = () => {
         setModelMatchPercentage(Math.round((matched / required.length) * 100));
     }, [studentSkills, selectedTarget, analysisMode]);
 
-    // Reset AI analysis when mode or target changes
+    // Reset error when mode or target changes
     useEffect(() => {
-        setAiAnalysis(null);
         setAiError(null);
     }, [analysisMode, selectedTarget]);
 
@@ -366,12 +399,30 @@ const SkillAnalysis = () => {
                     </div>
 
                     <button
-                        onClick={handleAnalyze}
+                        onClick={() => handleAnalyze(false)}
                         disabled={isAnalyzing || studentSkills.length === 0}
                         className={`mt-2 w-full py-4 bg-[#F97316] border-[3px] border-[#0F0F0F] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${isAnalyzing || studentSkills.length === 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed border-gray-400' : 'text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#0F0F0F]'} ${shouldPulse ? 'animate-pulse text-white bg-[#F97316]' : ''}`}
                     >
-                        {isAnalyzing ? <><Loader2 className="animate-spin" size={18} /> Analyzing...</> : <><Zap size={18} /> Generate AI Analysis</>}
+                        {isAnalyzing ? (
+                            <><Loader2 className="animate-spin" size={18} /> Processing in Background...</>
+                        ) : aiAnalysis ? (
+                            <><CheckCircle size={18} /> Re-analyze Target</>
+                        ) : (
+                            <><Zap size={18} /> Generate AI Analysis</>
+                        )}
                     </button>
+
+                    {aiError && (
+                        <div className="bg-[#FEE2E2] border-[2px] border-[#EF4444] p-3 text-xs font-bold text-[#991B1B] flex items-center justify-between gap-2 shadow-[2px_2px_0px_#EF4444]">
+                            <div className="flex items-center gap-2">
+                                <AlertTriangle size={15} className="shrink-0 text-[#EF4444]" />
+                                <span>{aiError}</span>
+                            </div>
+                            <button onClick={() => setAiError(null)} className="font-black text-[#991B1B] hover:underline shrink-0">
+                                <X size={14} />
+                            </button>
+                        </div>
+                    )}
                 </motion.div>
 
                 {/* Middle: Skills Inventory */}
@@ -480,11 +531,24 @@ const SkillAnalysis = () => {
                     )}
 
                     {isAnalyzing && (
-                        <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center py-20">
-                            <div className="w-16 h-16 border-4 border-[#E5E7EB] border-t-[#F97316] rounded-full animate-spin mb-6 shadow-[0_0_15px_rgba(249,115,22,0.5)]"></div>
-                            <div className="text-xl font-black text-[#0F0F0F] uppercase tracking-widest">{loadingMessages[loadingStep]}</div>
-                            <div className="mt-6 w-64 h-3 border-2 border-[#0F0F0F] bg-white overflow-hidden relative">
+                        <motion.div key="loading" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center py-14 px-6 bg-white border-[3px] border-[#0F0F0F] shadow-[6px_6px_0px_#0F0F0F] max-w-2xl mx-auto my-6 text-center">
+                            <div className="w-16 h-16 border-4 border-[#E5E7EB] border-t-[#F97316] rounded-full animate-spin mb-5 shadow-[0_0_15px_rgba(249,115,22,0.5)]"></div>
+                            <div className="text-xl font-black text-[#0F0F0F] uppercase tracking-wider mb-2">
+                                {activeTask?.progressStep || loadingMessages[loadingStep]}
+                            </div>
+                            <p className="font-bold text-xs text-gray-600 mb-5 max-w-lg leading-relaxed">
+                                Your analysis is running in the background queue. Feel free to use any other features (Analytics, Interview Vault, Campus Drives, Profile) &mdash; your results will be automatically saved and ready here!
+                            </p>
+                            <div className="w-64 h-3 border-2 border-[#0F0F0F] bg-white overflow-hidden relative">
                                 <motion.div className="h-full bg-[#A3E635]" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 1.5, repeat: Infinity }} />
+                            </div>
+                            <div className="mt-5 flex gap-2 flex-wrap justify-center">
+                                <span className="bg-[#FFFBF0] border-2 border-[#0F0F0F] text-[10px] font-black px-2.5 py-1 uppercase shadow-[1px_1px_0px_#0F0F0F]">
+                                    ⚡ Async Worker Active
+                                </span>
+                                <span className="bg-[#FFFBF0] border-2 border-[#0F0F0F] text-[10px] font-black px-2.5 py-1 uppercase shadow-[1px_1px_0px_#0F0F0F]">
+                                    Target: {selectedTarget}
+                                </span>
                             </div>
                         </motion.div>
                     )}
@@ -495,7 +559,18 @@ const SkillAnalysis = () => {
                             {/* Result Summary Bar */}
                             <div className="flex flex-col md:flex-row gap-4 bg-white border-[3px] border-[#0F0F0F] p-5 shadow-[4px_4px_0px_#0F0F0F] items-center justify-between">
                                 <div>
-                                    <h3 className="text-xl font-black uppercase text-[#0F0F0F]">{selectedTarget}</h3>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <h3 className="text-xl font-black uppercase text-[#0F0F0F]">{selectedTarget}</h3>
+                                        <button
+                                            onClick={() => handleAnalyze(true)}
+                                            disabled={isAnalyzing}
+                                            className="bg-white border-2 border-[#0F0F0F] px-2.5 py-0.5 text-[10px] font-black shadow-[2px_2px_0px_#0F0F0F] hover:bg-[#FACC15] flex items-center gap-1 transition-all text-[#0F0F0F]"
+                                            title="Re-run analysis with latest profile skills"
+                                        >
+                                            <RotateCw size={11} className={isAnalyzing ? 'animate-spin' : ''} />
+                                            Re-run
+                                        </button>
+                                    </div>
                                     <span className="bg-[#0F0F0F] text-white text-[10px] font-black px-2 py-1 uppercase">{analysisMode} Analysis</span>
                                 </div>
                                 <div className="flex-1 max-w-md mx-8 text-center">

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, LogOut, Shield, ChevronDown, Search, Bell } from 'lucide-react';
+import { User, LogOut, Shield, ChevronDown, Search, Bell, Loader2 } from 'lucide-react';
+import { useSkillAnalysisQueue } from '../context/SkillAnalysisQueueContext';
 
 const Topbar = ({ pageTitle }) => {
     const navigate = useNavigate();
@@ -8,6 +9,7 @@ const Topbar = ({ pageTitle }) => {
     const dropdownRef = useRef(null);
     const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const { activeTasks } = useSkillAnalysisQueue();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -36,6 +38,18 @@ const Topbar = ({ pageTitle }) => {
 
             {/* Right: Controls */}
             <div className="flex items-center gap-3">
+                {/* Active Background Task Pill */}
+                {activeTasks && activeTasks.length > 0 && (
+                    <Link
+                        to={`/app/skills?target=${encodeURIComponent(activeTasks[0].targetName)}&type=${encodeURIComponent(activeTasks[0].targetType)}`}
+                        className="hidden md:flex items-center gap-2 bg-[#FACC15] border-[2px] border-[#0F0F0F] px-3 py-1.5 font-black text-xs shadow-[3px_3px_0px_#0F0F0F] hover:shadow-[1px_1px_0px_#0F0F0F] hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                        title="Skill analysis task running in background — click to view"
+                    >
+                        <Loader2 size={13} className="animate-spin text-[#0F0F0F]" />
+                        <span className="truncate max-w-[140px]">AI: {activeTasks[0].targetName}</span>
+                    </Link>
+                )}
+
                 {/* Search */}
                 <div className="relative max-w-[240px]">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />

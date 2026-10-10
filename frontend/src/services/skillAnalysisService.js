@@ -36,6 +36,91 @@ export async function analyzeSkillGap(studentData, targetData) {
   return response.json();
 }
 
+/**
+ * Enqueue an asynchronous skill analysis task in the message queue.
+ * Returns immediately with task_id and queued status.
+ */
+export async function queueSkillGapAnalysis(studentData, targetData, userEmail = '') {
+  const inputPayload = {
+    student: {
+      name: studentData.fullName || 'Student',
+      branch: studentData.department || 'CE',
+      cgpa: studentData.cgpa || 8.0,
+      skills: studentData.skills || [],
+      email: userEmail || studentData.email || ''
+    },
+    target: {
+      type: targetData.type,        // "role" or "company"
+      name: targetData.name,
+      required_skills: targetData.required_skills,
+      good_to_have_skills: targetData.good_to_have_skills || []
+    }
+  };
+
+  const emailParam = encodeURIComponent(userEmail || studentData.email || '');
+  const url = `${API_URL}/api/skill-analysis/queue${emailParam ? `?email=${emailParam}` : ''}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(inputPayload)
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = `API Error: ${response.status}`;
+    try {
+      const parsed = JSON.parse(errorText);
+      errorMessage = parsed.detail || errorMessage;
+    } catch (e) {
+      errorMessage = `${errorMessage} ${errorText}`;
+    }
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}
+
+/**
+ * Poll the status of an asynchronous skill analysis task by task ID.
+ */
+export async function getSkillAnalysisTaskStatus(taskId) {
+  if (!taskId) return null;
+  const response = await fetch(`${API_URL}/api/skill-analysis/tasks/${taskId}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch task status: ${response.status}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetch the latest completed or running task for a user and target.
+ */
+export async function getLatestSkillAnalysisTask(userEmail, targetName = '', targetType = '') {
+  if (!userEmail) return { found: false, task: null };
+  const params = new URLSearchParams({ email: userEmail });
+  if (targetName) params.append('target_name', targetName);
+  if (targetType) params.append('target_type', targetType);
+
+  const response = await fetch(`${API_URL}/api/skill-analysis/tasks/latest?${params.toString()}`);
+  if (!response.ok) {
+    return { found: false, task: null };
+  }
+  return response.json();
+}
+
+/**
+ * Fetch all tasks currently in progress for a user.
+ */
+export async function getActiveSkillAnalysisTasks(userEmail) {
+  if (!userEmail) return { active_tasks: [] };
+  const response = await fetch(`${API_URL}/api/skill-analysis/tasks/active?email=${encodeURIComponent(userEmail)}`);
+  if (!response.ok) {
+    return { active_tasks: [] };
+  }
+  return response.json();
+}
+
 // Convert search_query → YouTube search URL
 export function buildYouTubeSearchUrl(searchQuery) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;

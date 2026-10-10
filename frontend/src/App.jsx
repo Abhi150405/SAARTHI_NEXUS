@@ -23,6 +23,7 @@ import Profile from './pages/Profile';
 import ExperienceTemplate from './pages/ExperienceTemplate';
 import ExperienceDetail from './pages/ExperienceDetail';
 import CalendarPage from './pages/CalendarPage';
+import { SkillAnalysisQueueProvider } from './context/SkillAnalysisQueueContext';
 
 // -----------------------------------------------------------------
 // AuthGuard: Protects a single route. Redirects to /signup if not
@@ -76,49 +77,51 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* ── Public Routes ── */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Navigate to="/login/student" replace />} />
-        <Route path="/login/student" element={<Login defaultRole="student" />} />
-        <Route path="/login/admin" element={<Login defaultRole="admin" />} />
-        <Route path="/signup" element={<Signup />} />
+      <SkillAnalysisQueueProvider>
+        <Routes>
+          {/* ── Public Routes ── */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Navigate to="/login/student" replace />} />
+          <Route path="/login/student" element={<Login defaultRole="student" />} />
+          <Route path="/login/admin" element={<Login defaultRole="admin" />} />
+          <Route path="/signup" element={<Signup />} />
 
-        {/* ── Admin Dashboard ── */}
-        <Route path="/admin/dashboard" element={
-          <AdminGuard><AdminDashboard /></AdminGuard>
-        } />
+          {/* ── Admin Dashboard ── */}
+          <Route path="/admin/dashboard" element={
+            <AdminGuard><AdminDashboard /></AdminGuard>
+          } />
 
-        {/* ── App Routes: Layout is always rendered (no auth on wrapper) ── */}
-        {/* /app/dashboard is fully PUBLIC — no AuthGuard                  */}
-        {/* Every other route is wrapped in AuthGuard → redirects to /signup */}
-        <Route path="/app" element={<Layout />}>
-          <Route index element={<Navigate to="/app/dashboard" replace />} />
+          {/* ── App Routes: Layout is always rendered (no auth on wrapper) ── */}
+          {/* /app/dashboard is fully PUBLIC — no AuthGuard                  */}
+          {/* Every other route is wrapped in AuthGuard → redirects to /signup */}
+          <Route path="/app" element={<Layout />}>
+            <Route index element={<Navigate to="/app/dashboard" replace />} />
 
-          {/* 🌐 PUBLIC — accessible without login */}
-          <Route path="dashboard" element={<Dashboard />} />
+            {/* 🌐 PUBLIC — accessible without login */}
+            <Route path="dashboard" element={<Dashboard />} />
 
-          {/* 🔒 PROTECTED — requires student login */}
-          <Route path="skills"          element={<AuthGuard><SkillAnalysis /></AuthGuard>} />
-          <Route path="eligibility"     element={<AuthGuard><Eligibility /></AuthGuard>} />
-          <Route path="records"         element={<AuthGuard><CompanyRecords /></AuthGuard>} />
-          <Route path="calendar"        element={<AuthGuard><CalendarPage /></AuthGuard>} />
-          <Route path="drives"          element={<AuthGuard><PlacementDrives /></AuthGuard>} />
-          <Route path="internships"     element={<AuthGuard><Internships /></AuthGuard>} />
-          <Route path="experiences"     element={<AuthGuard><Experiences /></AuthGuard>} />
-          <Route path="add-experience"  element={<AuthGuard><AddExperience /></AuthGuard>} />
-          <Route path="template"        element={<AuthGuard><ExperienceTemplate /></AuthGuard>} />
-          <Route path="experience/:id"  element={<AuthGuard><ExperienceDetail /></AuthGuard>} />
-          <Route path="resume"          element={<AuthGuard><ResumeMatch /></AuthGuard>} />
-          <Route path="help"            element={<AuthGuard><Help /></AuthGuard>} />
-          <Route path="about"           element={<AuthGuard><AboutUs /></AuthGuard>} />
-          <Route path="notifications"   element={<AuthGuard><Notifications /></AuthGuard>} />
-          <Route path="profile"         element={<AuthGuard><Profile /></AuthGuard>} />
-        </Route>
+            {/* 🔒 PROTECTED — requires student login */}
+            <Route path="skills"          element={<AuthGuard><SkillAnalysis /></AuthGuard>} />
+            <Route path="eligibility"     element={<AuthGuard><Eligibility /></AuthGuard>} />
+            <Route path="records"         element={<AuthGuard><CompanyRecords /></AuthGuard>} />
+            <Route path="calendar"        element={<AuthGuard><CalendarPage /></AuthGuard>} />
+            <Route path="drives"          element={<AuthGuard><PlacementDrives /></AuthGuard>} />
+            <Route path="internships"     element={<AuthGuard><Internships /></AuthGuard>} />
+            <Route path="experiences"     element={<AuthGuard><Experiences /></AuthGuard>} />
+            <Route path="add-experience"  element={<AuthGuard><AddExperience /></AuthGuard>} />
+            <Route path="template"        element={<AuthGuard><ExperienceTemplate /></AuthGuard>} />
+            <Route path="experience/:id"  element={<AuthGuard><ExperienceDetail /></AuthGuard>} />
+            <Route path="resume"          element={<AuthGuard><ResumeMatch /></AuthGuard>} />
+            <Route path="help"            element={<AuthGuard><Help /></AuthGuard>} />
+            <Route path="about"           element={<AuthGuard><AboutUs /></AuthGuard>} />
+            <Route path="notifications"   element={<AuthGuard><Notifications /></AuthGuard>} />
+            <Route path="profile"         element={<AuthGuard><Profile /></AuthGuard>} />
+          </Route>
 
-        {/* ── Global Fallback ── */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* ── Global Fallback ── */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </SkillAnalysisQueueProvider>
     </Router>
   );
 }
