@@ -158,3 +158,31 @@ export const logout = async () => {
         window.location.hash = '#/login/student';
     }
 };
+
+export const sendOtp = async (email, purpose, role = 'student') => {
+    const res = await apiFetch('/api/otp/send', {
+        method: 'POST',
+        body: JSON.stringify({ email, purpose, role })
+    });
+    const data = await res.json();
+    return { res, data };
+};
+
+export const verifyOtp = async (email, otp, purpose) => {
+    const res = await apiFetch('/api/otp/verify', {
+        method: 'POST',
+        body: JSON.stringify({ email, otp, purpose })
+    });
+    const data = await res.json();
+    return { res, data };
+};
+
+export const resetPassword = async (payload) => {
+    const res = await apiFetch('/api/reset-password', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    return { res, data };
+};
+

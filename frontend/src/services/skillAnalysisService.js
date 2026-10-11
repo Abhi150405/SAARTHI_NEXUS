@@ -216,3 +216,55 @@ export function isSkillSatisfied(studentSkills, requiredSkill) {
     });
 }
 
+/**
+ * Fetch a student's interactive learning pathway for a target.
+ */
+export async function getStudentPathway(userEmail, targetName, targetType = 'company') {
+  if (!userEmail || !targetName) return { found: false, pathway: null };
+  const params = new URLSearchParams({
+    email: userEmail,
+    target_name: targetName,
+    target_type: targetType
+  });
+  const response = await fetch(`${API_URL}/api/skill-analysis/progress?${params.toString()}`);
+  if (!response.ok) {
+    return { found: false, pathway: null };
+  }
+  return response.json();
+}
+
+/**
+ * Fetch all active tracked pathways for a student.
+ */
+export async function getAllStudentPathways(userEmail) {
+  if (!userEmail) return { pathways: [] };
+  const response = await fetch(`${API_URL}/api/skill-analysis/progress/all?email=${encodeURIComponent(userEmail)}`);
+  if (!response.ok) {
+    return { pathways: [] };
+  }
+  return response.json();
+}
+
+/**
+ * Toggle completion of a specific roadmap step.
+ * Recalculates match score and mastery status dynamically.
+ */
+export async function toggleRoadmapStep(userEmail, targetName, targetType, skill, stepIndex, completed) {
+  const response = await fetch(`${API_URL}/api/skill-analysis/progress/toggle-step`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: userEmail,
+      target_name: targetName,
+      target_type: targetType || 'company',
+      skill,
+      step_index: stepIndex,
+      completed
+    })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to toggle step: ${response.status}`);
+  }
+  return response.json();
+}
+

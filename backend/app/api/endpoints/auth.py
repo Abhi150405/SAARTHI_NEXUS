@@ -29,10 +29,20 @@ from app.core.security import (
 from app.db.mongodb import get_database
 from app.schemas.auth import (
     ChangePassword,
+    OtpResponse,
+    ResetPasswordWithOtp,
+    SendOtpRequest,
     TokenResponse,
     UserLogin,
     UserOut,
     UserSignup,
+    VerifyOtpRequest,
+    VerifyOtpResponse,
+)
+from app.services.otp_service import (
+    generate_and_send_otp,
+    validate_verification_token,
+    verify_otp_code,
 )
 
 router = APIRouter()
@@ -84,6 +94,85 @@ def _build_token_response(user_doc: dict, role: str) -> dict:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# OTP Endpoints
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@router.post("/otp/send", response_model=OtpResponse)
+@limiter.limit("10/minute")
+async def send_otp(request: Request, payload: SendOtpRequest):
+    """
+    Generate and dispatch a 6-digit OTP to the requested email address.
+    Purpose must be either 'signup' or 'reset_password'.
+    """
+    return await generate_and_send_otp(
+        email=payload.email,
+        purpose=payload.purpose,
+        role=payload.role or "student",
+    )
+
+
+@router.post("/otp/verify", response_model=VerifyOtpResponse)
+@limiter.limit("15/minute")
+async def verify_otp(request: Request, payload: VerifyOtpRequest):
+    """
+    Verify the 6-digit OTP provided by the user.
+    Returns a signed verification token upon success.
+    """
+    token = await verify_otp_code(
+        email=payload.email,
+        otp=payload.otp,
+        purpose=payload.purpose,
+    )
+    return {
+        "message": "Verification code verified successfully.",
+        "verification_token": token,
+    }
+
+
+@router.post("/reset-password")
+@limiter.limit("10/minute")
+async def reset_password(request: Request, payload: ResetPasswordWithOtp):
+    """
+    Reset user password using a verified OTP or cryptographic verification token.
+    Works for both students and admins.
+    """
+    email = payload.email.lower().strip()
+    db = get_database()
+    coll = db["admins"] if payload.role == "admin" else db["students"]
+
+    user = await coll.find_one({"email": email})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No account found with email {email}.",
+        )
+
+    # Enforce OTP verification
+    if payload.verificationToken:
+        validate_verification_token(payload.verificationToken, email, "reset_password")
+    elif payload.otp:
+        await verify_otp_code(email, payload.otp, "reset_password")
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Verification code or token is required to reset password.",
+        )
+
+    hashed_password = generate_password_hash(payload.newPassword)
+    await coll.update_one(
+        {"email": email},
+        {"$set": {"password": hashed_password}},
+    )
+
+    # Invalidate OTP records for reset_password
+    otp_coll = db["otp_verifications"]
+    await otp_coll.delete_many({"email": email, "purpose": "reset_password"})
+
+    return {"message": "Password reset successfully. You can now log in with your new password."}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # POST /signup   (rate-limited: 5/minute)
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -95,21 +184,34 @@ async def signup(request: Request, response: Response, user: UserSignup):
     students_coll = db["students"]
     admins_coll = db["admins"]
 
-    if await students_coll.find_one({"email": user.email}) or await admins_coll.find_one(
-        {"email": user.email}
+    email_clean = user.email.lower().strip()
+
+    if await students_coll.find_one({"email": email_clean}) or await admins_coll.find_one(
+        {"email": email_clean}
     ):
         raise HTTPException(
             status_code=400, detail="An account with this email already exists."
         )
 
-    if await students_coll.find_one({"id_number": user.idNumber}):
+    if await students_coll.find_one({"id_number": user.idNumber.strip()}):
         raise HTTPException(status_code=400, detail="The ID Number is already registered.")
+
+    # Require OTP email verification
+    if user.verificationToken:
+        validate_verification_token(user.verificationToken, email_clean, "signup")
+    elif user.otp:
+        await verify_otp_code(email_clean, user.otp, "signup")
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Email verification required. Please verify your email with an OTP.",
+        )
 
     hashed_password = generate_password_hash(user.password)
     user_record = {
-        "full_name": user.fullName,
-        "email": user.email,
-        "id_number": user.idNumber,
+        "full_name": user.fullName.strip(),
+        "email": email_clean,
+        "id_number": user.idNumber.strip(),
         "department": user.department,
         "password": hashed_password,
         "role": "student",
@@ -118,9 +220,13 @@ async def signup(request: Request, response: Response, user: UserSignup):
 
     await students_coll.insert_one(user_record)
 
+    # Clean up OTP records for this email
+    otp_coll = db["otp_verifications"]
+    await otp_coll.delete_many({"email": email_clean, "purpose": "signup"})
+
     # Issue tokens
     payload = _build_token_response(user_record, "student")
-    _set_refresh_cookie(response, create_refresh_token(user.email, "student"))
+    _set_refresh_cookie(response, create_refresh_token(email_clean, "student"))
     return payload
 
 

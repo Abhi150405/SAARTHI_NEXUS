@@ -93,7 +93,10 @@ const Notifications = () => {
     };
 
     const filters = ['all', 'announcement', 'attendance'];
-    const filteredNotifs = filter === 'all' ? notifications : notifications.filter(n => n.type === filter);
+    const filteredNotifs = (filter === 'all' 
+        ? notifications 
+        : notifications.filter(n => n.type === filter || (filter === 'announcement' && (n.type === 'broadcast' || !n.type)))
+    ).filter(n => n.type !== 'skill_analysis_ready');
 
     const priorityColor = (notif) => {
         if (notif.type === 'attendance') return 'bg-[#F97316]';

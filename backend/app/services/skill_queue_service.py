@@ -9,6 +9,7 @@ from app.services.skill_analysis_service import (
     run_skill_gap_pipeline,
     get_skill_analysis_cache_key
 )
+from app.services.pathway_service import pathway_service
 
 
 class SkillAnalysisQueueService:
@@ -25,6 +26,17 @@ class SkillAnalysisQueueService:
         self._is_running = True
         self._worker_task = asyncio.create_task(self._worker_loop())
         print("[QUEUE] Skill Analysis Queue Worker started.")
+
+        # Ensure TTL index (30-day auto cleanup) and active task query indexes
+        try:
+            db = get_database()
+            if db is not None:
+                await db['skill_analysis_tasks'].create_index("created_at", expireAfterSeconds=2592000)
+                await db['skill_analysis_tasks'].create_index([("user_email", 1), ("status", 1)])
+                await db['skill_analysis_tasks'].create_index("task_id", unique=True)
+                await pathway_service.init_indexes()
+        except Exception as e:
+            print(f"[QUEUE] Index initialization warning: {e}")
 
         # Re-enqueue any stranded pending tasks from previous server run
         try:
@@ -103,6 +115,19 @@ class SkillAnalysisQueueService:
                     await db['skill_analysis_tasks'].insert_one(task_doc)
                 except Exception as e:
                     print(f"[QUEUE] Error inserting cached task: {e}")
+
+            # Sync student pathway progress
+            if email and email.lower().strip() != "guest":
+                try:
+                    await pathway_service.save_or_update_progress_from_analysis(
+                        user_email=email,
+                        target_name=target_name,
+                        target_type=target_type,
+                        result=cached_result,
+                        task_id=task_id
+                    )
+                except Exception as pe:
+                    print(f"[QUEUE] Error syncing pathway progress for cached task: {pe}")
 
             return {
                 "task_id": task_id,
@@ -211,7 +236,7 @@ class SkillAnalysisQueueService:
         cursor = db['skill_analysis_tasks'].find({
             "user_email": user_email,
             "status": {"$in": ["queued", "processing"]}
-        }).sort("created_at", -1)
+        }, projection={"result": 0, "request_payload": 0}).sort("created_at", -1)
 
         tasks = await cursor.to_list(20)
         return [self._format_task_doc(t) for t in tasks]
@@ -294,22 +319,40 @@ class SkillAnalysisQueueService:
                 )
                 print(f"[QUEUE] Task {task_id} successfully completed for {task.get('target_name')}.")
 
-                # Add notification
+                # Sync interactive pathway progress in student_pathway_progress
+                try:
+                    user_email = task.get("user_email")
+                    target_name = task.get("target_name", "Target")
+                    target_type = task.get("target_type", "company")
+                    if user_email and user_email.lower().strip() != "guest":
+                        await pathway_service.save_or_update_progress_from_analysis(
+                            user_email=user_email,
+                            target_name=target_name,
+                            target_type=target_type,
+                            result=result,
+                            task_id=task_id
+                        )
+                except Exception as pe:
+                    print(f"[QUEUE] Pathway progress sync error: {pe}")
+
+                # Add notification into isolated user_notifications collection
                 try:
                     user_email = task.get("user_email")
                     target_name = task.get("target_name", "Target")
                     if user_email and user_email != "guest":
-                        await db['notifications'].insert_one({
+                        await db['user_notifications'].insert_one({
+                            "title": "Skill Gap Analysis Ready",
                             "message": f"Skill Gap Analysis for {target_name} is complete and ready to view!",
-                            "user_email": user_email,
+                            "user_email": user_email.lower().strip(),
                             "type": "skill_analysis_ready",
                             "target_name": target_name,
                             "target_type": task.get("target_type", "company"),
                             "task_id": task_id,
+                            "read": False,
                             "created_at": completed_at
                         })
                 except Exception as ne:
-                    print(f"[QUEUE] Notification insertion error: {ne}")
+                    print(f"[QUEUE] User notification insertion error: {ne}")
 
             except Exception as e:
                 print(f"[QUEUE] Task {task_id} failed with error: {e}")

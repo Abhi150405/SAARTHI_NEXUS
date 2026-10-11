@@ -11,8 +11,19 @@ from app.services.skill_analysis_service import (
     run_skill_gap_pipeline
 )
 from app.services.skill_queue_service import skill_queue_service
+from app.services.pathway_service import pathway_service
 from app.services.ml_service import ml_service
 from app.services.coursera_service import coursera_service
+from pydantic import BaseModel
+
+
+class ToggleStepRequest(BaseModel):
+    email: str
+    target_name: str
+    target_type: str = "company"
+    skill: str
+    step_index: int
+    completed: bool
 
 router = APIRouter()
 
@@ -45,7 +56,18 @@ async def analyze_skill_gap(request: AnalysisRequest):
     Maintained for backward compatibility and immediate direct execution.
     """
     try:
-        return await run_skill_gap_pipeline(request)
+        result = await run_skill_gap_pipeline(request)
+        if request.student.email and request.student.email.lower().strip() != "guest":
+            try:
+                await pathway_service.save_or_update_progress_from_analysis(
+                    user_email=request.student.email,
+                    target_name=request.target.name,
+                    target_type=request.target.type,
+                    result=result
+                )
+            except Exception as pe:
+                print(f"[PATHWAY] Progress sync warning on direct run: {pe}")
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -109,6 +131,56 @@ async def get_active_tasks(email: str = Query(..., description="Student email"))
     """
     tasks = await skill_queue_service.get_active_tasks(user_email=email)
     return {"active_tasks": tasks}
+
+
+# ── Interactive Student Pathway Progress Endpoints ───────────────────────────
+@router.get("/progress")
+async def get_pathway_progress(
+    email: str = Query(..., description="Student email"),
+    target_name: str = Query(..., description="Target company or role name"),
+    target_type: str = Query("company", description="Target type ('company' or 'role')")
+):
+    """
+    Retrieves the interactive learning pathway and completed steps for a student and target.
+    """
+    pathway = await pathway_service.get_student_pathway(
+        user_email=email,
+        target_name=target_name,
+        target_type=target_type
+    )
+    if not pathway:
+        return {"found": False, "pathway": None}
+    return {"found": True, "pathway": pathway}
+
+
+@router.get("/progress/all")
+async def get_all_student_pathways(
+    email: str = Query(..., description="Student email")
+):
+    """
+    Retrieves all learning pathways the student is actively tracking.
+    """
+    pathways = await pathway_service.get_all_student_pathways(user_email=email)
+    return {"pathways": pathways}
+
+
+@router.post("/progress/toggle-step")
+async def toggle_roadmap_step(payload: ToggleStepRequest):
+    """
+    Toggles completion of a roadmap step for a specific skill gap.
+    Dynamically recalculates the student's current match percentage.
+    """
+    updated_pathway = await pathway_service.toggle_roadmap_step(
+        user_email=payload.email,
+        target_name=payload.target_name,
+        target_type=payload.target_type,
+        skill_name=payload.skill,
+        step_index=payload.step_index,
+        completed=payload.completed
+    )
+    if not updated_pathway:
+        raise HTTPException(status_code=404, detail="Pathway or skill not found for user")
+    return {"success": True, "pathway": updated_pathway}
 
 
 # ── Supplementary Endpoints ──────────────────────────────────────────────────

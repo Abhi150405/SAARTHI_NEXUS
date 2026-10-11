@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { API_URL } from '../config';
 import '../styles/CompanyRecords.css';
 import CompanyXRay from '../components/CompanyXRay';
+import CompanyWisePlacementTable from '../components/CompanyWisePlacementTable';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -116,6 +117,13 @@ const CompanyRecords = () => {
   // ── Company X-Ray panel ──────────────────────────────────
   const [xrayCompany, setXrayCompany] = useState(null);
   const openXRay = (companyName) => setXrayCompany(companyName);
+
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const location = useLocation();
 
@@ -547,8 +555,107 @@ const CompanyRecords = () => {
         )}
       </div>
 
+      {/* ━━━━━━━━━━━━━━━━━━━━━ SECTION QUICK NAVIGATION ━━━━━━━━━━━━━━━━━━━━━ */}
+      <div className="cr-nav-bar" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px',
+        padding: '12px 32px',
+        background: '#0a0a0a',
+        borderBottom: 'var(--border)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ fontFamily: 'var(--fm)', fontSize: '11px', color: '#888', fontWeight: 700, letterSpacing: '1px' }}>
+            QUICK JUMP:
+          </span>
+          <button
+            type="button"
+            onClick={() => scrollToSection('year-analytics')}
+            style={{
+              cursor: 'pointer',
+              padding: '6px 14px',
+              background: '#1a1a1a',
+              color: '#fff',
+              fontSize: '11px',
+              fontFamily: 'var(--fm)',
+              fontWeight: 700,
+              border: '1px solid #333',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#FFE135'; e.currentTarget.style.color = '#000'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#1a1a1a'; e.currentTarget.style.color = '#fff'; }}
+          >
+            📊 PACKAGE METRICS
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection('loyalty-section')}
+            style={{
+              cursor: 'pointer',
+              padding: '6px 14px',
+              background: '#1a1a1a',
+              color: '#fff',
+              fontSize: '11px',
+              fontFamily: 'var(--fm)',
+              fontWeight: 700,
+              border: '1px solid #333',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#FFE135'; e.currentTarget.style.color = '#000'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#1a1a1a'; e.currentTarget.style.color = '#fff'; }}
+          >
+            🔄 RECRUITER SPECTRUM
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection('company-wise-report')}
+            style={{
+              cursor: 'pointer',
+              padding: '6px 16px',
+              background: '#FF3B3B',
+              color: '#fff',
+              fontSize: '11px',
+              fontFamily: 'var(--fm)',
+              fontWeight: 900,
+              border: '2px solid #FFE135',
+              boxShadow: '2px 2px 0px #000',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#FFE135'; e.currentTarget.style.color = '#000'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#FF3B3B'; e.currentTarget.style.color = '#fff'; }}
+          >
+            <span>📑 STUDENTS PLACEMENT REPORT (COMPANY-WISE)</span>
+            <span style={{ background: '#FFE135', color: '#000', fontSize: '9px', padding: '1px 4px', fontWeight: 900 }}>OFFICIAL</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection('hall-of-offers')}
+            style={{
+              cursor: 'pointer',
+              padding: '6px 14px',
+              background: '#1a1a1a',
+              color: '#fff',
+              fontSize: '11px',
+              fontFamily: 'var(--fm)',
+              fontWeight: 700,
+              border: '1px solid #333',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#FFE135'; e.currentTarget.style.color = '#000'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#1a1a1a'; e.currentTarget.style.color = '#fff'; }}
+          >
+            🎪 HALL OF OFFERS
+          </button>
+        </div>
+      </div>
+
       {/* ━━━━━━━━━━━━━━━━━━━━━ ZONE 2: YEAR SELECTOR ━━━━━━━━━━━━━━━━━━━━━ */}
-      <div className="year-row">
+      <div className="year-row" id="year-analytics">
         {yearList.length === 0 ? (
           <div className="skeleton-block" style={{ height: 40, width: 320 }} />
         ) : (
@@ -679,18 +786,18 @@ const CompanyRecords = () => {
           const { summary, companies, all_years } = loyaltyData;
 
           const SEGMENTS = [
-            { key: 'ALL',          label: 'ALL',          count: companies.length },
-            { key: 'ALWAYS_THERE', label: 'ALWAYS THERE', count: summary.always_there },
-            { key: 'COMEBACK',     label: 'COMEBACK KIDS', count: summary.comeback },
-            { key: 'FIRST_TIMER',  label: 'FIRST TIMERS', count: summary.first_timer },
-            { key: 'GHOSTED',      label: 'GHOSTED US',   count: summary.ghosted },
+            { key: 'ALL',          label: 'ALL',             count: companies.length },
+            { key: 'ALWAYS_THERE', label: 'ALWAYS THERE',    count: summary.always_there },
+            { key: 'COMEBACK',     label: 'COMEBACK KIDS',   count: summary.comeback },
+            { key: 'FIRST_TIMER',  label: 'FIRST TIMERS',    count: summary.first_timer },
+            { key: 'GHOSTED',      label: 'PAST RECRUITERS', count: summary.ghosted },
           ];
 
           const SEG_STYLE = {
-            ALWAYS_THERE: { bg: 'var(--green)',  text: '#000', label: 'ALWAYS THERE',  sub: 'Visited every season' },
-            COMEBACK:     { bg: 'var(--blue)',   text: '#fff', label: 'COMEBACK KIDS', sub: 'Left, then returned' },
-            FIRST_TIMER:  { bg: 'var(--yellow)', text: '#000', label: 'FIRST TIMERS',  sub: 'New this season' },
-            GHOSTED:      { bg: 'var(--red)',    text: '#fff', label: 'GHOSTED US',    sub: "Haven't returned" },
+            ALWAYS_THERE: { bg: 'var(--green)',  text: '#000', label: 'ALWAYS THERE',    sub: 'Visited every season' },
+            COMEBACK:     { bg: 'var(--blue)',   text: '#fff', label: 'COMEBACK KIDS',   sub: 'Left, then returned' },
+            FIRST_TIMER:  { bg: 'var(--yellow)', text: '#000', label: 'FIRST TIMERS',    sub: 'New this season' },
+            GHOSTED:      { bg: 'var(--red)',    text: '#fff', label: 'PAST RECRUITERS', sub: "Visited previously" },
           };
 
           const TREND_ARROW = { rising: '▲', declining: '▼', flat: '–' };
@@ -840,8 +947,13 @@ const CompanyRecords = () => {
         })()}
       </div>
 
-      {/* ━━━━━━━━━━━━━━━━━━━━━ ZONE 5: HALL OF OFFERS ━━━━━━━━━━━━━━━━━━━━━ */}
-      <div className="zone5">
+      {/* ━━━━━━━━━━━━━━━━━━━━━ ZONE 5: STUDENTS PLACEMENT (COMPANY WISE) REPORT ━━━━━━━━━━━━━━━━━━━━━ */}
+      <div id="company-wise-report" className="px-2 sm:px-6 py-6 border-b-[3px] border-black bg-[#FAF7F2] print:p-0 print:border-none">
+        <CompanyWisePlacementTable onCompanyClick={openXRay} />
+      </div>
+
+      {/* ━━━━━━━━━━━━━━━━━━━━━ ZONE 6: HALL OF OFFERS ━━━━━━━━━━━━━━━━━━━━━ */}
+      <div className="zone5" id="hall-of-offers">
         <div className="zone5-title">HALL OF OFFERS</div>
         <div className="zone5-sub">Every offer. Every company. Every year.</div>
 

@@ -7,13 +7,19 @@ import {
     Eye,
     EyeOff,
     ArrowRight,
+    ArrowLeft,
     ShieldCheck,
     Mail,
+    KeyRound,
+    X,
+    RefreshCw,
+    CheckCircle2,
 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import '../styles/Login.css';
 import { API_URL } from '../config';
-import { apiFetch, login as apiLogin, setAccessToken, setUser } from '../api';
+import { apiFetch, login as apiLogin, setAccessToken, setUser, sendOtp, resetPassword } from '../api';
+import OtpInput from '../components/OtpInput';
 
 // ─── Inline SVG Components ────────────────────────────────────────────────────
 
@@ -334,6 +340,19 @@ const Login = ({ defaultRole = 'student' }) => {
     const [fieldErrors, setFieldErrors] = useState({});
     const [success, setSuccess]         = useState(false);
 
+    // ─── Forgot Password / OTP State ──────────────────────────────────────────
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [forgotStep, setForgotStep]                 = useState('email'); // 'email' | 'otp' | 'success'
+    const [forgotEmail, setForgotEmail]               = useState('');
+    const [forgotOtp, setForgotOtp]                   = useState('');
+    const [newPassword, setNewPassword]               = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
+    const [showNewPassword, setShowNewPassword]       = useState(false);
+    const [forgotLoading, setForgotLoading]           = useState(false);
+    const [forgotError, setForgotError]               = useState('');
+    const [forgotCooldown, setForgotCooldown]         = useState(0);
+    const [forgotDevOtp, setForgotDevOtp]             = useState(null);
+
     const navigate = useNavigate();
 
     // Load remembered email on mount
@@ -341,6 +360,115 @@ const Login = ({ defaultRole = 'student' }) => {
         const saved = localStorage.getItem('rememberedEmail');
         if (saved) { setEmail(saved); setRememberMe(true); }
     }, []);
+
+    // Timer effect for Forgot Password resend cooldown
+    useEffect(() => {
+        if (forgotCooldown <= 0) return;
+        const timer = setInterval(() => {
+            setForgotCooldown(prev => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [forgotCooldown]);
+
+    const handleSendResetOtp = async (e) => {
+        if (e) e.preventDefault();
+        const cleanEmail = forgotEmail.trim().toLowerCase();
+        if (!cleanEmail || !cleanEmail.includes('@')) {
+            setForgotError('Please enter a valid email address.');
+            return;
+        }
+
+        setForgotLoading(true);
+        setForgotError('');
+
+        try {
+            const { res, data } = await sendOtp(cleanEmail, 'reset_password', role);
+            if (res.ok) {
+                setForgotStep('otp');
+                setForgotOtp('');
+                setForgotCooldown(data.cooldown_seconds || 60);
+                if (data.dev_otp) setForgotDevOtp(data.dev_otp);
+            } else {
+                setForgotError(data.detail || data.reason || `No account found for this email address.`);
+            }
+        } catch {
+            setForgotError('Failed to connect to authentication server. Please check your network.');
+        } finally {
+            setForgotLoading(false);
+        }
+    };
+
+    const handleResendResetOtp = async () => {
+        if (forgotCooldown > 0 || forgotLoading) return;
+        setForgotLoading(true);
+        setForgotError('');
+
+        try {
+            const { res, data } = await sendOtp(forgotEmail.trim().toLowerCase(), 'reset_password', role);
+            if (res.ok) {
+                setForgotCooldown(data.cooldown_seconds || 60);
+                if (data.dev_otp) setForgotDevOtp(data.dev_otp);
+            } else {
+                setForgotError(data.detail || 'Could not resend verification code');
+            }
+        } catch {
+            setForgotError('Network error');
+        } finally {
+            setForgotLoading(false);
+        }
+    };
+
+    const handleResetPasswordSubmit = async (e) => {
+        if (e) e.preventDefault();
+        if (forgotOtp.trim().length !== 6) {
+            setForgotError('Please enter all 6 digits of the verification code.');
+            return;
+        }
+        if (newPassword.length < 6) {
+            setForgotError('New password must contain at least 6 characters.');
+            return;
+        }
+        if (newPassword !== confirmNewPassword) {
+            setForgotError('New passwords do not match.');
+            return;
+        }
+
+        setForgotLoading(true);
+        setForgotError('');
+
+        try {
+            const { res, data } = await resetPassword({
+                email: forgotEmail.trim().toLowerCase(),
+                otp: forgotOtp.trim(),
+                newPassword: newPassword,
+                role: role,
+            });
+
+            if (res.ok) {
+                setForgotStep('success');
+            } else {
+                setForgotError(data.detail || data.reason || 'Password reset failed. Please try again.');
+            }
+        } catch {
+            setForgotError('Could not reach the server. Please try again.');
+        } finally {
+            setForgotLoading(false);
+        }
+    };
+
+    const handleCloseForgotModal = () => {
+        if (forgotStep === 'success') {
+            setEmail(forgotEmail);
+            setPassword('');
+        }
+        setShowForgotPassword(false);
+        setForgotStep('email');
+        setForgotOtp('');
+        setNewPassword('');
+        setConfirmNewPassword('');
+        setForgotError('');
+        setForgotDevOtp(null);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -678,6 +806,21 @@ const Login = ({ defaultRole = 'student' }) => {
                                         </div>
                                         <span className="text-[12px]" style={{ color: '#525252' }}>Remember me</span>
                                     </label>
+
+                                    {/* Forgot password link */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setForgotEmail(email);
+                                            setForgotStep('email');
+                                            setForgotError('');
+                                            setShowForgotPassword(true);
+                                        }}
+                                        className="text-[12px] font-medium transition-colors hover:underline bg-transparent border-none cursor-pointer p-0"
+                                        style={{ color: 'var(--primary)' }}
+                                    >
+                                        Forgot password?
+                                    </button>
                                 </div>
 
                                 {/* Submit */}
@@ -718,14 +861,24 @@ const Login = ({ defaultRole = 'student' }) => {
                                 {role === 'student' ? (
                                     <>Don't have an account?{' '}
                                         <Link to="/signup" className="font-medium transition-opacity hover:opacity-80" style={{ color: 'var(--primary)' }}>
-                                            Create Account
+                                             Create Account
                                         </Link>
                                     </>
                                 ) : (
                                     <>Forgot admin credentials?{' '}
-                                        <a href="mailto:support@saarthi.nexus" className="font-medium transition-opacity hover:opacity-80" style={{ color: 'var(--primary)' }}>
-                                            Contact IT Support
-                                        </a>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setForgotEmail(email);
+                                                setForgotStep('email');
+                                                setForgotError('');
+                                                setShowForgotPassword(true);
+                                            }}
+                                            className="font-medium transition-opacity hover:opacity-80 bg-transparent border-none cursor-pointer p-0"
+                                            style={{ color: 'var(--primary)' }}
+                                        >
+                                            Reset with OTP
+                                        </button>
                                     </>
                                 )}
                             </p>
@@ -736,6 +889,291 @@ const Login = ({ defaultRole = 'student' }) => {
                     </AnimatePresence>
                 </motion.div>
             </div>
+
+            {/* ══════════════════ FORGOT PASSWORD MODAL ═══════════════════════ */}
+            <AnimatePresence>
+                {showForgotPassword && (
+                    <motion.div
+                        key="forgot-modal-backdrop"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+                        onClick={(e) => {
+                            if (e.target === e.currentTarget) handleCloseForgotModal();
+                        }}
+                    >
+                        <motion.div
+                            key="forgot-modal-card"
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="relative w-full max-w-[460px] rounded-2xl bg-[#0E0E0E] border border-[#262626] p-6 sm:p-8 shadow-2xl overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Close button */}
+                            <button
+                                type="button"
+                                onClick={handleCloseForgotModal}
+                                className="absolute right-5 top-5 text-[#737373] hover:text-white transition-colors bg-transparent border-none cursor-pointer p-1"
+                                aria-label="Close"
+                            >
+                                <X size={18} />
+                            </button>
+
+                            {/* ── STEP 1: ENTER EMAIL ─────────────────────────────────── */}
+                            {forgotStep === 'email' && (
+                                <div>
+                                    <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/25 flex items-center justify-center text-orange-400 mb-5 shadow-lg shadow-orange-500/5">
+                                        <KeyRound size={22} />
+                                    </div>
+
+                                    <h2 className="text-[24px] font-bold tracking-tight text-white mb-2">
+                                        Reset your password
+                                    </h2>
+                                    <p className="text-[13px] text-[#888888] leading-relaxed mb-6">
+                                        Enter your registered college email address and we'll send you a 6-digit verification code.
+                                    </p>
+
+                                    {/* Error Banner */}
+                                    <AnimatePresence>
+                                        {forgotError && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -6 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -4 }}
+                                                className="flex items-start gap-3 rounded-xl px-4 py-3 mb-5 border"
+                                                style={{ background: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.22)' }}
+                                            >
+                                                <div className="w-[3px] self-stretch rounded-full flex-shrink-0" style={{ background: '#EF4444', minHeight: 16 }} />
+                                                <p className="text-[12px] leading-relaxed text-red-400">{forgotError}</p>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    <form onSubmit={handleSendResetOtp} className="space-y-4">
+                                        <div>
+                                            <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2 text-[#A3A3A3]">
+                                                Account Email
+                                            </label>
+                                            <div className="relative">
+                                                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#525252] pointer-events-none" />
+                                                <input
+                                                    type="email"
+                                                    placeholder="name@college.edu"
+                                                    value={forgotEmail}
+                                                    onChange={(e) => { setForgotEmail(e.target.value); setForgotError(''); }}
+                                                    required
+                                                    autoFocus
+                                                    className={inputCls(false)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <motion.button
+                                            type="submit"
+                                            disabled={forgotLoading || !forgotEmail}
+                                            whileHover={!forgotLoading ? { scale: 1.015 } : {}}
+                                            whileTap={!forgotLoading ? { scale: 0.975 } : {}}
+                                            className="w-full font-semibold text-[14px] py-3 rounded-xl border-none flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed mt-4"
+                                            style={{ backgroundColor: 'var(--primary)', color: '#000' }}
+                                        >
+                                            {forgotLoading ? (
+                                                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <span>Send Verification Code</span>
+                                                    <ArrowRight size={15} />
+                                                </>
+                                            )}
+                                        </motion.button>
+                                    </form>
+                                </div>
+                            )}
+
+                            {/* ── STEP 2: ENTER OTP & NEW PASSWORD ───────────────────── */}
+                            {forgotStep === 'otp' && (
+                                <div>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setForgotStep('email'); setForgotError(''); }}
+                                        className="flex items-center gap-2 text-[12px] font-medium text-[#A3A3A3] hover:text-white transition-colors mb-5 bg-transparent border-none cursor-pointer p-0"
+                                    >
+                                        <ArrowLeft size={14} />
+                                        <span>Change email</span>
+                                    </button>
+
+                                    <h2 className="text-[24px] font-bold tracking-tight text-white mb-2">
+                                        Enter verification code
+                                    </h2>
+                                    <p className="text-[13px] text-[#888888] leading-relaxed mb-5">
+                                        Code sent to <span className="font-semibold text-white">{forgotEmail}</span>
+                                    </p>
+
+                                    {/* Dev Mode Banner */}
+                                    {forgotDevOtp && (
+                                        <div
+                                            onClick={() => setForgotOtp(forgotDevOtp)}
+                                            className="mb-5 p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all duration-200"
+                                            style={{
+                                                backgroundColor: 'rgba(249, 115, 22, 0.08)',
+                                                borderColor: 'rgba(249, 115, 22, 0.25)',
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                                                <span className="text-[12px] text-orange-300 font-medium">
+                                                    Dev Mode: Code is <strong className="font-mono text-white tracking-wider">{forgotDevOtp}</strong>
+                                                </span>
+                                            </div>
+                                            <span className="text-[11px] uppercase tracking-wider font-semibold text-orange-400 hover:underline">
+                                                Fill
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Error Banner */}
+                                    <AnimatePresence>
+                                        {forgotError && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -6 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -4 }}
+                                                className="flex items-start gap-3 rounded-xl px-4 py-3 mb-5 border"
+                                                style={{ background: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.22)' }}
+                                            >
+                                                <div className="w-[3px] self-stretch rounded-full flex-shrink-0" style={{ background: '#EF4444', minHeight: 16 }} />
+                                                <p className="text-[12px] leading-relaxed text-red-400">{forgotError}</p>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+                                        <div>
+                                            <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2.5 text-[#A3A3A3]">
+                                                6-Digit Security Code
+                                            </label>
+                                            <OtpInput
+                                                length={6}
+                                                value={forgotOtp}
+                                                onChange={(val) => { setForgotOtp(val); setForgotError(''); }}
+                                                disabled={forgotLoading}
+                                                autoFocus
+                                            />
+                                        </div>
+
+                                        <div className="pt-2">
+                                            <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2 text-[#A3A3A3]">
+                                                New Password
+                                            </label>
+                                            <div className="relative">
+                                                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#525252] pointer-events-none" />
+                                                <input
+                                                    type={showNewPassword ? 'text' : 'password'}
+                                                    placeholder="At least 6 characters"
+                                                    value={newPassword}
+                                                    onChange={(e) => { setNewPassword(e.target.value); setForgotError(''); }}
+                                                    required
+                                                    className={inputCls(false) + ' pr-11'}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#525252] hover:text-white bg-transparent border-none cursor-pointer p-0.5"
+                                                >
+                                                    {showNewPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2 text-[#A3A3A3]">
+                                                Confirm New Password
+                                            </label>
+                                            <div className="relative">
+                                                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#525252] pointer-events-none" />
+                                                <input
+                                                    type={showNewPassword ? 'text' : 'password'}
+                                                    placeholder="Re-type new password"
+                                                    value={confirmNewPassword}
+                                                    onChange={(e) => { setConfirmNewPassword(e.target.value); setForgotError(''); }}
+                                                    required
+                                                    className={inputCls(false)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <motion.button
+                                            type="submit"
+                                            disabled={forgotLoading || forgotOtp.length !== 6 || !newPassword || !confirmNewPassword}
+                                            whileHover={!forgotLoading ? { scale: 1.015 } : {}}
+                                            whileTap={!forgotLoading ? { scale: 0.975 } : {}}
+                                            className="w-full font-semibold text-[14px] py-3 rounded-xl border-none flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed mt-4"
+                                            style={{ backgroundColor: 'var(--primary)', color: '#000' }}
+                                        >
+                                            {forgotLoading ? (
+                                                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                            ) : (
+                                                <span>Update Password</span>
+                                            )}
+                                        </motion.button>
+                                    </form>
+
+                                    {/* Resend strip */}
+                                    <div className="flex items-center justify-between pt-4 mt-5 border-t border-white/5 text-[12px]">
+                                        <span style={{ color: '#666666' }}>Didn't receive code?</span>
+                                        {forgotCooldown > 0 ? (
+                                            <span className="font-mono text-[11px] text-[#888888]">
+                                                Resend in {forgotCooldown}s
+                                            </span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={handleResendResetOtp}
+                                                disabled={forgotLoading}
+                                                className="flex items-center gap-1.5 font-medium transition-colors hover:underline bg-transparent border-none cursor-pointer p-0"
+                                                style={{ color: 'var(--primary)' }}
+                                            >
+                                                <RefreshCw size={12} className={forgotLoading ? 'animate-spin' : ''} />
+                                                <span>Resend code</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ── STEP 3: SUCCESS ────────────────────────────────────── */}
+                            {forgotStep === 'success' && (
+                                <div className="text-center py-4">
+                                    <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto mb-4">
+                                        <CheckCircle2 size={30} />
+                                    </div>
+
+                                    <h2 className="text-[22px] font-bold tracking-tight text-white mb-2">
+                                        Password Updated!
+                                    </h2>
+                                    <p className="text-[13px] text-[#888888] leading-relaxed mb-6">
+                                        Your password has been reset successfully. You can now log into your SAARTHI Nexus account with your new password.
+                                    </p>
+
+                                    <motion.button
+                                        type="button"
+                                        onClick={handleCloseForgotModal}
+                                        whileHover={{ scale: 1.015 }}
+                                        whileTap={{ scale: 0.975 }}
+                                        className="w-full font-semibold text-[14px] py-3 rounded-xl border-none flex items-center justify-center gap-2 cursor-pointer"
+                                        style={{ backgroundColor: 'var(--primary)', color: '#000' }}
+                                    >
+                                        <span>Back to Sign In</span>
+                                        <ArrowRight size={15} />
+                                    </motion.button>
+                                </div>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

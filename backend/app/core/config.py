@@ -31,6 +31,16 @@ class Settings(BaseSettings):
         "https://saarthi-nexus.onrender.com"
     ]
 
+    # SMTP / Email Configuration for OTP and notifications
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER: str = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_FROM_EMAIL: str = os.getenv("SMTP_FROM_EMAIL", "")
+    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "SAARTHI NEXUS")
+    SMTP_TLS: bool = os.getenv("SMTP_TLS", "true").lower() in ("true", "1", "yes")
+    SMTP_SSL: bool = os.getenv("SMTP_SSL", "false").lower() in ("true", "1", "yes")
+
     def __init__(self, **values):
         super().__init__(**values)
         origins = os.getenv("CORS_ORIGINS")

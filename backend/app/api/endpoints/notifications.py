@@ -27,19 +27,51 @@ async def broadcast_notification(request: Request, current_user: dict = Depends(
 
 @router.get("/notifications")
 async def get_notifications(limit: int = 5):
+    """Fetch public TNP broadcast and attendance announcements only."""
     db = get_database()
-    notifications = await db['notifications'].find({}).sort('created_at', -1).limit(limit).to_list(None)
+    notifications = await db['notifications'].find(
+        {"type": {"$in": ["broadcast", "attendance"]}}
+    ).sort('created_at', -1).limit(limit).to_list(None)
     for n in notifications:
         n['_id'] = str(n['_id'])
     return notifications
 
 @router.get("/notifications/all")
 async def get_all_notifications():
+    """Fetch all official TNP broadcast announcements."""
     db = get_database()
-    notifications = await db['notifications'].find({}).sort('created_at', -1).to_list(None)
+    notifications = await db['notifications'].find(
+        {"type": {"$in": ["broadcast", "attendance"]}}
+    ).sort('created_at', -1).to_list(None)
     for n in notifications:
         n['_id'] = str(n['_id'])
     return notifications
+
+@router.get("/notifications/user")
+async def get_user_notifications(email: str, limit: int = 10):
+    """
+    Fetch isolated personal notifications for a specific student
+    (e.g., Skill Gap Analysis completion alerts).
+    """
+    if not email:
+        return []
+    db = get_database()
+    user_notifs = await db['user_notifications'].find(
+        {"user_email": email.lower().strip()}
+    ).sort('created_at', -1).limit(limit).to_list(None)
+    for n in user_notifs:
+        n['_id'] = str(n['_id'])
+    return user_notifs
+
+@router.patch("/notifications/user/{id}/read")
+async def mark_user_notification_read(id: str):
+    """Mark an isolated personal notification as read."""
+    db = get_database()
+    await db['user_notifications'].update_one(
+        {"_id": ObjectId(id)},
+        {"$set": {"read": True}}
+    )
+    return {"status": "success"}
 
 @router.put("/notifications/{id}")
 async def update_notification(id: str, request: Request, current_user: dict = Depends(require_admin)):

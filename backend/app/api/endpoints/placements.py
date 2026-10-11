@@ -785,3 +785,147 @@ async def company_xray(
         },
         "yearly_branch_breakdown": yearly_branch_breakdown
     }
+
+
+# ─────────────────────────────────────────────────────────────────
+# H) GET /placements/company-wise-report
+# ─────────────────────────────────────────────────────────────────
+@router.get("/company-wise-report")
+@cache_response(ttl=300, namespace="placements")
+async def company_wise_report(
+    year: str = Query("2024-25", description="Academic year (e.g. 2024-25, 2023-24, 2022-23, 2021-22, or all)"),
+    search: Optional[str] = Query(None, description="Search company name"),
+    branch: Optional[str] = Query(None, description="Filter by branch (CE, IT, E&TC)"),
+    sort_by: Optional[str] = Query("sr_no", description="sr_no, salary_desc, salary_asc, hired_desc, company_asc")
+):
+    """
+    Returns full official list of companies year-wise, matching the
+    'Students Placement (Company Wise)' institutional format.
+    """
+    db = get_database()
+
+    match = {}
+    if year and year.lower() != "all":
+        match["academic_year"] = year
+
+    if search and search.strip():
+        match["company_name"] = {"$regex": re.escape(search.strip()), "$options": "i"}
+
+    if branch and branch.upper() in ["CE", "IT", "E&TC"]:
+        match[f"selections.{branch.upper()}"] = {"$gt": 0}
+
+    # Fetch available years
+    available_years = sorted(await db[COLLECTION].distinct("academic_year"), reverse=True)
+
+    # Sort
+    sort_spec = [("salary_lpa", -1), ("company_name", 1)]
+    if sort_by == "salary_asc":
+        sort_spec = [("salary_lpa", 1), ("company_name", 1)]
+    elif sort_by == "hired_desc":
+        sort_spec = [("gender_distribution.total", -1), ("salary_lpa", -1)]
+    elif sort_by == "company_asc" or sort_by == "sr_no":
+        sort_spec = [("company_name", 1)]
+
+    cursor = db[COLLECTION].find(match).sort(sort_spec)
+    docs = await cursor.to_list(None)
+
+    rows = []
+    tot_ce = 0
+    tot_it = 0
+    tot_entc = 0
+    tot_male = 0
+    tot_female = 0
+    tot_hired = 0
+    tot_value = 0.0
+    highest_sal = 0.0
+
+    for idx, doc in enumerate(docs, start=1):
+        c_name = doc.get("company_name", "")
+        sal = float(doc.get("salary_lpa") or 0.0)
+        highest_sal = max(highest_sal, sal)
+
+        crit = doc.get("criteria") or {}
+        min_cgpa = str(crit.get("min_cgpa", "")).strip()
+        elig_branches = str(crit.get("eligible_branches", "")).strip()
+
+        criteria_parts = []
+        if min_cgpa and min_cgpa != "None":
+            criteria_parts.append(f"{min_cgpa} CGPA" if not min_cgpa.upper().startswith("PPO") else "PPO")
+        if elig_branches and elig_branches != "None":
+            criteria_parts.append(elig_branches)
+        criteria_str = " | ".join(criteria_parts) if criteria_parts else "All Branches"
+
+        sel = doc.get("selections") or {}
+        ce_count = int(sel.get("CE", 0) or 0)
+        it_count = int(sel.get("IT", 0) or 0)
+        entc_count = int(sel.get("E&TC", 0) or 0)
+
+        gender = doc.get("gender_distribution") or {}
+        m_count = int(gender.get("male", 0) or 0)
+        f_count = int(gender.get("female", 0) or 0)
+        t_count = int(gender.get("total", 0) or (m_count + f_count) or (ce_count + it_count + entc_count))
+
+        # Date
+        v_date = doc.get("visit_date")
+        visit_date_str = str(v_date) if (v_date and str(v_date) != "None") else ("PPO" if "PPO" in min_cgpa.upper() else "-")
+
+        # Total salary (package * total students)
+        row_tot_salary = float(doc.get("total_salary_lpa") or 0.0)
+        if row_tot_salary <= 0:
+            row_tot_salary = round(sal * t_count, 2)
+
+        tot_ce += ce_count
+        tot_it += it_count
+        tot_entc += entc_count
+        tot_male += m_count
+        tot_female += f_count
+        tot_hired += t_count
+        tot_value += row_tot_salary
+
+        rows.append({
+            "sr_no": idx,
+            "company_name": c_name,
+            "academic_year": doc.get("academic_year", year),
+            "criteria": {
+                "min_cgpa": min_cgpa,
+                "eligible_branches": elig_branches,
+                "display": criteria_str
+            },
+            "ug_selections": {
+                "ce": ce_count,
+                "entc": entc_count,
+                "it": it_count,
+                "total": ce_count + it_count + entc_count
+            },
+            "gender": {
+                "male": m_count,
+                "female": f_count,
+                "total": t_count
+            },
+            "salary_lpa": sal,
+            "visit_date": visit_date_str,
+            "total_salary_lpa": round(row_tot_salary, 2),
+            "category": doc.get("category", "")
+        })
+
+    avg_sal = round(tot_value / tot_hired, 2) if tot_hired > 0 else 0.0
+
+    return {
+        "year": year,
+        "available_years": available_years,
+        "total_records": len(rows),
+        "summary": {
+            "total_companies": len(rows),
+            "total_ce": tot_ce,
+            "total_it": tot_it,
+            "total_entc": tot_entc,
+            "total_male": tot_male,
+            "total_female": tot_female,
+            "total_hired": tot_hired,
+            "total_salary_outflow_lpa": round(tot_value, 2),
+            "average_salary_lpa": avg_sal,
+            "highest_salary_lpa": highest_sal
+        },
+        "records": rows
+    }
+

@@ -10,6 +10,8 @@ class UserSignup(BaseModel):
     idNumber: str
     department: str
     password: str = Field(..., min_length=6)
+    otp: Optional[str] = None
+    verificationToken: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -21,6 +23,33 @@ class ChangePassword(BaseModel):
     currentPassword: str
     newPassword: str = Field(..., min_length=6)
     role: str = "student"
+
+class SendOtpRequest(BaseModel):
+    email: EmailStr
+    purpose: str = Field(..., pattern="^(signup|reset_password)$")
+    role: Optional[str] = "student"
+
+class VerifyOtpRequest(BaseModel):
+    email: EmailStr
+    otp: str = Field(..., min_length=6, max_length=6)
+    purpose: str = Field(..., pattern="^(signup|reset_password)$")
+
+class ResetPasswordWithOtp(BaseModel):
+    email: EmailStr
+    newPassword: str = Field(..., min_length=6)
+    otp: Optional[str] = None
+    verificationToken: Optional[str] = None
+    role: str = "student"
+
+class OtpResponse(BaseModel):
+    message: str
+    cooldown_seconds: int = 60
+    delivery_mode: Optional[str] = None
+    dev_otp: Optional[str] = None
+
+class VerifyOtpResponse(BaseModel):
+    message: str
+    verification_token: str
 
 class ProfileUpdate(BaseModel):
     email: str

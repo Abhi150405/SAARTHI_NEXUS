@@ -15,7 +15,7 @@ const NotificationBar = () => {
                 if (response.ok) {
                     const data = await response.json();
                     const closedIds = JSON.parse(localStorage.getItem('closed_notifications') || '[]');
-                    const newNotifications = data.filter(n => !closedIds.includes(n._id));
+                    const newNotifications = data.filter(n => !closedIds.includes(n._id) && n.type !== 'skill_analysis_ready');
                     if (newNotifications.length > 0) {
                         setNotifications(newNotifications);
                         setIsVisible(true);

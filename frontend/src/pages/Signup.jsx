@@ -7,16 +7,20 @@ import {
     Eye,
     EyeOff,
     ArrowRight,
+    ArrowLeft,
     Mail,
     IdCard,
     BookOpen,
     ChevronRight,
-    ShieldCheck
+    ShieldCheck,
+    RefreshCw,
+    KeyRound,
 } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import '../styles/Login.css';
 import { API_URL } from '../config';
-import { apiFetch, signup as apiSignup, setAccessToken, setUser } from '../api';
+import { apiFetch, signup as apiSignup, setAccessToken, setUser, sendOtp } from '../api';
+import OtpInput from '../components/OtpInput';
 
 // ─── Inline SVG Components ────────────────────────────────────────────────────
 
@@ -339,7 +343,24 @@ const Signup = () => {
     const [fieldErrors, setFieldErrors] = useState({});
     const [success, setSuccess] = useState(false);
 
+    // OTP verification state
+    const [step, setStep] = useState('form'); // 'form' | 'otp'
+    const [otp, setOtp] = useState('');
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [otpError, setOtpError] = useState('');
+    const [resendCooldown, setResendCooldown] = useState(0);
+    const [devOtp, setDevOtp] = useState(null);
+
     const navigate = useNavigate();
+
+    // Cooldown countdown effect
+    useEffect(() => {
+        if (resendCooldown <= 0) return;
+        const timer = setInterval(() => {
+            setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [resendCooldown]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -365,31 +386,90 @@ const Signup = () => {
         return Object.keys(errors).length === 0;
     };
 
+    // Step 1: Request OTP and proceed to verification screen
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
         if (!validateForm()) {
-            setError("Please fix errors");
+            setError("Please resolve the errors highlighted below");
             setLoading(false);
             return;
         }
 
         try {
-            const { res, data } = await apiSignup(formData);
+            const { res, data } = await sendOtp(formData.email, 'signup');
+
+            if (res.ok) {
+                setStep('otp');
+                setOtp('');
+                setOtpError('');
+                setResendCooldown(data.cooldown_seconds || 60);
+                if (data.dev_otp) setDevOtp(data.dev_otp);
+            } else {
+                const errMsg = data.detail || data.reason || 'Failed to dispatch verification code';
+                setError(errMsg);
+                if (errMsg.toLowerCase().includes('email')) {
+                    setFieldErrors({ email: 'Already registered' });
+                }
+            }
+        } catch {
+            setError('Could not connect to the authentication server. Please check your network.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Step 2: Verify OTP and finalize student registration
+    const handleVerifyAndSignup = async (e) => {
+        if (e) e.preventDefault();
+        if (otp.trim().length !== 6) {
+            setOtpError('Please enter the full 6-digit verification code.');
+            return;
+        }
+
+        setOtpLoading(true);
+        setOtpError('');
+
+        try {
+            const { res, data } = await apiSignup({
+                ...formData,
+                otp: otp.trim(),
+            });
 
             if (res.ok) {
                 setSuccess(true);
                 await new Promise(r => setTimeout(r, 1400));
                 navigate('/app/dashboard');
             } else {
-                setError(data.reason || 'Signup failed');
+                setOtpError(data.detail || data.reason || 'Verification failed. Please try again.');
             }
         } catch {
-            setError('Connection failed');
+            setOtpError('Could not connect to server. Please try again.');
         } finally {
-            setLoading(false);
+            setOtpLoading(false);
+        }
+    };
+
+    // Resend OTP
+    const handleResendOtp = async () => {
+        if (resendCooldown > 0 || otpLoading) return;
+        setOtpLoading(true);
+        setOtpError('');
+
+        try {
+            const { res, data } = await sendOtp(formData.email, 'signup');
+            if (res.ok) {
+                setResendCooldown(data.cooldown_seconds || 60);
+                if (data.dev_otp) setDevOtp(data.dev_otp);
+            } else {
+                setOtpError(data.detail || 'Could not resend verification code');
+            }
+        } catch {
+            setOtpError('Network connection failed');
+        } finally {
+            setOtpLoading(false);
         }
     };
 
@@ -524,7 +604,7 @@ const Signup = () => {
                                     Account created!
                                 </h2>
                                 <p className="text-[14px]" style={{ color: '#525252' }}>
-                                    Taking you to the login page…
+                                    Taking you to your dashboard…
                                 </p>
                                 <div className="mt-6 w-32 h-[2px] rounded-full overflow-hidden" style={{ background: '#1A1A1A' }}>
                                     <motion.div
@@ -536,6 +616,158 @@ const Signup = () => {
                                     />
                                 </div>
                             </motion.div>
+
+                        ) : step === 'otp' ? (
+
+                        /* ── OTP VERIFICATION STATE ───────────────────── */
+                        <motion.div
+                            key="otp"
+                            variants={formVariant}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            className="w-full"
+                        >
+                            {/* Mobile logo */}
+                            <div className="flex lg:hidden items-center gap-2 mb-6">
+                                <LogoSVG className="w-auto h-8" />
+                            </div>
+
+                            {/* Back to form button */}
+                            <button
+                                type="button"
+                                onClick={() => { setStep('form'); setOtpError(''); }}
+                                className="flex items-center gap-2 text-[12px] font-medium text-[#A3A3A3] hover:text-white transition-colors mb-6 bg-transparent border-none cursor-pointer p-0"
+                            >
+                                <ArrowLeft size={14} />
+                                <span>Change details / email</span>
+                            </button>
+
+                            {/* Icon badge */}
+                            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/25 flex items-center justify-center text-orange-400 mb-5 shadow-lg shadow-orange-500/5">
+                                <KeyRound size={22} />
+                            </div>
+
+                            {/* Heading */}
+                            <h1
+                                className="text-[28px] font-bold tracking-tighter leading-tight mb-2"
+                                style={{ color: 'var(--text-main)' }}
+                            >
+                                Verify your college email
+                            </h1>
+                            <p className="text-[13px] mb-6 leading-relaxed" style={{ color: '#888888' }}>
+                                We've sent a 6-digit verification code to <span className="font-semibold text-white">{formData.email}</span>. Please enter it below to confirm your account.
+                            </p>
+
+                            {/* Dev Mode Banner (if simulated) */}
+                            {devOtp && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    onClick={() => setOtp(devOtp)}
+                                    className="mb-5 p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all duration-200 hover:border-orange-500/50"
+                                    style={{
+                                        backgroundColor: 'rgba(249, 115, 22, 0.08)',
+                                        borderColor: 'rgba(249, 115, 22, 0.25)',
+                                    }}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                                        <span className="text-[12px] text-orange-300 font-medium">
+                                            Dev Mode: Code is <strong className="font-mono text-white tracking-wider">{devOtp}</strong>
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-orange-400 hover:underline">
+                                        Auto-fill
+                                    </span>
+                                </motion.div>
+                            )}
+
+                            {/* Error banner */}
+                            <AnimatePresence>
+                                {otpError && (
+                                    <motion.div
+                                        key="err"
+                                        initial={{ opacity: 0, y: -6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -4 }}
+                                        className="flex items-start gap-3 rounded-xl px-4 py-3 mb-5 border"
+                                        style={{ background: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.22)' }}
+                                    >
+                                        <div className="w-[3px] self-stretch rounded-full flex-shrink-0" style={{ background: '#EF4444', minHeight: 16 }} />
+                                        <div>
+                                            <p className="text-[12px] font-semibold mb-0.5" style={{ color: '#EF4444' }}>Verification failed</p>
+                                            <p className="text-[12px] leading-relaxed" style={{ color: 'rgba(239,68,68,0.75)' }}>{otpError}</p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Form */}
+                            <form onSubmit={handleVerifyAndSignup}>
+                                <div className="mb-6">
+                                    <label
+                                        className="block text-[10px] font-semibold uppercase tracking-widest mb-3"
+                                        style={{ color: '#A3A3A3' }}
+                                    >
+                                        6-Digit Security Code
+                                    </label>
+                                    <OtpInput
+                                        length={6}
+                                        value={otp}
+                                        onChange={(val) => { setOtp(val); setOtpError(''); }}
+                                        disabled={otpLoading}
+                                        autoFocus
+                                    />
+                                </div>
+
+                                {/* Submit */}
+                                <motion.button
+                                    type="submit"
+                                    disabled={otp.trim().length !== 6 || otpLoading}
+                                    whileHover={otp.trim().length === 6 && !otpLoading ? { scale: 1.015 } : {}}
+                                    whileTap={otp.trim().length === 6 && !otpLoading ? { scale: 0.975 } : {}}
+                                    className="w-full font-semibold text-[14px] py-3.5 rounded-xl border-none flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+                                    style={{ backgroundColor: 'var(--primary)', color: '#000' }}
+                                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                                >
+                                    {otpLoading ? (
+                                        <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                    ) : (
+                                        <>
+                                            <span>Verify & Complete Registration</span>
+                                            <ArrowRight size={15} />
+                                        </>
+                                    )}
+                                </motion.button>
+                            </form>
+
+                            {/* Resend strip */}
+                            <div className="flex items-center justify-between pt-5 mt-6 border-t border-white/5 text-[12px]">
+                                <span style={{ color: '#666666' }}>Didn't receive code?</span>
+                                {resendCooldown > 0 ? (
+                                    <span className="font-mono text-[11px] text-[#888888]">
+                                        Resend in {resendCooldown}s
+                                    </span>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={handleResendOtp}
+                                        disabled={otpLoading}
+                                        className="flex items-center gap-1.5 font-medium transition-colors hover:underline bg-transparent border-none cursor-pointer p-0"
+                                        style={{ color: 'var(--primary)' }}
+                                    >
+                                        <RefreshCw size={12} className={otpLoading ? 'animate-spin' : ''} />
+                                        <span>Resend Code</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Expiry note */}
+                            <p className="text-[11px] leading-relaxed text-[#525252] text-center pt-4">
+                                Verification codes are valid for 10 minutes. Check your spam folder if it doesn't arrive shortly.
+                            </p>
+                        </motion.div>
 
                         ) : (
 

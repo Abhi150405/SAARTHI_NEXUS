@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, CheckCircle, AlertTriangle, Loader2, Briefcase, Building2, ChevronDown, BookOpen, PlayCircle, GraduationCap, CheckCircle2, Sparkles, Clock, Trophy, Search, X, ExternalLink, Zap, RotateCw } from 'lucide-react';
+import { Target, CheckCircle, AlertTriangle, Loader2, Briefcase, Building2, ChevronDown, BookOpen, PlayCircle, GraduationCap, CheckCircle2, Sparkles, Clock, Trophy, Search, X, ExternalLink, Zap, RotateCw, CheckSquare, Square } from 'lucide-react';
 import { API_URL } from '../config';
 import { apiFetch, getUser } from '../api';
-import { analyzeSkillGap, buildYouTubeSearchUrl, isSkillSatisfied } from '../services/skillAnalysisService';
+import { 
+    analyzeSkillGap, 
+    buildYouTubeSearchUrl, 
+    isSkillSatisfied,
+    getStudentPathway,
+    getAllStudentPathways,
+    toggleRoadmapStep 
+} from '../services/skillAnalysisService';
 import { useSkillAnalysisQueue } from '../context/SkillAnalysisQueueContext';
 import skillData from '../data/skillData.json';
 
@@ -92,6 +99,18 @@ const SkillAnalysis = () => {
     const activeTask = targetState.activeTask;
     const aiAnalysis = targetState.result;
 
+    // Interactive Pathway & User Goals State (Phase 2)
+    const [interactivePathway, setInteractivePathway] = useState(null);
+    const [userPathways, setUserPathways] = useState([]);
+
+    // Effective analysis prioritizes interactive roadmap progress over raw task result
+    const effectiveAnalysis = useMemo(() => {
+        if (interactivePathway && (interactivePathway.target_name || '').toLowerCase() === (selectedTarget || '').toLowerCase()) {
+            return interactivePathway;
+        }
+        return aiAnalysis;
+    }, [interactivePathway, aiAnalysis, selectedTarget]);
+
     // New state for redesigned UI
     const [activeAccordionIndex, setActiveAccordionIndex] = useState(null);
     const [resourceTabs, setResourceTabs] = useState({});
@@ -118,12 +137,140 @@ const SkillAnalysis = () => {
         }
     }, [searchParams]);
 
+    // Load all active student pathways
+    const loadUserPathways = useCallback(async () => {
+        const user = getUser();
+        if (!user || !user.email) return;
+        try {
+            const res = await getAllStudentPathways(user.email);
+            if (res && res.pathways) {
+                setUserPathways(res.pathways);
+            }
+        } catch (err) {
+            console.warn('Could not load student pathways:', err);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadUserPathways();
+    }, [loadUserPathways]);
+
+    // Fetch interactive pathway when target changes
+    useEffect(() => {
+        const fetchPathway = async () => {
+            const user = getUser();
+            if (!user || !user.email || !selectedTarget) return;
+            try {
+                const res = await getStudentPathway(user.email, selectedTarget, analysisMode);
+                if (res && res.found && res.pathway) {
+                    setInteractivePathway(res.pathway);
+                } else {
+                    setInteractivePathway(null);
+                }
+            } catch (err) {
+                console.warn('Error fetching pathway progress:', err);
+            }
+        };
+        fetchPathway();
+    }, [selectedTarget, analysisMode]);
+
     // Check DB for latest saved analysis when selecting a target if not already cached
     useEffect(() => {
         if (selectedTarget && !aiAnalysis && !isAnalyzing) {
             fetchLatestForTarget(selectedTarget, analysisMode);
         }
     }, [selectedTarget, analysisMode, aiAnalysis, isAnalyzing, fetchLatestForTarget]);
+
+    // Sync interactive pathway when background queue completes a task
+    useEffect(() => {
+        if (aiAnalysis && selectedTarget) {
+            const user = getUser();
+            if (user?.email) {
+                getStudentPathway(user.email, selectedTarget, analysisMode).then(res => {
+                    if (res && res.found && res.pathway) {
+                        setInteractivePathway(res.pathway);
+                    }
+                    loadUserPathways();
+                });
+            }
+        }
+    }, [aiAnalysis, selectedTarget, analysisMode, loadUserPathways]);
+
+    // Handle toggling of roadmap step with optimistic UI updates
+    const handleToggleStep = async (skillName, stepIndex, newCompleted) => {
+        const user = getUser();
+        if (!user || !user.email) return;
+
+        // Optimistically update local interactive state
+        setInteractivePathway(prev => {
+            const base = prev || aiAnalysis;
+            if (!base) return null;
+
+            const updatedSkills = (base.missing_skills || []).map(ms => {
+                if ((ms.skill || '').toLowerCase() === (skillName || '').toLowerCase()) {
+                    const rawRoadmap = ms.roadmap || [];
+                    const currentRoadmap = rawRoadmap.map((st, idx) => {
+                        const title = typeof st === 'string' ? st : st.step;
+                        const isChecked = idx === stepIndex ? newCompleted : (typeof st === 'object' && st.completed !== undefined ? st.completed : (ms.completed_steps || []).includes(idx));
+                        return { step_id: idx, step: title, completed: isChecked };
+                    });
+                    const allDone = currentRoadmap.every(st => st.completed);
+                    const compIndices = currentRoadmap.filter(st => st.completed).map(st => st.step_id);
+                    return {
+                        ...ms,
+                        roadmap: currentRoadmap,
+                        completed_steps: compIndices,
+                        is_mastered: allDone
+                    };
+                }
+                return ms;
+            });
+
+            let totalSt = 0;
+            let compSt = 0;
+            let masteredCount = 0;
+            updatedSkills.forEach(ms => {
+                (ms.roadmap || []).forEach(st => {
+                    totalSt++;
+                    if (typeof st === 'object' ? st.completed : false) compSt++;
+                });
+                if (ms.is_mastered) masteredCount++;
+            });
+
+            const matchedCount = (base.matched_skills || []).length;
+            const totalSkills = matchedCount + updatedSkills.length;
+            const initPct = base.initial_match_percentage || base.match_percentage || 0;
+            const newPct = totalSkills > 0 
+                ? Math.min(100, Math.round(((matchedCount + masteredCount) / totalSkills) * 100))
+                : initPct;
+
+            return {
+                ...base,
+                missing_skills: updatedSkills,
+                completed_steps: compSt,
+                total_steps: totalSt,
+                initial_match_percentage: initPct,
+                current_match_percentage: Math.max(initPct, newPct)
+            };
+        });
+
+        try {
+            const res = await toggleRoadmapStep(
+                user.email,
+                selectedTarget,
+                analysisMode,
+                skillName,
+                stepIndex,
+                newCompleted
+            );
+            if (res && res.pathway) {
+                setInteractivePathway(res.pathway);
+                loadUserPathways();
+            }
+        } catch (err) {
+            console.error('Failed to toggle step on server:', err);
+        }
+    };
 
     useEffect(() => {
         const fetchSkills = async () => {
@@ -325,6 +472,39 @@ const SkillAnalysis = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left: Configuration */}
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex flex-col gap-4">
+                    {/* Tracked Goals Bar (Phase 2) */}
+                    {userPathways.length > 0 && (
+                        <div className="bg-white border-[3px] border-[#0F0F0F] p-3 shadow-[3px_3px_0px_#0F0F0F]">
+                            <div className="flex justify-between items-center mb-1.5">
+                                <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1">
+                                    <Sparkles size={12} className="text-[#F97316]" /> Your Active Goals ({userPathways.length})
+                                </span>
+                            </div>
+                            <div className="flex gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+                                {userPathways.map(p => (
+                                    <button
+                                        key={p.target_key || `${p.target_type}:${p.target_name}`}
+                                        type="button"
+                                        onClick={() => {
+                                            setAnalysisMode(p.target_type || 'company');
+                                            setSelectedTarget(p.target_name);
+                                        }}
+                                        className={`px-2 py-1 text-xs font-black border-2 border-[#0F0F0F] shrink-0 transition-all flex items-center gap-1.5 ${
+                                            selectedTarget === p.target_name && analysisMode === (p.target_type || 'company')
+                                                ? 'bg-[#A3E635] shadow-[2px_2px_0px_#0F0F0F] translate-x-[-1px] translate-y-[-1px]'
+                                                : 'bg-[#FFFBF0] hover:bg-white'
+                                        }`}
+                                    >
+                                        <span className="truncate max-w-[90px]">{p.target_name}</span>
+                                        <span className="text-[9px] bg-[#0F0F0F] text-white px-1 font-black">
+                                            {p.current_match_percentage}%
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Mode Toggle */}
                     <div className="flex gap-2">
                         <button
@@ -553,7 +733,7 @@ const SkillAnalysis = () => {
                         </motion.div>
                     )}
 
-                    {aiAnalysis && !isAnalyzing && (
+                    {effectiveAnalysis && !isAnalyzing && (
                         <motion.div key="results" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
                             
                             {/* Result Summary Bar */}
@@ -571,80 +751,153 @@ const SkillAnalysis = () => {
                                             Re-run
                                         </button>
                                     </div>
-                                    <span className="bg-[#0F0F0F] text-white text-[10px] font-black px-2 py-1 uppercase">{analysisMode} Analysis</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="bg-[#0F0F0F] text-white text-[10px] font-black px-2 py-1 uppercase">{analysisMode} Analysis</span>
+                                        {effectiveAnalysis.total_steps > 0 && (
+                                            <span className="bg-[#A3E635] text-[#0F0F0F] text-[10px] font-black px-2 py-1 uppercase border border-[#0F0F0F]">
+                                                {effectiveAnalysis.completed_steps || 0}/{effectiveAnalysis.total_steps} Steps Done
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="flex-1 max-w-md mx-8 text-center">
-                                    <p className="font-bold text-[#0F0F0F] text-sm mb-2">{aiAnalysis.placement_readiness_message}</p>
-                                    <div className="h-4 w-full bg-[#FFFBF0] border-2 border-[#0F0F0F] overflow-hidden">
-                                        <div className="h-full bg-[#F97316]" style={{ width: `${Math.min(aiAnalysis.match_percentage || 0, 100)}%` }} />
+                                    <div className="flex justify-between items-center text-xs font-black uppercase text-[#0F0F0F] mb-1">
+                                        <span>Placement Match</span>
+                                        <span className="text-[#F97316] font-black text-sm">
+                                            {effectiveAnalysis.current_match_percentage ?? effectiveAnalysis.match_percentage}%
+                                            {effectiveAnalysis.current_match_percentage > (effectiveAnalysis.initial_match_percentage ?? effectiveAnalysis.match_percentage) && (
+                                                <span className="text-green-600 ml-1 text-[11px]">
+                                                    (+{effectiveAnalysis.current_match_percentage - (effectiveAnalysis.initial_match_percentage ?? effectiveAnalysis.match_percentage)}%)
+                                                </span>
+                                            )}
+                                        </span>
                                     </div>
+                                    <div className="h-4 w-full bg-[#FFFBF0] border-2 border-[#0F0F0F] overflow-hidden">
+                                        <div 
+                                            className="h-full bg-[#F97316] transition-all duration-500" 
+                                            style={{ width: `${Math.min(effectiveAnalysis.current_match_percentage ?? effectiveAnalysis.match_percentage ?? 0, 100)}%` }} 
+                                        />
+                                    </div>
+                                    <p className="font-bold text-[#0F0F0F] text-xs mt-2">{effectiveAnalysis.placement_readiness_message}</p>
                                 </div>
                                 <div className="text-right">
                                     <div className="text-[10px] font-black text-gray-500 uppercase">Est. Prep Time</div>
-                                    <div className="text-xl font-black text-[#0F0F0F]">{aiAnalysis.estimated_total_preparation_days} Days</div>
+                                    <div className="text-xl font-black text-[#0F0F0F]">{effectiveAnalysis.estimated_total_preparation_days} Days</div>
                                 </div>
                             </div>
 
-                            {/* Missing Skills Grid (Kanban style) */}
-                            {aiAnalysis.missing_skills?.length > 0 ? (
+                            {/* Missing Skills Grid (Kanban style with interactive checkboxes) */}
+                            {effectiveAnalysis.missing_skills?.length > 0 ? (
                                 <div>
-                                    <h3 className="text-lg font-black text-[#0F0F0F] uppercase mb-4 flex items-center gap-2">
-                                        Action Plan <span className="bg-[#EF4444] text-white px-2 py-1 text-xs">{aiAnalysis.missing_skills.length} gaps</span>
-                                    </h3>
+                                    <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                                        <h3 className="text-lg font-black text-[#0F0F0F] uppercase flex items-center gap-2">
+                                            Action Plan & Interactive Roadmap 
+                                            <span className="bg-[#EF4444] text-white px-2 py-1 text-xs">
+                                                {effectiveAnalysis.missing_skills.length} gaps
+                                            </span>
+                                        </h3>
+                                        <span className="text-xs font-black text-gray-500 uppercase flex items-center gap-1.5 bg-white border border-[#0F0F0F] px-2 py-1">
+                                            <CheckSquare size={13} className="text-[#10B981]" /> Check steps as you complete them to increase score
+                                        </span>
+                                    </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-                                        {aiAnalysis.missing_skills.map((ms, idx) => (
-                                            <motion.div key={idx} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.1 }} className="bg-white border-[3px] border-[#0F0F0F] shadow-[4px_4px_0px_#0F0F0F] flex flex-col h-full">
-                                                {/* Header */}
-                                                <div className={`p-3 border-b-[3px] border-[#0F0F0F] flex justify-between items-center ${ms.severity === 'critical' ? 'bg-[#FCA5A5]' : ms.severity === 'important' ? 'bg-[#FEF08A]' : 'bg-[#BFDBFE]'}`}>
-                                                    <h4 className="font-black text-[#0F0F0F] truncate" title={ms.skill}>{ms.skill}</h4>
-                                                    <span className="text-[10px] font-black uppercase bg-white border border-[#0F0F0F] px-2 py-1 whitespace-nowrap">
-                                                        {ms.estimated_days_to_learn}d
-                                                    </span>
-                                                </div>
-                                                
-                                                {/* Body */}
-                                                <div className="p-4 flex-1 flex flex-col gap-4">
-                                                    <p className="text-xs font-bold text-gray-700 italic border-l-4 border-[#0F0F0F] pl-2">{ms.why_needed}</p>
+                                        {effectiveAnalysis.missing_skills.map((ms, idx) => {
+                                            const rawRoadmap = ms.roadmap || [];
+                                            const steps = rawRoadmap.map((st, i) => {
+                                                const title = typeof st === 'string' ? st : st.step;
+                                                const isDone = typeof st === 'object' && st.completed !== undefined 
+                                                    ? st.completed 
+                                                    : (ms.completed_steps || []).includes(i);
+                                                return { step_id: i, step: title, completed: isDone };
+                                            });
+                                            const completedInThisSkill = steps.filter(s => s.completed).length;
+                                            const isSkillMastered = ms.is_mastered || (steps.length > 0 && completedInThisSkill === steps.length);
+
+                                            return (
+                                                <motion.div key={idx} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.1 }} className={`bg-white border-[3px] border-[#0F0F0F] shadow-[4px_4px_0px_#0F0F0F] flex flex-col h-full transition-all ${isSkillMastered ? 'ring-2 ring-[#A3E635]' : ''}`}>
+                                                    {/* Header */}
+                                                    <div className={`p-3 border-b-[3px] border-[#0F0F0F] flex justify-between items-center ${isSkillMastered ? 'bg-[#A3E635]' : (ms.severity === 'critical' ? 'bg-[#FCA5A5]' : ms.severity === 'important' ? 'bg-[#FEF08A]' : 'bg-[#BFDBFE]')}`}>
+                                                        <div className="flex items-center gap-1.5 truncate mr-2">
+                                                            <h4 className="font-black text-[#0F0F0F] truncate" title={ms.skill}>{ms.skill}</h4>
+                                                            {isSkillMastered && (
+                                                                <span className="bg-[#0F0F0F] text-[#A3E635] text-[9px] font-black px-1.5 py-0.5 uppercase shrink-0">
+                                                                    Mastered ✨
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <span className="text-[10px] font-black uppercase bg-white border border-[#0F0F0F] px-2 py-1 whitespace-nowrap">
+                                                            {ms.estimated_days_to_learn}d
+                                                        </span>
+                                                    </div>
                                                     
-                                                    {/* Steps */}
-                                                    <div className="flex flex-col gap-2 flex-1">
-                                                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Roadmap</div>
-                                                        {ms.roadmap?.slice(0,3).map((step, i) => (
-                                                            <div key={i} className="flex gap-2 items-start">
-                                                                <span className="bg-[#0F0F0F] text-white text-[10px] font-black w-4 h-4 flex items-center justify-center shrink-0">{i+1}</span>
-                                                                <span className="text-xs font-bold leading-tight">{step}</span>
+                                                    {/* Body */}
+                                                    <div className="p-4 flex-1 flex flex-col gap-4">
+                                                        <p className="text-xs font-bold text-gray-700 italic border-l-4 border-[#0F0F0F] pl-2">{ms.why_needed}</p>
+                                                        
+                                                        {/* Interactive Roadmap Steps */}
+                                                        <div className="flex flex-col gap-2 flex-1">
+                                                            <div className="flex justify-between items-center text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                                <span>Roadmap Checklist</span>
+                                                                <span className="font-bold">
+                                                                    {completedInThisSkill}/{steps.length}
+                                                                </span>
                                                             </div>
-                                                        ))}
-                                                    </div>
+                                                            {steps.slice(0, 4).map((step, i) => (
+                                                                <button
+                                                                    key={i}
+                                                                    type="button"
+                                                                    onClick={() => handleToggleStep(ms.skill, i, !step.completed)}
+                                                                    className={`w-full text-left p-2 border-2 border-[#0F0F0F] flex items-start gap-2.5 transition-all text-xs font-bold group ${
+                                                                        step.completed
+                                                                            ? 'bg-[#A3E635]/25 text-gray-600 line-through'
+                                                                            : 'bg-white hover:bg-[#FFFBF0] text-[#0F0F0F]'
+                                                                    }`}
+                                                                >
+                                                                    <div className={`w-4 h-4 mt-0.5 border-2 border-[#0F0F0F] flex items-center justify-center shrink-0 transition-colors ${
+                                                                        step.completed ? 'bg-[#A3E635]' : 'bg-white group-hover:border-[#F97316]'
+                                                                    }`}>
+                                                                        {step.completed ? (
+                                                                            <CheckCircle size={12} className="text-[#0F0F0F]" />
+                                                                        ) : (
+                                                                            <span className="text-[9px] font-black text-gray-400 group-hover:text-[#F97316]">{i+1}</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <span className="leading-tight flex-1">
+                                                                        {step.step}
+                                                                    </span>
+                                                                </button>
+                                                            ))}
+                                                        </div>
 
-                                                    {/* Resources */}
-                                                    <div className="mt-auto flex flex-col gap-1 border-t-[2px] border-dashed border-[#0F0F0F] pt-2">
-                                                        <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Recommended Resources</div>
-                                                        
-                                                        {ms.resources?.youtube?.[0] && (
-                                                            <a href={buildYouTubeSearchUrl(ms.resources.youtube[0].search_query)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#EF4444] transition-colors group">
-                                                                <PlayCircle size={14} className="text-[#EF4444] shrink-0" />
-                                                                <span className="text-[11px] font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.youtube[0].title}</span>
-                                                            </a>
-                                                        )}
-                                                        
-                                                        {ms.resources?.courses?.[0] && (
-                                                            <a href={ms.resources.courses[0].url || `https://www.google.com/search?q=${encodeURIComponent(ms.resources.courses[0].title + ' ' + ms.resources.courses[0].platform)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#3B82F6] transition-colors group">
-                                                                <BookOpen size={14} className="text-[#3B82F6] shrink-0" />
-                                                                <span className="text-[11px] font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.courses[0].title}</span>
-                                                            </a>
-                                                        )}
+                                                        {/* Resources */}
+                                                        <div className="mt-auto flex flex-col gap-1 border-t-[2px] border-dashed border-[#0F0F0F] pt-2">
+                                                            <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Recommended Resources</div>
+                                                            
+                                                            {ms.resources?.youtube?.[0] && (
+                                                                <a href={buildYouTubeSearchUrl(ms.resources.youtube[0].search_query)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#EF4444] transition-colors group">
+                                                                    <PlayCircle size={14} className="text-[#EF4444] shrink-0" />
+                                                                    <span className="text-[11px] font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.youtube[0].title}</span>
+                                                                </a>
+                                                            )}
+                                                            
+                                                            {ms.resources?.courses?.[0] && (
+                                                                <a href={ms.resources.courses[0].url || `https://www.google.com/search?q=${encodeURIComponent(ms.resources.courses[0].title + ' ' + ms.resources.courses[0].platform)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#3B82F6] transition-colors group">
+                                                                    <BookOpen size={14} className="text-[#3B82F6] shrink-0" />
+                                                                    <span className="text-[11px] font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.courses[0].title}</span>
+                                                                </a>
+                                                            )}
 
-                                                        {ms.resources?.practice?.[0] && (
-                                                            <a href={ms.resources.practice[0].url || `https://www.google.com/search?q=${encodeURIComponent(ms.resources.practice[0].platform + ' practice ' + ms.skill)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#10B981] transition-colors group">
-                                                                <ExternalLink size={14} className="text-[#10B981] shrink-0" />
-                                                                <span className="text-[11px] font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.practice[0].suggestion || `${ms.resources.practice[0].platform} Practice`}</span>
-                                                            </a>
-                                                        )}
+                                                            {ms.resources?.practice?.[0] && (
+                                                                <a href={ms.resources.practice[0].url || `https://www.google.com/search?q=${encodeURIComponent(ms.resources.practice[0].platform + ' practice ' + ms.skill)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#10B981] transition-colors group">
+                                                                    <ExternalLink size={14} className="text-[#10B981] shrink-0" />
+                                                                    <span className="text-[11px] font-black truncate text-[#0F0F0F] group-hover:underline">{ms.resources.practice[0].suggestion || `${ms.resources.practice[0].platform} Practice`}</span>
+                                                                </a>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </motion.div>
-                                        ))}
+                                                </motion.div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ) : (

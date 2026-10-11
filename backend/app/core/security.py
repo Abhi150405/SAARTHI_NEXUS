@@ -17,10 +17,18 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Configuration — must be set in the environment before import
-# ─────────────────────────────────────────────────────────────────────────────
+from dotenv import load_dotenv
 
+# Ensure environment variables from .env are loaded
+load_dotenv()
 _SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")
+if not _SECRET_KEY:
+    # Try parent directory .env
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    load_dotenv(os.path.join(base_dir, ".env"))
+    load_dotenv(os.path.join(os.path.dirname(base_dir), ".env"))
+    _SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")
+
 if not _SECRET_KEY:
     raise RuntimeError(
         "JWT_SECRET_KEY is not set. "
@@ -64,6 +72,19 @@ def create_refresh_token(email: str, role: str) -> str:
         "type": "refresh",
         "iat": now,
         "exp": now + timedelta(days=_REFRESH_EXPIRE_DAYS),
+    }
+    return jwt.encode(payload, _SECRET_KEY, algorithm=_ALGORITHM)
+
+
+def create_otp_verification_token(email: str, purpose: str, expires_minutes: int = 15) -> str:
+    """Create a short-lived token confirming that an email was verified via OTP."""
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub": email.lower().strip(),
+        "purpose": purpose,
+        "type": "otp_verified",
+        "iat": now,
+        "exp": now + timedelta(minutes=expires_minutes),
     }
     return jwt.encode(payload, _SECRET_KEY, algorithm=_ALGORITHM)
 
